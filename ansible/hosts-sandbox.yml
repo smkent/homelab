@@ -1,0 +1,9 @@
+all:
+  children:
+    cloud:
+      hosts:
+        sandbox:
+          postfix_relayhost: "[{{ default_postfix_relayhost }}]:587"
+  vars:
+    host_suffix: "{{ fqdn }}"
+    ansible_host: "{{ inventory_hostname }}.{{ host_suffix }}"

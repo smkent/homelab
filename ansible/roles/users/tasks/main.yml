@@ -1,0 +1,10 @@
+- include_role:
+    name: include-user
+    allow_duplicates: no
+  loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
+  loop_control:
+    loop_var: loop_user
+
+- name: Load users info
+  getent:
+    database: passwd

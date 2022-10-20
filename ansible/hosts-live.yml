@@ -1,0 +1,13 @@
+all:
+  children:
+    cloud:
+      hosts:
+        io:
+          host_public: "{{ host_suffix }}"
+          postfix_relayhost:
+    onprem:
+      hosts:
+        ganymede:
+  vars:
+    host_suffix: "{{ fqdn }}"
+    ansible_host: "{{ inventory_hostname }}.{{ host_suffix }}"

@@ -1,0 +1,10 @@
+create_users:
+  deploy:
+    uid: 1000
+    groups:
+    - docker
+    - sudo
+    home: /opt/deploy
+    authorized_keys: '{{ ssh_authorized_keys }}'
+    dotfiles: true
+    user_packages: true

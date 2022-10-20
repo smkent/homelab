@@ -1,0 +1,37 @@
+- name: Install dropbear-initramfs
+  apt:
+    pkg:
+    - dropbear-initramfs
+    state: present
+  notify:
+  - update-initramfs
+
+- name: Configure authorized_keys
+  copy:
+    content: '{{ ssh_authorized_keys }}'
+    dest: /etc/dropbear-initramfs/authorized_keys
+    mode: 0600
+  notify:
+  - update-initramfs
+
+- name: Configure dropbear login banner
+  copy:
+    content: |
+      #!/bin/sh
+      mkdir -p "${DESTDIR}/etc/dropbear"
+      busybox printf '\xf0\x9f\x92\xbe\n' > "${DESTDIR}/etc/dropbear/banner"
+    dest: /etc/initramfs-tools/hooks/dropbear-banner
+    mode: 0755
+  notify:
+  - update-initramfs
+
+- name: Configure dropbear settings in initramfs
+  lineinfile:
+    dest: /etc/dropbear-initramfs/config
+    regexp: ^#?DROPBEAR_OPTIONS=
+    line: DROPBEAR_OPTIONS="-jks -I 120 -c cryptroot-unlock -b /etc/dropbear/banner
+      -r /etc/dropbear/dropbear_ed25519_host_key"
+    state: present
+  notify:
+  - update-initramfs
+  ignore_errors: '{{ ansible_check_mode }}'

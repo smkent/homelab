@@ -1,0 +1,20 @@
+- name: Add Docker apt key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution|lower }}/gpg
+    state: present
+  ignore_errors: '{{ ansible_check_mode }}'
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/{{ ansible_distribution|lower }}
+      {{ ansible_distribution_release }} stable
+    update_cache: true
+    state: present
+
+- name: Install Docker
+  apt:
+    pkg:
+    - docker-ce
+    - docker-compose
+    state: present
+  ignore_errors: '{{ ansible_check_mode }}'

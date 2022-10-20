@@ -1,0 +1,11 @@
+- name: Provision homelab host
+  collections:
+  - community.general
+  hosts: all
+  roles:
+  - users
+  - packages
+  - system
+  - deploy_user
+  - {name: webapps, become_user: '{{ deploy_user }}', when: deploy_user_info.exists}
+  become: true

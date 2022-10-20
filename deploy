@@ -1,0 +1,52 @@
+#!/bin/sh
+
+set -e
+
+cd "$(dirname "${0}")/ansible"
+
+export ANSIBLE_NOCOWS=1
+
+if [ -n "$(echo " ${*} " | grep -e ' -h ' -e ' --help ' || :)" ]; then
+    ansible-playbook --help
+    exit 0
+fi
+
+fqdn="${FQDN-smkent.net}"
+env="${ENV-live}"
+
+if [ -z "${fqdn}" ]; then
+    echo "FQDN is empty" >&2
+    exit 1
+fi
+
+case "${1}" in
+    hostvars)
+        exec ansible -i "hosts-${env}.yml" -m debug "${2-all}" \
+            -e "fqdn=${fqdn}" \
+            -a 'msg={{hostvars[inventory_hostname]}}'
+        ;;
+esac
+
+if [ ! -d "vault/.git" ]; then
+    if [ -z "${HOMELAB_VAULT}" ]; then
+        echo "Error: Set \$HOMELAB_VAULT to the URL of your vault repository" >&2
+        exit 1
+    fi
+    git clone "${HOMELAB_VAULT}" vault
+fi
+
+if [ ! -d "${HOME}/.ansible/collections/ansible_collections/community/general" ]; then
+    (
+        set -x
+        ansible-galaxy collection install community.general
+    )
+fi
+
+set -x
+
+gpg -d "vault/ansible.asc" \
+    | ansible-playbook -i "hosts-${env}.yml" \
+        -e'@/dev/stdin' \
+        -e "fqdn=${fqdn}" \
+        "main.yml" \
+        "${@}"

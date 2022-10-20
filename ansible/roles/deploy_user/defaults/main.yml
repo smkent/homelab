@@ -1,0 +1,4 @@
+docker_compose_profiles: []
+s3cmd:
+  s3_access_key:
+  s3_secret_key:

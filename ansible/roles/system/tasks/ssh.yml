@@ -1,0 +1,50 @@
+- name: Create root .ssh directory
+  file:
+    path: /root/.ssh
+    mode: 0700
+    owner: root
+    group: root
+    state: directory
+
+- name: Install root authorized_keys
+  copy:
+    dest: /root/.ssh/authorized_keys
+    content: '{{ ssh_root_authorized_keys }}'
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Configure ssh login settings
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: ^#?{{ item.name }}
+    line: '{{ item.name }} {{ item.value }}'
+    state: present
+  loop:
+  - {name: PasswordAuthentication, value: "no"}
+  - {name: PermitRootLogin, value: "prohibit-password"}
+  - {name: StreamLocalBindUnlink, value: "yes"}
+  notify:
+  - restart-ssh
+
+- name: Configure ssh cryptography settings
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    block: |
+      KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+      Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr
+      MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+      HostKey /etc/ssh/ssh_host_rsa_key
+      HostKey /etc/ssh/ssh_host_ed25519_key
+      RekeyLimit 128M 15m
+    marker: '# {mark} ANSIBLE MANAGED BLOCK ssh-crypto'
+  register: ssh_crypto
+  notify:
+  - restart-ssh
+
+- name: Ensure RSA host key has sufficient bits
+  script: ssh-generate
+  when: ssh_crypto.changed
+  register: ssh_generate
+  notify:
+  - restart-ssh

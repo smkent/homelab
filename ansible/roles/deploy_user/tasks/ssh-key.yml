@@ -1,0 +1,16 @@
+- name: Install SSH private key
+  copy:
+    dest: '{{ deploy_user_info.home }}/.ssh/id_ed25519'
+    content: '{{ ssh_key_deploy }}'
+    mode: 0600
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
+  diff: false
+
+- name: Install SSH public key
+  copy:
+    dest: '{{ deploy_user_info.home }}/.ssh/id_ed25519.pub'
+    content: '{{ ssh_key_deploy_pub }}'
+    mode: 0644
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
