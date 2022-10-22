@@ -1,0 +1,59 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+services:
+  gitea:
+    image: gitea/gitea:1.16.5
+    depends_on:
+    - db
+    env_file:
+    - env
+    environment:
+    - USER_UID=1000
+    - USER_GID=1000
+    - GITEA__database__DB_TYPE=postgres
+    - GITEA__database__HOST=db:5432
+    - GITEA__database__NAME=gitea
+    - GITEA__database__USER=gitea
+    - GITEA__database__PASSWD=gitea
+    - GITEA__server__DOMAIN=git.${HOST?}
+    - GITEA__server__SSH_DOMAIN=git.${HOST?}
+    - GITEA__server__ROOT_URL=https://git.${HOST?}/
+    - GITEA__service__NO_REPLY_ADDRESS=https://noreply.git.${HOST?}/
+    - GITEA__mailer__FROM=Gitea <git@git.${HOST?}>
+    networks:
+    - default
+    - local
+    ports:
+    - 2202:22
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./files/themes:/data/gitea/public/css:ro
+    - ./files/sshd_config-template:/etc/templates/sshd_config:ro
+    - $HOME/secrets/gitea-ssh-ed25519-host-key:/data/ssh/ssh_host_ed25519_key:ro
+    - $HOME/secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
+    - $HOME/secrets/gitea-ssh-rsa-host-key:/data/ssh/ssh_host_rsa_key:ro
+    - $HOME/secrets/gitea-ssh-rsa-host-key-pub:/data/ssh/ssh_host_rsa_key.pub:ro
+    - ./data/gitea:/data
+
+  db:
+    image: postgres:13
+    environment:
+    - POSTGRES_USER=gitea
+    - POSTGRES_PASSWORD=gitea
+    - POSTGRES_DB=gitea
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data

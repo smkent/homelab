@@ -1,0 +1,16 @@
+server {
+    listen 443 ssl;
+    set $backend "http://gitea:3000";
+    server_name git.${NGINX_HOST};
+    include /etc/nginx/conf.d/common-vhost.include;
+    include /etc/nginx/conf.d/common-ssl-options.include;
+
+    location / {
+        proxy_pass $backend;
+        include /etc/nginx/conf.d/common-reverse-proxy.include;
+    }
+
+    location /user/login {
+        return 302 https://$host/user/oauth2/gitea$is_args$args;
+    }
+}
