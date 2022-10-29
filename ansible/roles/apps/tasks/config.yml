@@ -37,3 +37,4 @@
   diff: false
   loop:
   - samba
+  - backup-apps

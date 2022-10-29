@@ -1,0 +1,31 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+
+secrets:
+  backup-apps-ssh-key: {file: $HOME/secrets/backup-apps-ssh-key}
+
+services:
+  backup-apps:
+    build: build
+    env_file:
+    - $HOME/secrets/backup-apps.env
+    environment:
+    - SMTPHOST=smtp
+    - HOST=${HOST?}
+    - MAILTO=cron-to@${HOST_SUFFIX?}
+    - CRON_SCHEDULE=7 1 * * *
+    - CRON_COMMAND=/root/backup-apps 2>&1
+    - EXPORT_SSH_KEY_FILE=/run/secrets/backup-apps-ssh-key
+    - EXPORT_BACKUP_DEST=/data/backup/apps
+    - EXPORT_BACKUP_KEEP_COUNT=14
+    profiles:
+    - onprem
+    restart: unless-stopped
+    secrets:
+    - backup-apps-ssh-key
+    volumes:
+    - /data/backup:/data/backup:rw
