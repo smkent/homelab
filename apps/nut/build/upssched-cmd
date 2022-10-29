@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo | mail -r "${NUT_MAIL_FROM}" -s "UPS event: ${1}" "${NUT_MAIL_TO}"

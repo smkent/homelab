@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -e
+
+sleep 0.2
+
+# Detect UPS
+mkdir -p /etc/nut/local
+nut-scanner | sed -e 's/^\[nutdev1\]$/[ups]/g' | tee /etc/nut/local/ups.conf
+
+# Configure shutdown command
+sed -i /etc/nut/upsmon.conf -e 's:^SHUTDOWNCMD.*:SHUTDOWNCMD "/sbin/poweroff":g'
+
+# Configure notifications
+cat <<EOF >> /etc/nut/upsmon.conf
+NOTIFYCMD /usr/sbin/upssched
+NOTIFYFLAG ONLINE   SYSLOG+EXEC
+NOTIFYFLAG ONBATT   SYSLOG+EXEC
+NOTIFYFLAG LOWBATT  SYSLOG+EXEC
+NOTIFYFLAG FSD      SYSLOG+EXEC
+NOTIFYFLAG COMMOK   SYSLOG+EXEC
+NOTIFYFLAG COMMBAD  SYSLOG+EXEC
+NOTIFYFLAG SHUTDOWN SYSLOG+EXEC
+NOTIFYFLAG REPLBATT SYSLOG+EXEC
+NOTIFYFLAG NOCOMM   SYSLOG+EXEC
+NOTIFYFLAG NOPARENT SYSLOG
+EOF
+
+exec /usr/local/bin/entrypoint.sh
