@@ -1,0 +1,48 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+services:
+  kanboard:
+    image: kanboard/kanboard:latest
+    depends_on:
+    - db
+    entrypoint: /smkent-extras/entrypoint
+    environment:
+    - DB_DRIVER=postgres
+    - DB_USERNAME=kanboard
+    - DB_PASSWORD=kanboard
+    - DB_HOSTNAME=db
+    - DB_NAME=kanboard
+    - MAIL_TRANSPORT=smtp
+    - MAIL_SMTP_HOSTNAME=smtp
+    - MAIL_FROM=kanboard@${HOST?}
+    networks:
+    - default
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./data/kanboard/data:/var/www/app/data
+    - ./data/kanboard/plugins:/var/www/app/plugins
+    - ./files/entrypoint:/smkent-extras/entrypoint:ro
+
+  db:
+    image: postgres:13
+    environment:
+    - POSTGRES_USER=kanboard
+    - POSTGRES_PASSWORD=kanboard
+    - POSTGRES_DB=kanboard
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
