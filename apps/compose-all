@@ -1,0 +1,36 @@
+#!/bin/sh
+
+set -e
+cd "$(dirname "$(readlink -f "${0}")")"
+
+(
+    echo "--------"
+    echo
+    echo "COMPOSE_PROFILES=${COMPOSE_PROFILES}"
+    echo
+    echo "--------"
+) >&2
+
+if [ -z "${*}" ] || \
+        [ -n "$(echo " ${*} " | grep -e ' --help ' -e ' -h ' || :)" ]; then
+    docker-compose --help
+    exit ${?}
+fi
+
+(
+    echo gateway
+    find . -mindepth 2  -maxdepth 2 -name compose.yaml \
+        | cut -d/ -f2 \
+        | sort -u \
+        | grep -ve gateway
+) | while read -r dir; do
+    (
+        echo
+        echo ">>> ${dir}"
+        echo
+    ) >&2
+    (
+        cd "${dir}"
+        docker-compose "${@}"
+    )
+done
