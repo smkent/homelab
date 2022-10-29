@@ -1,0 +1,17 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+
+services:
+  cups:
+    build: build
+    ports:
+    - 631:631
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./data/cups:/data/cups:rw
