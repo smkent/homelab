@@ -1,0 +1,48 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+secrets:
+  nextcloud-admin-password: {file: $HOME/secrets/nextcloud-admin-password}
+
+services:
+  nextcloud:
+    image: nextcloud:stable-apache
+    depends_on:
+    - db
+    environment:
+    - POSTGRES_HOST=db:5432
+    - POSTGRES_DB=nextcloud
+    - POSTGRES_USER=nextcloud
+    - POSTGRES_PASSWORD=nextcloud
+    - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud-admin-password
+    - NEXTCLOUD_ADMIN_USER=admin
+    networks:
+    - default
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    secrets:
+    - nextcloud-admin-password
+    volumes:
+    - ./data/nextcloud:/var/www/html
+
+  db:
+    image: postgres:13
+    environment:
+    - POSTGRES_USER=nextcloud
+    - POSTGRES_PASSWORD=nextcloud
+    - POSTGRES_DB=nextcloud
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
