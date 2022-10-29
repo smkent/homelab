@@ -1,0 +1,90 @@
+version: '3.7'
+
+secrets:
+  certbot-linode-key: {file: $HOME/secrets/certbot-linode-key}
+  nginx-connect-slug: {file: $HOME/secrets/nginx-connect-slug}
+  smtp-submit-password: {file: $HOME/secrets/smtp-submit-password}
+
+services:
+  certbot:
+    image: certbot/dns-linode:latest
+    entrypoint: /smkent-extras/entrypoint
+    environment:
+    - CERTBOT_INIT
+    - CERTBOT_EMAIL=${EMAIL?}
+    - CERTBOT_HOSTS=*.${HOST?} ${HOST?}
+    - CERTBOT_LINODE_API_KEY=certbot-linode-key
+    restart: unless-stopped
+    secrets:
+    - certbot-linode-key
+    volumes:
+    - ./certbot/entrypoint:/smkent-extras/entrypoint:ro
+    - ./data/certbot/conf:/etc/letsencrypt
+
+  ddns:
+    build: ddns
+    environment:
+    - SMTPHOST=smtp
+    - HOST=${HOST?}
+    - MAILTO=cron-to@${HOST_SUFFIX?}
+    - CRON_SCHEDULE=*/5 * * * *
+    - CRON_COMMAND=/update-linode-dns 2>&1
+    - EXPORT_LINODE_API_TOKEN_FILE=/run/secrets/certbot-linode-key
+    - EXPORT_LINODE_FQDN=${HOST?}
+    profiles:
+    - onprem
+    restart: unless-stopped
+    secrets:
+    - certbot-linode-key
+    volumes:
+    - ./ddns/update-linode-dns:/update-linode-dns:ro
+
+  nginx:
+    image: ghcr.io/smkent/nginx-http-connect:0.1
+    depends_on:
+    - certbot
+    ports:
+    - 80:80
+    - 443:443
+    environment:
+    - NGINX_HOST=${HOST?}
+    - PLEX_HOST=${PLEX_HOST?}
+    extra_hosts:
+      gw: host-gateway
+    restart: unless-stopped
+    secrets:
+    - nginx-connect-slug
+    volumes:
+    - ./data/certbot/conf:/etc/letsencrypt:ro
+    - ./nginx/templates:/etc/nginx/templates:ro
+    - ./nginx/errors:/srv/errors:ro
+
+  smtp:
+    build: postfix
+    environment:
+    - POSTFIX_myhostname=${POSTFIX_HOST?}
+    - POSTFIX_mynetworks=127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+    - POSTFIX_smtpd_sasl_auth_enable=yes
+    - POSTFIX_smtpd_sasl_security_options=noanonymous
+    - POSTFIX_broken_sasl_auth_clients=yes
+    - POSTFIX_smtpd_relay_restrictions=permit_mynetworks, permit_sasl_authenticated,
+      reject
+    - POSTFIX_bounce_notice_recipient=root@localhost
+    - POSTFIX_2bounce_notice_recipient=root@localhost
+    - POSTFIX_smtpd_tls_chain_files=/etc/letsencrypt/live/${HOST?}/privkey.pem,/etc/letsencrypt/live/${HOST?}/fullchain.pem
+    - POSTFIXMASTER_submission__inet=submission inet n - y - - smtpd -o smtpd_tls_security_level=encrypt
+    - OPENDKIM_DOMAINS=${POSTFIX_DKIM_HOST?}=${DKIM_SELECTOR-homelab}
+    - SUBMIT_PASSWORD_FILE=/run/secrets/smtp-submit-password
+    - RELAYHOST=${POSTFIX_RELAYHOST-}
+    ports:
+    - 25:25
+    - 587:587
+    restart: unless-stopped
+    secrets:
+    - smtp-submit-password
+    volumes:
+    - ./data/certbot/conf:/etc/letcencrypt:ro
+    - ./data/postfix/lib:/var/lib/postfix:rw
+    - ./data/postfix/spool:/var/spool/postfix:rw
+    - ./data/postfix/mail:/var/mail:rw
+    - ./data/postfix/dkim:/etc/opendkim/keys:rw

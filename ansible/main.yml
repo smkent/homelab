@@ -7,5 +7,5 @@
   - packages
   - system
   - deploy_user
-  - {name: webapps, become_user: '{{ deploy_user }}', when: deploy_user_info.exists}
+  - {name: apps, become_user: '{{ deploy_user }}', when: deploy_user_info.exists}
   become: true

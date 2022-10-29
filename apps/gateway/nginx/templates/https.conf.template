@@ -1,0 +1,13 @@
+server {
+    listen 443 ssl;
+    server_name _;
+    include /etc/nginx/conf.d/common-vhost.include;
+    include /etc/nginx/conf.d/common-ssl-options.include;
+
+    location / {
+        root /srv/errors;
+        ssi on;
+        index index.html;
+        expires -1;
+    }
+}
