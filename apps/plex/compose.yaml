@@ -1,0 +1,26 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+
+services:
+  plex:
+    image: linuxserver/plex:1.25.9
+    ports:
+    - 32400:32400
+    environment:
+    - VERSION=docker
+    healthcheck:
+      test: [CMD, curl, -m, '5', -f, --insecure, https://localhost:32400/web/index.html]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./data/config:/config:rw
+    - ${FS_MEDIA_PATH-/data/media}:/media:ro
