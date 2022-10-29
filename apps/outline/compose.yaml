@@ -1,0 +1,58 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+services:
+  outline:
+    image: outlinewiki/outline:0.62.0
+    command: sh -c "yarn sequelize:migrate --env=production-ssl-disabled && yarn
+      start --env=production-ssl-disabled"
+    depends_on:
+    - db
+    - redis
+    env_file:
+    - env
+    - $HOME/secrets/outline.env
+    environment:
+    - REDIS_URL=redis://redis:6379
+    - URL=https://outline.${HOST?}
+    - AWS_S3_UPLOAD_BUCKET_NAME=outline.${HOST?}
+    - OIDC_AUTH_URI=https://${HOST?}/oidc/auth
+    - OIDC_TOKEN_URI=https://${HOST?}/oidc/token
+    - OIDC_USERINFO_URI=https://${HOST?}/oidc/userinfo
+    - OIDC_DISPLAY_NAME=${HOST_SUFFIX?}
+    - SMTP_FROM_EMAIL=outline@${HOST?}
+    networks:
+    - default
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    user: root
+
+  db:
+    image: postgres:13
+    environment:
+    - POSTGRES_USER=outline
+    - POSTGRES_PASSWORD=outline
+    - POSTGRES_DB=outline
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
