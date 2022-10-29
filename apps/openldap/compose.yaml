@@ -1,0 +1,27 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+
+services:
+  ldap:
+    image: bitnami/openldap:2.6
+    env_file:
+    - $HOME/secrets/ldap.env
+    environment:
+    - LDAP_ADMIN_USERNAME=${LDAP_ADMIN_USERNAME-admin}
+    - LDAP_ROOT=${LDAP_ROOT?}
+    - LDAP_CUSTOM_LDIF_DIR=/ldif
+    ports:
+    - 1389:1389
+    - 1636:1636
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./config/ldif:/ldif:ro
+    - ./config/schema.ldif:/schema/custom.ldif:ro
+    - ./data/db:/bitnami/openldap
+    - ./data/slapd.d:/bitnami/openldap/slapd.d
