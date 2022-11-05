@@ -1,0 +1,19 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+
+services:
+  safeway-coupons:
+    image: ghcr.io/smkent/safeway-coupons:latest
+    environment:
+      CRON_SCHEDULE: "42 13 * * *"
+      SMTPHOST: smtp
+      SAFEWAY_ACCOUNTS_FILE: /accounts
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - $HOME/secrets/safeway-accounts:/accounts:ro
