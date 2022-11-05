@@ -1,0 +1,28 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+
+secrets:
+  jmap-api-token: {file: $HOME/secrets/jmap-api-token}
+
+services:
+  waffles:
+    image: ghcr.io/smkent/waffles:latest
+    environment:
+      JMAP_HOST: api.fastmail.com
+      JMAP_API_TOKEN: /run/secrets/jmap-api-token
+      WAFFLES_MAILBOX: Recruiters
+      WAFFLES_REPLY_FILE: /reply.html
+      # WAFFLES_DRY_RUN: "true"
+      # WAFFLES_DEBUG: "true"
+      TZ: PST8PDT
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./reply.html:/reply.html:ro
+    secrets:
+    - jmap-api-token
