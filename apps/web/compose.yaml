@@ -1,0 +1,46 @@
+version: "3.7"
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+secrets:
+  flask-secret-key: {file: $HOME/secrets/flask-secret-key}
+  flask-wtf-secret-key: {file: $HOME/secrets/flask-wtf-secret-key}
+
+services:
+  web:
+    build: build
+    depends_on:
+    - db
+    env_file:
+    - env
+    - $HOME/secrets/web.env
+    environment:
+    - APP_FIDO2_SERVER_HOST=${HOST?}
+    networks:
+    - default
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    secrets:
+    - flask-secret-key
+    - flask-wtf-secret-key
+
+  db:
+    image: postgres:13
+    environment:
+    - POSTGRES_USER=web
+    - POSTGRES_PASSWORD=web
+    - POSTGRES_DB=web
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data

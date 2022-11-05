@@ -26,3 +26,12 @@
   loop:
   - {name: secrets, mode: '0700'}
   become_user: root
+
+- name: Clone web repository
+  git:
+    repo: '{{ web_repo }}'
+    dest: '{{ deploy_user_info.home }}/homelab/apps/web/build'
+    version: main
+    accept_hostkey: true
+  environment:
+    GIT_TERMINAL_PROMPT: 0
