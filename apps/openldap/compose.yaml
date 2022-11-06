@@ -14,9 +14,6 @@ services:
     - LDAP_ADMIN_USERNAME=${LDAP_ADMIN_USERNAME-admin}
     - LDAP_ROOT=${LDAP_ROOT?}
     - LDAP_CUSTOM_LDIF_DIR=/ldif
-    ports:
-    - 1389:1389
-    - 1636:1636
     profiles:
     - cloud
     restart: unless-stopped
