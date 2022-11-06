@@ -3,6 +3,7 @@ all:
     cloud:
       hosts:
         sandbox:
+          host_public: "{{ host_suffix }}"
           postfix_relayhost: "[{{ default_postfix_relayhost }}]:587"
   vars:
     host_suffix: "{{ fqdn }}"

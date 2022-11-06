@@ -1,5 +1,5 @@
 - ansible.builtin.hostname:
-    name: '{{ inventory_hostname }}'
+    name: '{{ ansible_host }}'
 
 - name: Create groups
   ansible.builtin.group:
