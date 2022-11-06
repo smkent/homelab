@@ -40,7 +40,7 @@
       account default
       host localhost
       port 587
-      from sys@{{ inventory_hostname }}
+      from sys@{{ ansible_host }}
       aliases /etc/aliases
       tls on
       tls_certcheck off
