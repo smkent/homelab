@@ -31,7 +31,7 @@ services:
     - default
     - local
     ports:
-    - 2202:22
+    - "2202:22"
     profiles:
     - cloud
     restart: unless-stopped
