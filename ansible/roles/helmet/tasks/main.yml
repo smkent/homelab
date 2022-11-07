@@ -1,0 +1,29 @@
+- name: Install helmet-copy script
+  template:
+    dest: "{{ deploy_user_info.home }}/helmet-copy"
+    src: helmet-copy.j2
+    mode: 0755
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
+
+- name: Install helmet-copy systemd service
+  copy:
+    dest: "/etc/systemd/system/99-helmet-copy@.service"
+    content: |
+      [Service]
+      Type=oneshot
+      ExecStart={{ deploy_user_info.home }}/helmet-copy %I
+    mode: 0644
+    owner: root
+    group: root
+  notify: reload-udev-rules
+
+- name: Install helmet-copy udev rule
+  copy:
+    dest: "/etc/udev/rules.d/99-helmet-copy.rules"
+    content: |
+      ACTION=="add", SUBSYSTEM=="block", ATTRS{removable}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}="99-helmet-copy@%E{DEVNAME}.service"
+    mode: 0644
+    owner: root
+    group: root
+  notify: reload-udev-rules

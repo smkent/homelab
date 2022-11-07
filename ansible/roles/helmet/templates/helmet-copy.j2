@@ -1,0 +1,86 @@
+#!/bin/sh
+
+camera_subdir="/DCIM/100MEDIA"
+dest="/data/media/helmet"
+mailto="{{ email }}"
+sz_gb_threshold=33
+
+set -e
+
+dev="${DEVNAME-${1?}}"
+
+if [ ! -d "${dest?}" ]; then
+    echo "${dest} is not a directory" >&2
+    exit 1
+fi
+
+dest_stat=$(stat -c '%u:%g' "${dest}")
+if [ -z "${dest_stat}" ]; then
+    echo "Unable to determine owner of ${dest}" >&2
+    exit 1
+fi
+
+if [ ! -b "${dev}" ]; then
+    echo "${dev} is not a block device" >&2
+    exit 1
+fi
+
+sz_gb=$(($(blockdev --getsize64 "${dev}")/1024/1024/1024))
+if [ "${sz_gb-1}" -gt "${sz_gb_threshold-0}" ]; then
+    echo "${dev} size ${sz_gb} GiB is above threshold" >&2
+    exit 1
+fi
+
+if ! blkid -o export "${dev}" | grep -qe "^TYPE=vfat\$"; then
+    echo "${dev} does not contain a vfat file system" >&2
+    exit 1
+fi
+
+num_files=$(mdir -b -i "${dev}" "${camera_subdir?}" 2>/dev/null | wc -l)
+if [ "${num_files-0}" -le 0 ]; then
+    echo "${dev} file system path ${camera_subdir} contains no files" >&2
+    exit 1
+fi
+
+mnt_dir=
+_exit() {
+    cd /
+    if [ -n "${mnt_dir}" ] && [ -d "${mnt_dir}" ]; then
+        if mountpoint -q "${mnt_dir}" ; then
+            umount "${mnt_dir}" || { sleep 1 && umount -l "${mnt_dir}"; }
+            if mountpoint -q "${mnt_dir}"; then
+                echo "Error unmounting ${mnt_dir}" >&2
+                exit 1
+            fi
+        fi
+    fi
+    if [ -n "${mnt_dir}" ] && [ -d "${mnt_dir}" ]; then
+        rmdir "${mnt_dir}"
+        mnt_dir=
+    fi
+}
+
+_main() {
+    trap _exit EXIT TERM INT
+    mnt_dir=$(mktemp -d --suffix="_$(basename "${0}")")
+    mount "${dev}" "${mnt_dir}"
+    cd "${mnt_dir}${camera_subdir}"
+    find . -mindepth 1 -maxdepth 1 -type f | sort | while read -r fn; do
+        dest_fn="${dest%%/}/$(basename "${fn}")"
+        rsync --info=COPY,DEL,FLIST,MISC,NAME,SYMSAFE,REMOVE,SKIP,BACKUP "${fn}" "${dest_fn}"
+        chown -c "${dest_stat}" "${dest_fn}"
+        chmod -c 0664 "${dest_fn}"
+        if [ "$(stat -c "%s" "${fn}")" != "$(stat -c "%s" "${dest_fn}")" ]; then
+            echo "Error: Size of ${fn} and ${dest_fn} do not match" >&2
+            exit 1
+        fi
+        rm -vf "${fn}"
+    done
+    _exit
+}
+
+trap wait EXIT TERM INT
+(
+    _main 2>&1 | mail -s "Helmet (with ${num_files} files)" -r "${mailto}" "${mailto}"
+) &
+wait
