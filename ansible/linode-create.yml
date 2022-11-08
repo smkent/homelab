@@ -1,0 +1,10 @@
+- name: VPS setup
+  collections:
+  - linode.cloud
+  hosts: all
+  gather_facts: false
+  roles:
+  - name: linode-create
+    delegate_to: localhost
+    serial: 2
+    when: '"cloud" in group_names'

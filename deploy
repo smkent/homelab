@@ -11,6 +11,7 @@ if [ -n "$(echo " ${*} " | grep -e ' -h ' -e ' --help ' || :)" ]; then
     exit 0
 fi
 
+playbook="${PLAYBOOK-main}"
 fqdn="${FQDN-smkent.net}"
 env="${ENV-live}"
 
@@ -35,18 +36,20 @@ if [ ! -d "vault/.git" ]; then
     git clone "${HOMELAB_VAULT}" vault
 fi
 
-if [ ! -d "${HOME}/.ansible/collections/ansible_collections/community/general" ]; then
+if [ "$(cat ".requirements.yml.sha256sum" 2>/dev/null || :)" \
+        != "$(sha256sum requirements.yml)" ]; then
     (
         set -x
-        ansible-galaxy collection install community.general
+        ansible-galaxy collection install -r requirements.yml
+        python3 -m pip install --user -r \
+            "${HOME}/.ansible/collections/ansible_collections/linode/cloud/requirements.txt"
     )
+    sha256sum requirements.yml > ".requirements.yml.sha256sum"
 fi
-
-set -x
 
 gpg -d "vault/ansible.asc" \
     | ansible-playbook -i "hosts-${env}.yml" \
         -e'@/dev/stdin' \
         -e "fqdn=${fqdn}" \
-        "main.yml" \
+        "${playbook}.yml" \
         "${@}"
