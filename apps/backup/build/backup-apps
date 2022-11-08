@@ -70,13 +70,14 @@ for backup_host in $(echo "${BACKUP_HOSTS-${EXPORT_BACKUP_HOSTS}}" | sed -e 's:,
     fi
     (
         set -x
+        # shellcheck disable=SC2086
         ionice -c 3 nice -n 19 \
             rsync \
                 -e "ssh -i ${ssh_key_file} -o UserKnownHostsFile=${known_hosts_file} -o StrictHostKeyChecking=accept-new" \
                 -P -avHSPAX --numeric-ids --delete \
+                ${link_dest} \
                 root@"${backup_host}":/opt/deploy/. \
                 "${backup_dest_host_id}/" \
-                "${link_dest}"
     )
     all_vers=$(find "${backup_dest_host}" -regextype posix-basic -mindepth 1 -maxdepth 1 -type d -regex '.*/[0-9]\{8\}.*$' | grep -ve '^$' | sort -n)
     if [ "$(echo "${all_vers}" | wc -l)" -gt "${backup_keep_count}" ]; then
