@@ -50,6 +50,14 @@ mkdir -vp "${backup_dest}"
 
 known_hosts_file="${backup_dest}/ssh_known_hosts"
 
+existing_vers() {
+    find "${1?}" -mindepth 1 -maxdepth 1 -type d -print0 \
+        | xargs -0 -n1 basename 2>/dev/null \
+        | grep '^[0-9]\{8\}$' \
+        | grep -ve '^$' \
+        | sort -n
+}
+
 for backup_host in $(echo "${BACKUP_HOSTS-${EXPORT_BACKUP_HOSTS}}" | sed -e 's:,: :g'); do
     backup_id="$(date +%Y%m%d)"
     backup_dest_host="${backup_dest}/${backup_host}"
@@ -62,7 +70,7 @@ for backup_host in $(echo "${BACKUP_HOSTS-${EXPORT_BACKUP_HOSTS}}" | sed -e 's:,
     mkdir -vp "${backup_dest_host}"
     if [ ! -e "${backup_dest_host_id}" ]; then
         ls -l "${backup_dest_host}"
-        all_vers=$(find "${backup_dest_host}" -regextype posix-basic -mindepth 1 -maxdepth 1 -type d -regex '.*/[0-9]\{8\}.*$' -print0 | xargs -0 -n1 basename 2>/dev/null | grep -ve '^$' | sort -n)
+        all_vers="$(existing_vers "${backup_dest_host}")"
     fi
     if [ -n "${all_vers}" ]; then
         newest_ver=$(echo "${all_vers}" | xargs -n1 | sort -n | tail -n 1)
@@ -70,15 +78,16 @@ for backup_host in $(echo "${BACKUP_HOSTS-${EXPORT_BACKUP_HOSTS}}" | sed -e 's:,
     fi
     (
         set -x
+        # shellcheck disable=SC2086
         ionice -c 3 nice -n 19 \
             rsync \
                 -e "ssh -i ${ssh_key_file} -o UserKnownHostsFile=${known_hosts_file} -o StrictHostKeyChecking=accept-new" \
                 -P -avHSPAX --numeric-ids --delete \
+                ${link_dest} \
                 root@"${backup_host}":/opt/deploy/. \
                 "${backup_dest_host_id}/" \
-                "${link_dest}"
     )
-    all_vers=$(find "${backup_dest_host}" -regextype posix-basic -mindepth 1 -maxdepth 1 -type d -regex '.*/[0-9]\{8\}.*$' | grep -ve '^$' | sort -n)
+    all_vers="$(existing_vers "${backup_dest_host}")"
     if [ "$(echo "${all_vers}" | wc -l)" -gt "${backup_keep_count}" ]; then
         echo ">>> Removing old backups for ${backup_host}"
         echo "${all_vers}" | head "-n-${backup_keep_count}" | xargs -t -n 1 rm -rf

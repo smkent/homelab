@@ -18,7 +18,7 @@ services:
     - HOST=${HOST?}
     - MAILTO=cron-to@${HOST_SUFFIX?}
     - CRON_SCHEDULE=7 1 * * *
-    - CRON_COMMAND=/root/backup-apps 2>&1
+    - CRON_COMMAND=/smkent-extras/backup-apps 2>&1
     - EXPORT_SSH_KEY_FILE=/run/secrets/backup-apps-ssh-key
     - EXPORT_BACKUP_DEST=/data/backup/apps
     - EXPORT_BACKUP_KEEP_COUNT=14
