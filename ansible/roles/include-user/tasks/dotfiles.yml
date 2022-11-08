@@ -13,36 +13,32 @@
   when: not ansible_check_mode or not user_register.changed
   register: dotfiles_exists
 
-- name: Clone dotfiles repository
-  git:
-    repo: https://github.com/smkent/dotfiles
-    dest: /tmp/dotfiles_temp
-  become_user: '{{ loop_user.user }}'
-  when: dotfiles_exists.skipped is not defined and not dotfiles_exists.before
+- name: Install dotfiles repository
+  block:
+  - name: Clone dotfiles repository
+    git:
+      repo: https://github.com/smkent/dotfiles
+      dest: /tmp/dotfiles_temp
 
-- name: Move repository metadata directory into place
-  command: mv /tmp/dotfiles_temp/.git "{{ user_register.home }}"
-  args:
-    chdir: '{{ user_register.home }}'
-    removes: /tmp/dotfiles_temp/.git
-    creates: '{{ user_register.home }}/.git'
-  become_user: '{{ loop_user.user }}'
-  when: dotfiles_exists.skipped is not defined and not dotfiles_exists.before
+  - name: Move repository metadata directory into place
+    command: mv /tmp/dotfiles_temp/.git "{{ user_register.home }}"
+    args:
+      chdir: '{{ user_register.home }}'
+      removes: /tmp/dotfiles_temp/.git
+      creates: '{{ user_register.home }}/.git'
 
-- name: Check out dotfiles repository contents
-  git:
-    repo: https://github.com/smkent/dotfiles
-    dest: '{{ user_register.home }}'
-    clone: false
-    force: true
-  become_user: '{{ loop_user.user }}'
-  when: dotfiles_exists.skipped is not defined and not dotfiles_exists.before
+  - name: Check out dotfiles repository contents
+    git:
+      repo: https://github.com/smkent/dotfiles
+      dest: '{{ user_register.home }}'
+      clone: false
+      force: true
 
-- name: Clean up temporary dotfiles repository directory
-  file:
-    path: /tmp/dotfiles_temp
-    state: absent
+  - name: Clean up temporary dotfiles repository directory
+    file:
+      path: /tmp/dotfiles_temp
+      state: absent
+    diff: false
+    no_log: true
   become_user: '{{ loop_user.user }}'
-  diff: false
-  no_log: true
   when: dotfiles_exists.skipped is not defined and not dotfiles_exists.before
