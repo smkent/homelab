@@ -1,0 +1,38 @@
+- name: Get domain info
+  linode.cloud.domain_info:
+    domain: "{{ fqdn }}"
+    api_token: "{{ linode_access_token }}"
+  check_mode: no
+
+- name: Locate or create Linode instance
+  block:
+  - name: Get instance info
+    linode.cloud.instance_info:
+      label: "{{ linode_name|d() or host_public|d() or ansible_host }}"
+      api_token: "{{ linode_access_token }}"
+    check_mode: no
+    register: linode_instance
+  rescue:
+  - name: Create instance
+    linode.cloud.instance:
+      label: "{{ linode_name|d() or host_public|d() or ansible_host }}"
+      type: g6-standard-1
+      region: us-southeast
+      image: linode/debian11
+      authorized_keys: "{{ ssh_authorized_keys }}"
+      api_token: "{{ linode_access_token }}"
+      state: present
+    register: linode_instance
+
+- name: Configure DNS records
+  linode.cloud.domain_record:
+    domain: "{{ fqdn }}"
+    name: "{{ item }}"
+    type: A
+    target: "{{ linode_instance.networking.ipv4.public.0.address }}"
+    api_token: "{{ linode_access_token }}"
+    ttl_sec: 300
+    state: present
+  with_items:
+  - '{{ host_public|d(inventory_hostname) }}'
+  - '*.{{ host_public|d(inventory_hostname) }}'

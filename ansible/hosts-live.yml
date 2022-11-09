@@ -4,6 +4,7 @@ all:
       hosts:
         io:
           host_public: "{{ host_suffix }}"
+          linode_name: "io.net"
           postfix_relayhost:
     onprem:
       hosts:
