@@ -20,7 +20,7 @@ action="${2}"
 
 shift 2
 
-app=
+app="**"
 if [ -n "${1}" ] && {
     [ -d "apps/${1}" ] || [ -d "${dest}/${host}/${1}" ]
 }; then
@@ -30,7 +30,7 @@ fi
 
 run_rsync() {
     rsync -avHSPm --numeric-ids \
-        --include="${app-**}"'/data/**' --include='*/' --exclude='*' "${@}"
+        --include="${app}"'/data/**' --include='*/' --exclude='*' "${@}"
 }
 
 set -x
