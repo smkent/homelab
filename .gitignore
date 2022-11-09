@@ -2,3 +2,4 @@ ansible/.requirements.yml.sha256sum
 ansible/vault/
 apps/.env
 apps/*/data
+/.cache

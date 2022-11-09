@@ -1,0 +1,48 @@
+#!/bin/sh
+
+set -e
+
+cd "$(dirname "${0}")"
+
+dest=./.cache
+mkdir -pv "${dest}"
+
+usage() {
+    echo "Usage: $(basename "${0}") host backup|restore [app]" >&2
+    exit 1
+}
+
+host="${1}"
+action="${2}"
+[ -z "${host}" ] || [ -z "${action}" ] && usage
+
+[ "$(id -u)" -ne "0" ] && exec sudo -E "${0}" "${@}"
+
+shift 2
+
+app=
+if [ -n "${1}" ] && {
+    [ -d "apps/${1}" ] || [ -d "${dest}/${host}/${1}" ]
+}; then
+    app="${1}"
+    shift
+fi
+
+run_rsync() {
+    rsync -avHSPm --numeric-ids \
+        --include="${app-**}"'/data/**' --include='*/' --exclude='*' "${@}"
+}
+
+set -x
+
+case "${action}" in
+    backup)
+        run_rsync "root@${host}:/opt/deploy/apps/" "${dest}/${host}/" "${@}"
+        ;;
+    restore)
+        run_rsync "${dest}/${host}/" "root@${host}:/opt/deploy/apps/" "${@}"
+        ;;
+    *)
+        usage
+        ;;
+esac
