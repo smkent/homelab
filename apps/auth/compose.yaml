@@ -1,0 +1,61 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+secrets:
+  lldap-jwt-secret: {file: $HOME/secrets/lldap-jwt-secret}
+  lldap-ldap-user-pass: {file: $HOME/secrets/lldap-ldap-user-pass}
+  authelia-jwt-secret: {file: $HOME/secrets/authelia-jwt-secret}
+  authelia-session-secret: {file: $HOME/secrets/authelia-session-secret}
+  authelia-storage-encryption-key: {file: $HOME/secrets/authelia-storage-encryption-key}
+
+services:
+  authelia:
+    image: docker.io/authelia/authelia:latest
+    environment:
+      AUTHELIA_JWT_SECRET_FILE: /run/secrets/authelia-jwt-secret
+      AUTHELIA_SESSION_SECRET_FILE: /run/secrets/authelia-session-secret
+      AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/authelia-storage-encryption-key
+    networks:
+    - default
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    secrets:
+    - authelia-jwt-secret
+    - authelia-session-secret
+    - authelia-storage-encryption-key
+    volumes:
+    - ./data/authelia/config:/config
+
+  redis:
+    image: redis
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+
+  lldap:
+    image: nitnelave/lldap:stable
+    environment:
+    - UID=1000
+    - GID=1000
+    - TZ=UTC
+    - LLDAP_JWT_SECRET_FILE=/run/secrets/lldap-jwt-secret
+    - LLDAP_LDAP_USER_PASS_FILE=/run/secrets/lldap-ldap-user-pass
+    - LLDAP_LDAP_BASE_DN=${LDAP_ROOT?}
+    profiles:
+    - cloud
+    restart: unless-stopped
+    secrets:
+    - lldap-jwt-secret
+    - lldap-ldap-user-pass
+    volumes:
+    - ./data/lldap:/data
