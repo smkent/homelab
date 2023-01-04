@@ -49,6 +49,8 @@ services:
     environment:
     - NGINX_HOST=${HOST?}
     - PLEX_HOST=${PLEX_HOST?}
+    env_file:
+    - $HOME/secrets/nginx.env
     extra_hosts:
       gw: host-gateway
     restart: unless-stopped
