@@ -58,7 +58,7 @@ services:
     - nginx-connect-slug
     volumes:
     - ./data/certbot/conf:/etc/letsencrypt:ro
-    - ./nginx/templates:/etc/nginx/templates:ro
+    - ./nginx/templates/${ENV_NAME?}:/etc/nginx/templates:ro
     - ./nginx/errors:/srv/errors:ro
 
   smtp:
