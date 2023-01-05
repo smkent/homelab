@@ -27,6 +27,8 @@ services:
     networks:
     - default
     - local
+    profiles:
+    - mastodon
     restart: unless-stopped
     volumes:
     - ./data/public/system:/mastodon/public/system
@@ -49,6 +51,8 @@ services:
     networks:
     - default
     - local
+    profiles:
+    - mastodon
     restart: unless-stopped
 
   mastodon-sidekiq:
@@ -70,6 +74,8 @@ services:
     networks:
     - default
     - local
+    profiles:
+    - mastodon
     volumes:
     - ./data/public/system:/mastodon/public/system
 
@@ -85,7 +91,7 @@ services:
     networks:
     - local
     profiles:
-    - cloud
+    - mastodon
     restart: unless-stopped
     shm_size: 256mb
     volumes:
@@ -98,7 +104,7 @@ services:
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
     profiles:
-    - cloud
+    - mastodon
     restart: unless-stopped
     volumes:
     - ./data/redis:/data
