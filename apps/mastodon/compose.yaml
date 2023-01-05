@@ -10,7 +10,8 @@ networks:
 services:
   mastodon-web:
     image: tootsuite/mastodon:v4.0
-    command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"
+    command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p
+      3000"
     depends_on:
     - db
     - redis
@@ -21,7 +22,8 @@ services:
     - env
     - $HOME/secrets/mastodon.env
     healthcheck:
-      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health || exit 1']
+      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health ||
+          exit 1']
     networks:
     - default
     - local
@@ -42,7 +44,8 @@ services:
     - env
     - $HOME/secrets/mastodon.env
     healthcheck:
-      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1']
+      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health
+          || exit 1']
     networks:
     - default
     - local
@@ -62,7 +65,7 @@ services:
     - env
     - $HOME/secrets/mastodon.env
     healthcheck:
-      test: ['CMD-SHELL', "ps aux | grep '[s]idekiq\ 6' || false"]
+      test: ['CMD-SHELL', "ps aux | grep '[s]idekiq 6' || false"]
     restart: unless-stopped
     networks:
     - default
