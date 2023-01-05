@@ -83,7 +83,7 @@ services:
     secrets:
     - smtp-submit-password
     volumes:
-    - ./data/certbot/conf:/etc/letcencrypt:ro
+    - ./data/certbot/conf:/etc/letsencrypt:ro
     - ./data/postfix/lib:/var/lib/postfix:rw
     - ./data/postfix/spool:/var/spool/postfix:rw
     - ./data/postfix/mail:/var/mail:rw
