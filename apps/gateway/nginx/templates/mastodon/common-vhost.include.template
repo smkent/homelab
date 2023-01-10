@@ -1,0 +1,37 @@
+include /etc/nginx/conf.d/common-host-map.include;
+
+server_tokens off;
+resolver 127.0.0.11;
+
+include /run/secrets/nginx-connect-slug;
+set $pc_auth_state "";
+if ($request_method = "CONNECT") {
+    set $pc_auth_state "O";
+}
+if ($http_x_smkent != $want_connect_slug) {
+    set $pc_auth_state "N${pc_auth_state}";
+}
+if ($pc_auth_state = "NO") {
+    return 404;
+}
+proxy_connect;
+proxy_connect_allow 22;
+proxy_connect_address $gw;
+proxy_connect_response "HTTP/1.1 200 Connection Established\r\n\r\n";
+
+error_page
+    400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 421 422 423 424 425 426 428 429 431 451
+    500 501 502 503 504 505 506 507 508 510 511
+    //errors/index.html;
+location //errors {
+    rewrite ^/\/errors/(.*) /$1 break;
+    root /srv/errors;
+    ssi on;
+    expires -1;
+}
+location /__service_error_static__ {
+    rewrite ^/__service_error_static__/(.*) /$1 break;
+    try_files $uri =404;
+    root /srv/errors;
+    expires 1h;
+}

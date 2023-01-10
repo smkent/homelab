@@ -1,0 +1,110 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+services:
+  mastodon-web:
+    image: tootsuite/mastodon:v4.0
+    command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p
+      3000"
+    depends_on:
+    - db
+    - redis
+    environment:
+      LOCAL_DOMAIN: ${HOST?}
+      S3_ALIAS_HOST: files.${HOST?}
+    env_file:
+    - env
+    - $HOME/secrets/mastodon.env
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health ||
+          exit 1']
+    networks:
+    - default
+    - local
+    profiles:
+    - mastodon
+    restart: unless-stopped
+    volumes:
+    - ./data/public/system:/mastodon/public/system
+
+  mastodon-streaming:
+    image: tootsuite/mastodon:v4.0
+    command: node ./streaming
+    depends_on:
+    - db
+    - redis
+    environment:
+      LOCAL_DOMAIN: ${HOST?}
+      S3_ALIAS_HOST: files.${HOST?}
+    env_file:
+    - env
+    - $HOME/secrets/mastodon.env
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health
+          || exit 1']
+    networks:
+    - default
+    - local
+    profiles:
+    - mastodon
+    restart: unless-stopped
+
+  mastodon-sidekiq:
+    image: tootsuite/mastodon:v4.0
+    command: bundle exec sidekiq
+    depends_on:
+    - db
+    - redis
+    environment:
+      LOCAL_DOMAIN: ${HOST?}
+      S3_ALIAS_HOST: files.${HOST?}
+      SMTP_FROM_ADDRESS: Mastodon <notifications@${HOST?}>
+    env_file:
+    - env
+    - $HOME/secrets/mastodon.env
+    healthcheck:
+      test: ['CMD-SHELL', "ps aux | grep '[s]idekiq 6' || false"]
+    restart: unless-stopped
+    networks:
+    - default
+    - local
+    profiles:
+    - mastodon
+    volumes:
+    - ./data/public/system:/mastodon/public/system
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: mastodon
+      POSTGRES_USER: mastodon
+    env_file:
+    - $HOME/secrets/mastodon.env
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'mastodon']
+    networks:
+    - local
+    profiles:
+    - mastodon
+    restart: unless-stopped
+    shm_size: 256mb
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    networks:
+    - local
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+    profiles:
+    - mastodon
+    restart: unless-stopped
+    volumes:
+    - ./data/redis:/data
