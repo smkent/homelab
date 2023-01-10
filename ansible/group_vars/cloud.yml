@@ -1,3 +1,2 @@
-env_name: cloud
 docker_compose_profiles:
 - cloud
