@@ -6,11 +6,6 @@ all:
           host_public: "{{ host_suffix }}"
           linode_name: "io.net"
           postfix_relayhost:
-    mastodon_herd:
-      hosts:
-        mastodon:
-          host_public: "{{ host_suffix }}"
-          postfix_relayhost: "[{{ default_postfix_relayhost }}]:587"
     onprem:
       hosts:
         ganymede:

@@ -1,4 +1,0 @@
-#!/bin/sh
-set -ex
-cd "$(readlink -f "$(dirname "$(readlink -f "${0}")")")/.."
-docker-compose run --rm -e DISABLE_DATABASE_ENVIRONMENT_CHECK=1 mastodon-web bundle exec rake mastodon:setup

@@ -1,3 +1,2 @@
-env_name: onprem
 docker_compose_profiles:
 - onprem
