@@ -7,4 +7,4 @@
   - name: linode-destroy
     delegate_to: localhost
     serial: 2
-    when: '"onprem" not in group_names'
+    when: '"cloud" in group_names'

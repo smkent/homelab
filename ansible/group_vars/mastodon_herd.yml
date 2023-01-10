@@ -1,3 +1,0 @@
-env_name: mastodon
-docker_compose_profiles:
-- mastodon
