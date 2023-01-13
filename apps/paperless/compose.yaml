@@ -1,0 +1,70 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+services:
+  paperless:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    depends_on:
+    - db
+    - redis
+    env_file:
+    - $HOME/secrets/paperless.env
+    environment:
+      PAPERLESS_REDIS: redis://redis:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_URL: https://paperless.${HOST?}
+      PAPERLESS_TIME_ZONE: America/Los_Angeles
+      PAPERLESS_SSO_ENABLED: "true"
+      PAPERLESS_SSO_OIDC_NAME: ${HOST_SUFFIX?}
+      PAPERLESS_SSO_OIDC_URL: https://${HOST_SUFFIX?}
+      PAPERLESS_LOGIN_HIDE_PASSWORD_FORM: "true"
+      USERMAP_UID: 2000
+      USERMAP_GID: 2000
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-S", "--max-time", "2", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+    - default
+    - local
+    ports:
+    - 8000:8000
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./data/paperless/data:/usr/src/paperless/data
+    - ./data/paperless/media:/usr/src/paperless/media
+    - ./data/paperless/export:/usr/src/paperless/export
+    - ./data/paperless/consume:/usr/src/paperless/consume
+
+  db:
+    image: postgres:14
+    environment:
+    - POSTGRES_USER=paperless
+    - POSTGRES_PASSWORD=paperless
+    - POSTGRES_DB=paperless
+    networks:
+    - local
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    networks:
+    - local
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./data/redis:/data
