@@ -1,0 +1,105 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+services:
+  librephotos-proxy:
+    image: reallibrephotos/librephotos-proxy:latest
+    depends_on:
+    - backend
+    - frontend
+    networks:
+    - default
+    - local
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./scan:/data
+    - ./data/librephotos/protected_media:/protected_media
+
+  frontend:
+    image: reallibrephotos/librephotos-frontend:latest
+    networks:
+    - local
+    profiles:
+    - onprem
+    restart: unless-stopped
+
+  backend:
+    image: reallibrephotos/librephotos:latest
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+    - SECRET_KEY=${LIBREPHOTOS_SECRET_KEY?}
+    - BACKEND_HOST=backend
+    - ADMIN_EMAIL=librephotos-admin@${HOST_SUFFIX?}
+    - ADMIN_USERNAME=admin
+    - ADMIN_PASSWORD=${LIBREPHOTOS_ADMIN_PASSWORD?}
+    - DB_BACKEND=postgresql
+    - DB_NAME=librephotos
+    - DB_USER=librephotos
+    - DB_PASS=librephotos
+    - DB_HOST=db
+    - DB_PORT=5432
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+    - MAPBOX_API_KEY=${mapApiKey:-}
+    - WEB_CONCURRENCY=2
+    - SKIP_PATTERNS=${skipPatterns:-}
+    - ALLOW_UPLOAD=${allowUpload:-false}
+    - DEBUG=0
+    - HEAVYWEIGHT_PROCESS=${HEAVYWEIGHT_PROCESS:-}
+    networks:
+    - local
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./scan:/data
+    - ./data/librephotos/protected_media:/protected_media
+    - ./data/librephotos/logs:/logs
+    - ./data/librephotos/cache:/root/.cache
+
+  db:
+    image: postgres:14
+    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c random_page_cost=1.0
+    environment:
+    - POSTGRES_USER=librephotos
+    - POSTGRES_PASSWORD=librephotos
+    - POSTGRES_DB=librephotos
+    healthcheck:
+      test: psql -U librephotos -d librephotos -c "SELECT 1;"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+    - local
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+    - local
+    profiles:
+    - onprem
+    restart: unless-stopped
+    volumes:
+    - ./data/redis:/data
