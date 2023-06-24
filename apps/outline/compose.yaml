@@ -9,9 +9,7 @@ networks:
 
 services:
   outline:
-    image: outlinewiki/outline:0.62.0
-    command: sh -c "yarn sequelize:migrate --env=production-ssl-disabled && yarn
-      start --env=production-ssl-disabled"
+    image: outlinewiki/outline:0.69.2
     depends_on:
     - db
     - redis
