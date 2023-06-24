@@ -19,8 +19,8 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/pre-commit
-        key: "pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml')\
-          \ }}"
+        key: "pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml')
+          }}"
 
     - name: ✨ Install pre-commit
       shell: bash
