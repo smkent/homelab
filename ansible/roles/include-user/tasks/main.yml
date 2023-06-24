@@ -3,8 +3,8 @@
     name: '{{ loop_user.user }}'
     uid: '{{ loop_user.data.uid or omit }}'
     groups: '{{ loop_user.data.groups|default([]) }}'
-    password: "{{ (loop_user.data.password | password_hash('sha512')) if loop_user.data.password|d()\
-      \ else '!' }}"
+    password: "{{ (loop_user.data.password | password_hash('sha512')) if loop_user.data.password|d()
+      else '!' }}"
     update_password: on_create
     shell: "{{ loop_user.data.shell|default(None) or '/bin/bash' }}"
     home: '{{ loop_user.data.home|default(None) or omit }}'
@@ -14,8 +14,8 @@
 
 - name: Set check mode user facts
   set_fact:
-    user_register: {home: "{{ loop_user.data.home|default(None) or ('/home/' + loop_user.user)\
-        \ }}", changed: true}
+    user_register: {home: "{{ loop_user.data.home|default(None) or ('/home/' + loop_user.user)
+        }}", changed: true}
     dotfiles_exists: {before: true}
   when: ansible_check_mode and user_register.changed
 
