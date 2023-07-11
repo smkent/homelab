@@ -12,7 +12,7 @@ secrets:
 
 services:
   nextcloud:
-    image: nextcloud:stable-apache
+    image: nextcloud:26-apache
     depends_on:
     - db
     environment:
