@@ -13,7 +13,7 @@ services:
       SMTPHOST: smtp
       SAFEWAY_ACCOUNTS_FILE: /accounts
     profiles:
-    - cloud
+    - onprem
     restart: unless-stopped
     volumes:
     - $HOME/secrets/safeway-accounts:/accounts:ro
