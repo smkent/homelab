@@ -19,7 +19,7 @@ fi
     if [ -n "${SMTPHOST}" ]; then
         echo "SMTPHOST=${SMTPHOST}"
     fi
-    echo "${CRON_SCHEDULE} /root/cron-wrap ${CRON_COMMAND}"
+    echo "${CRON_SCHEDULE} /smkent-extras/cron-wrap ${CRON_COMMAND}"
 ) > /var/spool/cron/crontabs/root
 
 exec crond -n -m "/usr/sbin/sendmail -t -f ${MAILFROM}"
