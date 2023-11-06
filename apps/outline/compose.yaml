@@ -9,7 +9,7 @@ networks:
 
 services:
   outline:
-    image: outlinewiki/outline:0.69.2
+    image: outlinewiki/outline:0.72.1
     depends_on:
     - db
     - redis
