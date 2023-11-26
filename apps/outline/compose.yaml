@@ -9,7 +9,7 @@ networks:
 
 services:
   outline:
-    image: outlinewiki/outline:0.72.1
+    image: outlinewiki/outline:0.73.1
     depends_on:
     - db
     - redis
@@ -19,7 +19,6 @@ services:
     environment:
     - REDIS_URL=redis://redis:6379
     - URL=https://outline.${HOST?}
-    - AWS_S3_UPLOAD_BUCKET_NAME=outline.${HOST?}
     - OIDC_AUTH_URI=https://${HOST?}/oidc/auth
     - OIDC_TOKEN_URI=https://${HOST?}/oidc/token
     - OIDC_USERINFO_URI=https://${HOST?}/oidc/userinfo
@@ -32,6 +31,9 @@ services:
     - cloud
     restart: unless-stopped
     user: root
+    volumes:
+    - ./data/outline:/var/lib/outline/data
+
 
   db:
     image: postgres:13
