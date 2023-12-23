@@ -1,4 +1,4 @@
-FROM olbat/cupsd
+FROM olbat/cupsd:stable
 
 RUN apt update \
     && apt install tini
