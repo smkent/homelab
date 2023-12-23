@@ -18,6 +18,7 @@ if [ -n "${RELAYHOST}" ]; then
     echo "${RELAYHOST} ${SUBMIT_USER}:$(cat "${SUBMIT_PASSWORD_FILE}")" > "${saslpass_file}"
     chmod -c 400 "${saslpass_file}"
     postmap "${saslpass_file}"
+    export POSTFIX_inet_protocols="ipv4"
     export POSTFIX_smtp_use_tls="yes"
     export POSTFIX_smtp_sasl_auth_enable="yes"
     export POSTFIX_smtp_sasl_password_maps="hash:/etc/saslpass"
