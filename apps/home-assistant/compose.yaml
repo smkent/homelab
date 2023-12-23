@@ -18,7 +18,7 @@ services:
     profiles:
     - onprem
     volumes:
-    - ./data/config:/config
+    - ./data/homeassistant/config:/config
     - /etc/localtime:/etc/localtime:ro
     - /run/dbus:/run/dbus:ro
 
