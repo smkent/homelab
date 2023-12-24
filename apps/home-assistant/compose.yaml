@@ -26,6 +26,8 @@ services:
     image: ghcr.io/esphome/esphome
     env_file:
     - $HOME/secrets/esphome.env
+    environment:
+    - ESPHOME_DASHBOARD_USE_PING=1
     networks:
     - local
     restart: unless-stopped
