@@ -36,5 +36,6 @@
     mode: 0600
   diff: false
   loop:
+  - certbot
   - samba
   - backup-apps

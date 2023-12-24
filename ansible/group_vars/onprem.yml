@@ -1,2 +1,5 @@
 docker_compose_profiles:
 - onprem
+
+certbot_hosts:
+- "casa.{{ host_suffix }}"

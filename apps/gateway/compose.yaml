@@ -14,6 +14,8 @@ services:
     - CERTBOT_EMAIL=${EMAIL?}
     - CERTBOT_HOSTS=*.${HOST?} ${HOST?}
     - CERTBOT_LINODE_API_KEY=certbot-linode-key
+    env_file:
+    - $HOME/secrets/certbot.env
     restart: unless-stopped
     secrets:
     - certbot-linode-key
