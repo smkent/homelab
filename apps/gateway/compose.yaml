@@ -50,6 +50,7 @@ services:
     - 443:443
     environment:
     - NGINX_HOST=${HOST?}
+    - HOST_SUFFIX=${HOST_SUFFIX?}
     - PLEX_HOST=${PLEX_HOST?}
     extra_hosts:
       gw: host-gateway

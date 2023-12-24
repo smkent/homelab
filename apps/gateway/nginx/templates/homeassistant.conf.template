@@ -1,9 +1,12 @@
 server {
     listen 443 ssl;
     set $backend "http://homeassistant:8123";
-    server_name home.${NGINX_HOST};
+    server_name casa.${HOST_SUFFIX};
     include /etc/nginx/conf.d/common-vhost.include;
     include /etc/nginx/conf.d/common-ssl-options.include;
+
+    ssl_certificate /etc/letsencrypt/live/casa.${HOST_SUFFIX}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/casa.${HOST_SUFFIX}/privkey.pem;
 
     location / {
         proxy_pass $backend;
