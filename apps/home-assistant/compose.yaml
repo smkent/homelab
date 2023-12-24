@@ -23,7 +23,7 @@ services:
     - /run/dbus:/run/dbus:ro
 
   esphome:
-    image: ghcr.io/esphome/esphome
+    build: esphome
     env_file:
     - $HOME/secrets/esphome.env
     environment:
@@ -34,6 +34,7 @@ services:
     privileged: true
     profiles:
     - onprem
+    user: esphome:esphome
     volumes:
     - ./data/esphome/config:/config
     - /etc/localtime:/etc/localtime:ro
