@@ -23,25 +23,35 @@ certbot_args=
 if [ -n "${CERTBOT_EMAIL}" ]; then
     certbot_args="${certbot_args} -m ${CERTBOT_EMAIL}"
 fi
-for host in ${CERTBOT_HOSTS?}; do
-    certbot_args="${certbot_args} -d ${host}"
-done
 
-(
-    set -x
-    # shellcheck disable=SC2086
-    certbot \
-        certonly \
-        -v \
-        -n \
-        --expand \
-        --agree-tos \
-        --dns-linode \
-        --dns-linode-propagation-seconds "${CERTBOT_LINODE_DNS_SECONDS:-180}" \
-        --dns-linode-credentials "${linode_creds_ini}" \
-        ${certbot_args} \
-        "${@}"
-)
+cert_for_hosts() {
+    certbot_host_args=
+    for host in ${1?}; do
+        certbot_host_args="${certbot_host_args} -d ${host}"
+    done
+    shift
+
+    (
+        set -x
+        # shellcheck disable=SC2086
+        certbot \
+            certonly \
+            -v \
+            -n \
+            --expand \
+            --agree-tos \
+            --dns-linode \
+            --dns-linode-propagation-seconds "${CERTBOT_LINODE_DNS_SECONDS:-180}" \
+            --dns-linode-credentials "${linode_creds_ini}" \
+            ${certbot_args} \
+            ${certbot_host_args} \
+            "${@}"
+    )
+}
+
+for host_set in "${CERTBOT_HOSTS}" ${CERTBOT_EXTRA_HOSTS-}; do
+    cert_for_hosts "${host_set}" "${@}"
+done
 
 if [ -n "${CERTBOT_INIT}" ]; then
     exit 0
