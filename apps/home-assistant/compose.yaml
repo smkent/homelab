@@ -26,6 +26,8 @@ services:
     image: ghcr.io/esphome/esphome
     env_file:
     - $HOME/secrets/esphome.env
+    environment:
+    - ESPHOME_DASHBOARD_USE_PING=1
     networks:
     - local
     restart: unless-stopped
@@ -38,6 +40,7 @@ services:
 
   esphome-oidc:
     image: quay.io/oauth2-proxy/oauth2-proxy
+    command: --config=/etc/oauth2-proxy.cfg
     env_file:
     - $HOME/secrets/esphome-oidc.env
     environment:
@@ -55,3 +58,5 @@ services:
     profiles:
     - onprem
     restart: unless-stopped
+    volumes:
+    - ./oauth2-proxy/oauth2-proxy.cfg:/etc/oauth2-proxy.cfg:ro
