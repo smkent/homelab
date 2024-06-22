@@ -1,2 +1,3 @@
-postfix_relayhost:
 apps_dir: apps
+certbot_hosts: []
+postfix_relayhost:
