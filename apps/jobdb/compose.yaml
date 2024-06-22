@@ -1,0 +1,39 @@
+version: '3.7'
+
+networks:
+  default:
+    external:
+      name: gateway_default
+  local:
+    external: false
+
+services:
+  jobdb:
+    image: ghcr.io/smkent/jobdb:main
+    environment:
+      SECRET_KEY: insecure_example_change_me
+      CSRF_TRUSTED_ORIGIN: https://jobs.${HOST?}
+    depends_on:
+    - db
+    env_file:
+    - $HOME/secrets/jobdb.env
+    networks:
+    - default
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    environment:
+    - POSTGRES_USER=jobdb
+    - POSTGRES_PASSWORD=jobdb
+    - POSTGRES_DB=jobdb
+    networks:
+    - local
+    profiles:
+    - cloud
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
