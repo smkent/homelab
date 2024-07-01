@@ -1,5 +1,8 @@
 version: '3.7'
 
+secrets:
+  smtp-submit-password: {file: $HOME/secrets/smtp-submit-password}
+
 networks:
   default:
     external:
@@ -13,6 +16,9 @@ services:
     environment:
       SECRET_KEY: insecure_example_change_me
       CSRF_TRUSTED_ORIGIN: https://jobs.${HOST?}
+      DJANGO_EMAIL_HOST: smtp
+      DJANGO_EMAIL_PORT: 587
+      DJANGO_DEFAULT_FROM_EMAIL: jobs@${HOST?}
     depends_on:
     - db
     env_file:
@@ -23,6 +29,8 @@ services:
     profiles:
     - cloud
     restart: unless-stopped
+    secrets:
+    - smtp-submit-password
 
   db:
     image: postgres:16
