@@ -10,5 +10,3 @@ GITEA__server__SSH_PORT=2202
 GITEA__service__DISABLE_REGISTRATION=true
 GITEA__service__ENABLE_NOTIFY_MAIL=true
 GITEA__service__REQUIRE_SIGNIN_VIEW=true
-GITEA__ui__DEFAULT_THEME=arc-green
-GITEA__ui__THEMES=auto,gitea,arc-green,earl-grey,gitea-blue,gitea-modern,github,github-dark,litepurple,pitchblack,tangerine-dream

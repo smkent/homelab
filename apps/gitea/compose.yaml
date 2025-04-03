@@ -9,7 +9,7 @@ networks:
 
 services:
   gitea:
-    image: gitea/gitea:1.16.5
+    image: docker.gitea.com/gitea:1.23
     depends_on:
     - db
     env_file:
@@ -36,7 +36,6 @@ services:
     - cloud
     restart: unless-stopped
     volumes:
-    - ./files/themes:/data/gitea/public/css:ro
     - ./files/sshd_config-template:/etc/templates/sshd_config:ro
     - $HOME/secrets/gitea-ssh-ed25519-host-key:/data/ssh/ssh_host_ed25519_key:ro
     - $HOME/secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
