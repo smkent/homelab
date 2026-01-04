@@ -1,16 +1,17 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
   - id: check-merge-conflict
   - id: end-of-file-fixer
   - id: trailing-whitespace
+    exclude: \.(yml|yaml)$
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.14.0
+  rev: v2.15.0
   hooks:
   - id: pretty-format-yaml
     args: [--preserve-quotes, --autofix, --indent, '2', --line-width, '79']
 - repo: https://github.com/koalaman/shellcheck-precommit
-  rev: v0.10.0
+  rev: v0.11.0
   hooks:
   - id: shellcheck
