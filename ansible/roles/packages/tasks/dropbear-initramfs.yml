@@ -29,8 +29,8 @@
   lineinfile:
     dest: /etc/dropbear-initramfs/config
     regexp: ^#?DROPBEAR_OPTIONS=
-    line: DROPBEAR_OPTIONS="-jks -I 120 -c cryptroot-unlock -b /etc/dropbear/banner
-      -r /etc/dropbear/dropbear_ed25519_host_key"
+    line: DROPBEAR_OPTIONS="-jks -I 120 -c cryptroot-unlock -b 
+      /etc/dropbear/banner -r /etc/dropbear/dropbear_ed25519_host_key"
     state: present
   notify:
   - update-initramfs
