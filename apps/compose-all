@@ -31,6 +31,6 @@ fi
     ) >&2
     (
         cd "${dir}"
-        docker-compose "${@}"
+        docker compose "${@}"
     )
 done
