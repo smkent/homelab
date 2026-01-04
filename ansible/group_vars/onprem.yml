@@ -3,3 +3,4 @@ docker_compose_profiles:
 
 certbot_hosts:
 - "casa.{{ host_suffix }}"
+- "mealie.{{ host_suffix }}"
