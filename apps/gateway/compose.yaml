@@ -1,5 +1,3 @@
-version: '3.7'
-
 secrets:
   certbot-linode-key: {file: $HOME/secrets/certbot-linode-key}
   nginx-connect-slug: {file: $HOME/secrets/nginx-connect-slug}

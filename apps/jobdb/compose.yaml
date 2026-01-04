@@ -1,12 +1,10 @@
-version: '3.7'
-
 secrets:
   smtp-submit-password: {file: $HOME/secrets/smtp-submit-password}
 
 networks:
   default:
-    external:
-      name: gateway_default
+    name: gateway_default
+    external: true
   local:
     external: false
 
