@@ -1,5 +1,3 @@
-version: '3.7'
-
 secrets:
   smtp-submit-password: {file: $HOME/secrets/smtp-submit-password}
 
