@@ -13,7 +13,8 @@ services:
     environment:
     - VERSION=docker
     healthcheck:
-      test: [CMD, curl, -m, '5', -f, --insecure, https://localhost:32400/web/index.html]
+      test: [CMD, curl, -m, '5', -f, --insecure, 
+          https://localhost:32400/web/index.html]
       interval: 2m
       timeout: 5s
       retries: 3
