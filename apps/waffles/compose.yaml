@@ -1,7 +1,7 @@
 networks:
   default:
-    external:
-      name: gateway_default
+    name: gateway_default
+    external: true
 
 secrets:
   jmap-api-token: {file: $HOME/secrets/jmap-api-token}

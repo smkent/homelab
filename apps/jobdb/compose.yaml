@@ -3,8 +3,8 @@ secrets:
 
 networks:
   default:
-    external:
-      name: gateway_default
+    name: gateway_default
+    external: true
   local:
     external: false
 
