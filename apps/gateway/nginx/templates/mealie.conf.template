@@ -1,7 +1,9 @@
 server {
     listen 443 ssl;
     set $backend "http://mealie:9000";
-    server_name mealie.${NGINX_HOST};
+    server_name mealie.smkent.net mealie.${NGINX_HOST};
+    ssl_certificate /etc/letsencrypt/live/mealie.smkent.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mealie.smkent.net/privkey.pem;
     include /etc/nginx/conf.d/common-vhost.include;
     include /etc/nginx/conf.d/common-ssl-options.include;
 
