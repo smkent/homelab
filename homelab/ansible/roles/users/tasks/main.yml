@@ -21,7 +21,14 @@
     cache_valid_time: 600
   loop:
   - git
-  - pipx
+  - >-
+    {{
+      'pipx'
+      if ansible_facts['distribution'] == 'Debian'
+      and ansible_facts['distribution_version'] | int >= 12
+      else ''
+    }}
+  when: item | length > 0
 
 - name: "User package tasks"
   include_tasks: packages.yml
