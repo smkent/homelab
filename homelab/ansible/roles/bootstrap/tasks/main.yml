@@ -5,12 +5,6 @@
     - installation_user | mandatory | length > 0
     quiet: true
 
-- name: Ensure sudo is installed
-  ansible.builtin.apt:
-    name: sudo
-    state: present
-    cache_valid_time: 600
-
 - name: Ensure installation user is removed
   ansible.builtin.user:
     name: user
@@ -57,15 +51,3 @@
   loop_control:
     loop_var: key
     label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
-
-- name: Restrict su to wheel group
-  community.general.pamd:
-    name: su
-    type: auth
-    control: sufficient
-    module_path: pam_rootok.so
-    new_type: auth
-    new_control: required
-    new_module_path: pam_wheel.so
-    module_arguments: use_uid
-    state: after

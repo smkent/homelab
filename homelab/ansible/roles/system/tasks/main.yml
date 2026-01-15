@@ -11,13 +11,3 @@
   - {name: shared, gid: 8888}
   loop_control:
     label: '{{ item.name }}'
-
-- name: Configure default umask
-  lineinfile:
-    dest: /etc/pam.d/{{ item }}
-    regexp: ^#?session\s+optional\s+pam_umask.so
-    line: session optional pam_umask.so umask=002
-    state: present
-  loop:
-  - common-session
-  - common-session-noninteractive
