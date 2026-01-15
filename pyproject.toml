@@ -18,6 +18,9 @@ classifiers = [
 requires-python = ">=3.12,<4.0"
 dynamic = [ "version" ]
 dependencies = [
+    "ansible-core",
+    "gnupg",
+    "passlib",
 ]
 
 [project.scripts]
