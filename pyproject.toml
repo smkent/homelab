@@ -28,7 +28,7 @@ dependencies = [
 [tool.poetry]
 requires-poetry = ">=2.0"
 exclude = [
-  "ansible/vault/**",
+  "homelab/ansible/vault/**",
 ]
 version = "0.0.0"
 

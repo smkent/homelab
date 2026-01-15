@@ -6,10 +6,10 @@
 .pytest_results.xml
 .venv/
 dist/
-ansible/.requirements.yml.sha256sum
-ansible/collections/
-ansible/vault/
-ansible/venv/
+homelab/ansible/.requirements.yml.sha256sum
+homelab/ansible/collections/
+homelab/ansible/vault/
+homelab/ansible/venv/
 apps/.env
 apps/*/data
 /.cache

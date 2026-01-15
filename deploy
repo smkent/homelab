@@ -2,7 +2,7 @@
 
 set -e
 
-cd "$(dirname "${0}")/ansible"
+cd "$(dirname "${0}")/homerun/ansible"
 
 export ANSIBLE_NOCOWS=1
 
