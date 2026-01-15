@@ -1,6 +1,7 @@
+deploy_user: deploy
+
 ansible_connection: ssh
 ansible_ssh_user: root
 
-deploy_user: deploy
 plex_host: 'plex.ganymede.{{ host_suffix }}'
 postfix_relayhost: '[{{ host_suffix }}]:587'

@@ -7,7 +7,7 @@
   roles:
   - ssh
 
-- name: "Configure deployment user on bootstrap host"
+- name: "Add deployment user to bootstrap host"
   hosts: all
   gather_facts: false
   remote_user: root
@@ -16,6 +16,7 @@
   roles:
   - auth
   - bootstrap
+  - deploy_user_common
 
 - name: "Test configured connection to bootstrap host"
   hosts: all

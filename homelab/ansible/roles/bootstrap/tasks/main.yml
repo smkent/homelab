@@ -1,7 +1,6 @@
 - name: Check configuration
   ansible.builtin.assert:
     that:
-    - create_users.deploy.password | mandatory | length > 8
     - installation_user | mandatory | length > 0
     quiet: true
 
@@ -11,43 +10,12 @@
     state: absent
     remove: true
     force: true
-  when: installation_user != "deploy"
+  when: installation_user != deploy_user
   ignore_errors: true
 
 - name: Ensure installation group is removed
   ansible.builtin.group:
     name: user
     state: absent
-  when: installation_user != "deploy"
+  when: installation_user != deploy_user
   ignore_errors: true
-
-- name: Ensure deploy group exists
-  ansible.builtin.group:
-    name: deploy
-    gid: 1000
-    state: present
-
-- name: Ensure deploy user exists
-  ansible.builtin.user:
-    name: deploy
-    uid: 1000
-    group: deploy
-    groups: sudo
-    append: true
-    password: "{{ create_users.deploy.password | mandatory | password_hash('sha512')
-      }}"
-    update_password: on_create
-    home: /opt/deploy
-    create_home: true
-    shell: /bin/bash
-    state: present
-
-- name: Ensure deploy user authorized_keys are present
-  ansible.posix.authorized_key:
-    user: deploy
-    key: '{{ key }}'
-    state: present
-  loop: '{{ ssh_authorized_keys }}'
-  loop_control:
-    loop_var: key
-    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
