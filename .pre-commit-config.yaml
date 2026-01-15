@@ -3,6 +3,7 @@ repos:
   rev: v6.0.0
   hooks:
   - id: check-merge-conflict
+  - id: debug-statements
   - id: end-of-file-fixer
   - id: trailing-whitespace
     exclude: \.(yml|yaml)$
@@ -15,3 +16,23 @@ repos:
   rev: v0.11.0
   hooks:
   - id: shellcheck
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.14.11
+  hooks:
+  - id: ruff
+    args: ["--fix"]
+  - id: ruff-format
+- repo: https://github.com/pycqa/bandit
+  rev: 1.9.2
+  hooks:
+  - id: bandit
+    additional_dependencies: ['.[toml]']
+    args: ["--configfile", "pyproject.toml"]
+    exclude: '^tests/'
+- repo: local
+  hooks:
+  - id: mypy
+    name: mypy
+    language: python
+    types_or: [python, pyi]
+    entry: env -u VIRTUAL_ENV poetry run mypy
