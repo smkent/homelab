@@ -1,13 +1,2 @@
 - ansible.builtin.hostname:
     name: '{{ ansible_host }}'
-
-- name: Create groups
-  ansible.builtin.group:
-    name: '{{ item.name }}'
-    gid: '{{ item.gid }}'
-    state: present
-  loop:
-  - {name: docker, gid: 200}
-  - {name: shared, gid: 8888}
-  loop_control:
-    label: '{{ item.name }}'
