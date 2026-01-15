@@ -9,7 +9,6 @@ dist/
 homelab/ansible/.requirements.yml.sha256sum
 homelab/ansible/collections/
 homelab/ansible/vault/
-homelab/ansible/venv/
 apps/.env
 apps/*/data
 /.cache
