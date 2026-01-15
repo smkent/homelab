@@ -70,6 +70,26 @@ class Homerun:
                 print(self.args)
                 self.args.func()
 
+    def action_bootstrap(self) -> None:
+        self.ansible_collections.ensure()
+        with gpg_fifo(self.args.ansible_vault) as fifo:
+            cmd = [
+                "ansible-playbook",
+                "-i",
+                f"{self.args.host},",
+                "-u",
+                self.args.username,
+                "--ask-pass",
+                "--ask-become-pass",
+                "-e",
+                f"installation_user={self.args.username}",
+                "-e",
+                f"@{fifo}",
+                "playbooks/bootstrap.yml",
+            ]
+            cmd += self.extra_args
+            run(cmd)
+
     def action_hostvars(self) -> None:
         with gpg_fifo(self.args.ansible_vault) as fifo:
             cmd = [
@@ -185,6 +205,15 @@ class Homerun:
             ),
         )
         subp = ap.add_subparsers(title="Subcommands", metavar="command")
+
+        bootstrap_p = subp.add_parser(
+            "bootstrap",
+            parents=[ansible_vault_mixin],
+            help="Bootstrap new host",
+        )
+        bootstrap_p.set_defaults(func=self.action_bootstrap)
+        bootstrap_p.add_argument("host", help="Target host")
+        bootstrap_p.add_argument("username", help="Username on target host")
 
         run_p = subp.add_parser(
             "run",
