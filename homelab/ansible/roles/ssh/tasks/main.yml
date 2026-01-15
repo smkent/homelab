@@ -1,21 +1,15 @@
-- name: Create root .ssh directory
-  file:
-    path: /root/.ssh
-    mode: 0700
-    owner: root
-    group: root
-    state: directory
-
-- name: Install root authorized_keys
-  copy:
-    dest: /root/.ssh/authorized_keys
-    content: '{{ ssh_root_authorized_keys }}'
-    mode: 0644
-    owner: root
-    group: root
+- name: Ensure root authorized_keys are present
+  ansible.posix.authorized_key:
+    user: deploy
+    key: '{{ key }}'
+    state: present
+  loop: '{{ ssh_root_authorized_keys }}'
+  loop_control:
+    loop_var: key
+    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
 
 - name: Configure ssh login settings
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     regexp: ^#?{{ item.name }}
     line: '{{ item.name }} {{ item.value }}'
@@ -24,11 +18,13 @@
   - {name: PasswordAuthentication, value: "no"}
   - {name: PermitRootLogin, value: "prohibit-password"}
   - {name: StreamLocalBindUnlink, value: "yes"}
+  loop_control:
+    label: "{{ item.name }}"
   notify:
   - restart-ssh
 
 - name: Configure ssh cryptography settings
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/ssh/sshd_config
     block: |
       KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
@@ -43,7 +39,7 @@
   - restart-ssh
 
 - name: Ensure RSA host key has sufficient bits
-  script: ssh-generate
+  ansible.builtin.script: ssh-generate
   when: ssh_crypto.changed
   register: ssh_generate
   notify:

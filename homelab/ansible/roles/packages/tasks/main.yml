@@ -1,5 +1,21 @@
-- include_tasks: packages.yml
-- include_tasks: docker.yml
-
-- include_tasks: dropbear-initramfs.yml
-  when: crypttab_stat.stat.exists
+- name: Ensure apt packages are installed
+  ansible.builtin.apt:
+    pkg:
+    - curl
+    - git
+    - gnupg
+    - htop
+    - libpam-modules
+    - make
+    - mdadm
+    - mtools
+    - net-tools
+    - python3-pip
+    - python3-venv
+    - rsync
+    - s3cmd
+    - tmux
+    - universal-ctags
+    - vim-nox
+    state: present
+    cache_valid_time: 600

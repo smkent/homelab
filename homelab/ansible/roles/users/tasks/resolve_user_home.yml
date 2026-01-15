@@ -1,0 +1,16 @@
+- name: "Refresh passwd cache for {{ resolve_home_user_name }}"
+  getent:
+    database: passwd
+    key: "{{ resolve_home_user_name }}"
+    fail_key: false
+
+- name: "Locate home directory for {{ resolve_home_user_name }}"
+  set_fact:
+    user_home: >-
+      {%- if ansible_facts.getent_passwd.get(resolve_home_user_name)|d() -%}
+        {{ ansible_facts.getent_passwd[resolve_home_user_name][4] }}
+      {%- elif resolve_home_user_def.home|d() -%}
+        {{ resolve_home_user_def.home }}
+      {%- else -%}
+        /home/{{ resolve_home_user_name }}
+      {%- endif -%}

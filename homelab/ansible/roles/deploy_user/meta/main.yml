@@ -1,2 +1,2 @@
 dependencies:
-- {role: users}
+- role: deploy_user_common

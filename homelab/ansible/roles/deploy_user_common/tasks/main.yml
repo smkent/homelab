@@ -1,0 +1,40 @@
+- name: "Ensure {{ deploy_user }} group exists"
+  ansible.builtin.group:
+    name: "{{ deploy_user | mandatory }}"
+    gid: 1000
+    state: present
+
+- name: "Ensure {{ deploy_user }} user exists"
+  ansible.builtin.user:
+    name: "{{ deploy_user | mandatory }}"
+    uid: 1000
+    group: "{{ deploy_user }}"
+    groups: sudo
+    append: true
+    password: "{{ create_users[deploy_user].password | mandatory | password_hash('sha512')
+      }}"
+    update_password: on_create
+    home: "{{ create_users[deploy_user].home|d(None) or omit }}"
+    create_home: true
+    shell: /bin/bash
+    state: present
+
+- name: Ensure deploy user authorized_keys are present
+  ansible.posix.authorized_key:
+    user: "{{ deploy_user }}"
+    key: '{{ key }}'
+    state: present
+  loop: '{{ ssh_authorized_keys }}'
+  loop_control:
+    loop_var: key
+    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+
+- name: "Refresh passwd cache for {{ deploy_user }}"
+  getent:
+    database: passwd
+    key: "{{ deploy_user }}"
+    fail_key: false
+
+- name: "Locate home directory for {{ deploy_user }}"
+  set_fact:
+    deploy_user_home: "{{ ansible_facts.getent_passwd[deploy_user][4] }}"

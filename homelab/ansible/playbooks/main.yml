@@ -1,11 +1,12 @@
 - name: Provision homelab host
-  collections:
-  - community.general
   hosts: all
   roles:
   - users
+  - crypt_root
+  - mta
   - packages
   - system
+  - docker
   - deploy_user
   - {name: apps, become_user: '{{ deploy_user }}', when: 
       deploy_user_info.exists}

@@ -1,0 +1,35 @@
+- name: Ensure sudo is installed
+  ansible.builtin.apt:
+    name: sudo
+    state: present
+    cache_valid_time: 600
+
+- name: Ensure wheel group exists
+  ansible.builtin.group:
+    name: wheel
+    system: true
+    state: present
+
+- name: Restrict su to wheel group
+  community.general.pamd:
+    name: su
+    type: auth
+    control: sufficient
+    module_path: pam_rootok.so
+    new_type: auth
+    new_control: required
+    new_module_path: pam_wheel.so
+    module_arguments: use_uid
+    state: after
+
+- name: Configure default umask
+  community.general.pamd:
+    name: "{{ item }}"
+    type: session
+    control: optional
+    module_path: pam_umask.so
+    module_arguments: umask=002
+    state: updated
+  loop:
+  - common-session
+  - common-session-noninteractive
