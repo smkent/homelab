@@ -27,7 +27,7 @@ fi
 
 case "${1}" in
     hostvars)
-        exec venv/bin/ansible -i "hosts-${env}.yml" -m debug "${2-all}" \
+        exec venv/bin/ansible -i "inventories/${env}/hosts.yml" -m debug "${2-all}" \
             -e "fqdn=${fqdn}" \
             -a 'msg={{hostvars[inventory_hostname]}}'
         ;;
@@ -64,8 +64,8 @@ _rm_pipe
 mkfifo "${pipe}"
 
 gpg -d "vault/ansible.asc" > "${pipe}" &
-venv/bin/ansible-playbook -i "hosts-${env}.yml" \
+venv/bin/ansible-playbook -i "inventories/${env}/hosts.yml" \
     -e "@${pipe}" \
     -e "fqdn=${fqdn}" \
-    "${playbook}.yml" \
+    "playbooks/${playbook}.yml" \
     "${@}"
