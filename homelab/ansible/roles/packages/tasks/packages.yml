@@ -1,15 +1,5 @@
-- name: Retrieve installed packages list
-  package_facts:
-
-- name: Remove unneeded exim4-daemon-light package
-  apt:
-    pkg:
-    - exim4-daemon-light
-    state: absent
-  when: "'exim4-daemon-light' in ansible_facts.packages"
-
-- name: Install apt packages
-  apt:
+- name: Ensure apt packages are installed
+  ansible.builtin.apt:
     pkg:
     - curl
     - git
@@ -18,11 +8,8 @@
     - libpam-modules
     - make
     - mdadm
-    - msmtp
-    - msmtp-mta
     - mtools
     - net-tools
-    - ntp
     - python3-pip
     - python3-venv
     - rsync
@@ -30,29 +17,5 @@
     - tmux
     - universal-ctags
     - vim-nox
-    update_cache: true
     state: present
-
-- name: Configure msmtp
-  copy:
-    dest: /etc/msmtprc
-    content: |
-      account default
-      host localhost
-      port 587
-      from sys@{{ ansible_host }}
-      aliases /etc/aliases
-      tls on
-      tls_certcheck off
-    mode: 0640
-    owner: root
-    group: msmtp
-
-- name: Configure mail aliases
-  lineinfile:
-    dest: /etc/aliases
-    regexp: '^#?root:'
-    line: 'root: {{ email }}'
-    state: present
-    create: true
-    mode: 0644
+    cache_valid_time: 600
