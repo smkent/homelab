@@ -1,6 +1,4 @@
 - name: Provision homelab host
-  collections:
-  - community.general
   hosts: all
   roles:
   - users
