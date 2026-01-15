@@ -1,10 +1,46 @@
-- include_role:
-    name: include-user
-    allow_duplicates: no
+- name: Ensure shared group exists
+  ansible.builtin.group:
+    name: shared
+    gid: 8888
+    state: present
+
+- name: "User creation tasks"
+  include_tasks: user.yml
+  vars:
+    user_name: "{{ loop_user.user }}"
+    user_def: "{{ loop_user.data }}"
   loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
   loop_control:
     loop_var: loop_user
+    label: "{{ loop_user.user }}"
 
-- name: Load users info
-  getent:
-    database: passwd
+- name: Ensure system packages for user features are installed
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    cache_valid_time: 600
+  loop:
+  - git
+  - pipx
+
+- name: "User package tasks"
+  include_tasks: packages.yml
+  vars:
+    user_name: "{{ loop_user.user }}"
+    user_def: "{{ loop_user.data }}"
+  loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
+  loop_control:
+    loop_var: loop_user
+    label: "{{ loop_user.user }}"
+  when: loop_user.data.user_packages|d(False)
+
+- name: "User dotfiles tasks"
+  include_tasks: dotfiles.yml
+  vars:
+    user_name: "{{ loop_user.user }}"
+    user_def: "{{ loop_user.data }}"
+  loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
+  loop_control:
+    loop_var: loop_user
+    label: "{{ loop_user.user }}"
+  when: loop_user.data.dotfiles|d(False)
