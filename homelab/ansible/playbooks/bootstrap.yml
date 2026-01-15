@@ -1,0 +1,34 @@
+- name: "Configure root ssh on bootstrap host"
+  hosts: all
+  ignore_unreachable: true
+  gather_facts: false
+  become: true
+  become_method: su
+  tasks:
+  - name: Ensure root authorized_keys are present
+    ansible.posix.authorized_key:
+      user: deploy
+      key: '{{ key }}'
+      state: present
+    loop: '{{ ssh_root_authorized_keys }}'
+    loop_control:
+      loop_var: key
+      label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+
+- name: "Configure deployment user on bootstrap host"
+  hosts: all
+  gather_facts: false
+  remote_user: root
+  become: true
+  become_method: su
+  roles:
+  - bootstrap
+
+- name: "Test configured connection to bootstrap host"
+  hosts: all
+  gather_facts: true
+  remote_user: deploy
+  become: true
+  become_method: sudo
+  vars:
+    ansible_become_pass: "{{ create_users[deploy_user].password | mandatory }}"

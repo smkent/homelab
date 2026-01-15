@@ -1,0 +1,71 @@
+- name: Check configuration
+  ansible.builtin.assert:
+    that:
+    - create_users.deploy.password | mandatory | length > 8
+    - installation_user | mandatory | length > 0
+    quiet: true
+
+- name: Ensure sudo is installed
+  ansible.builtin.apt:
+    name: sudo
+    state: present
+    cache_valid_time: 600
+
+- name: Ensure installation user is removed
+  ansible.builtin.user:
+    name: user
+    state: absent
+    remove: true
+    force: true
+  when: installation_user != "deploy"
+  ignore_errors: true
+
+- name: Ensure installation group is removed
+  ansible.builtin.group:
+    name: user
+    state: absent
+  when: installation_user != "deploy"
+  ignore_errors: true
+
+- name: Ensure deploy group exists
+  ansible.builtin.group:
+    name: deploy
+    gid: 1000
+    state: present
+
+- name: Ensure deploy user exists
+  ansible.builtin.user:
+    name: deploy
+    uid: 1000
+    group: deploy
+    groups: sudo
+    append: true
+    password: "{{ create_users.deploy.password | mandatory | password_hash('sha512')
+      }}"
+    update_password: on_create
+    home: /opt/deploy
+    create_home: true
+    shell: /bin/bash
+    state: present
+
+- name: Ensure deploy user authorized_keys are present
+  ansible.posix.authorized_key:
+    user: deploy
+    key: '{{ key }}'
+    state: present
+  loop: '{{ ssh_authorized_keys }}'
+  loop_control:
+    loop_var: key
+    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+
+- name: Restrict su to wheel group
+  community.general.pamd:
+    name: su
+    type: auth
+    control: sufficient
+    module_path: pam_rootok.so
+    new_type: auth
+    new_control: required
+    new_module_path: pam_wheel.so
+    module_arguments: use_uid
+    state: after
