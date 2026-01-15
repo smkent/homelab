@@ -28,13 +28,14 @@
     state: directory
 
 - name: Install authorized_keys
-  copy:
-    dest: '{{ user_register.home }}/.ssh/authorized_keys'
-    content: '{{ loop_user.data.authorized_keys }}'
-    mode: 0644
-    owner: '{{ loop_user.user }}'
-    group: '{{ loop_user.user }}'
-  when: loop_user.data.authorized_keys|d() != ""
+  ansible.posix.authorized_key:
+    user: loop_user.user
+    key: '{{ key }}'
+    state: present
+  loop: '{{ loop_user.data.authorized_keys }}'
+  loop_control:
+    loop_var: key
+    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
 
 - name: Create .local directory
   file:

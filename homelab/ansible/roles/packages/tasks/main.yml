@@ -1,5 +1,10 @@
 - include_tasks: packages.yml
 - include_tasks: docker.yml
 
+- name: Check if root filesystem is encrypted
+  stat:
+    path: /etc/crypttab
+  register: crypttab_stat
+
 - include_tasks: dropbear-initramfs.yml
   when: crypttab_stat.stat.exists

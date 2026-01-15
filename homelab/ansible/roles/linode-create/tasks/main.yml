@@ -19,7 +19,7 @@
       type: g6-standard-1
       region: us-southeast
       image: linode/debian11
-      authorized_keys: "{{ ssh_authorized_keys }}"
+      authorized_keys: "{{ ssh_authorized_keys | join('\n') }}"
       api_token: "{{ linode_access_token }}"
       state: present
     register: linode_instance

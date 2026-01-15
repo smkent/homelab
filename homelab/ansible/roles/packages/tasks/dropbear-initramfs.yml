@@ -8,7 +8,7 @@
 
 - name: Configure authorized_keys
   copy:
-    content: '{{ ssh_authorized_keys }}'
+    content: "{{ ssh_authorized_keys | join('\n') }}"
     dest: /etc/dropbear-initramfs/authorized_keys
     mode: 0600
   notify:

@@ -4,16 +4,8 @@
   gather_facts: false
   become: true
   become_method: su
-  tasks:
-  - name: Ensure root authorized_keys are present
-    ansible.posix.authorized_key:
-      user: deploy
-      key: '{{ key }}'
-      state: present
-    loop: '{{ ssh_root_authorized_keys }}'
-    loop_control:
-      loop_var: key
-      label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+  roles:
+  - ssh
 
 - name: "Configure deployment user on bootstrap host"
   hosts: all
