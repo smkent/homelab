@@ -1,0 +1,51 @@
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: wheel
+    gid: 200
+    state: present
+
+- name: Remove legacy Docker apt_repository file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/download_docker_com_linux_debian.list
+    state: absent
+
+- name: Ensure apt keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  register: apt_keyring_dir
+
+- name: Add Docker GPG key
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower
+      }}/gpg"
+    dest: /etc/apt/keyrings/docker.gpg
+    mode: 0644
+  when: not (ansible_check_mode and apt_keyring_dir.changed)
+
+- name: Add Docker apt repository
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower
+      }}"
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: stable
+    signed_by: /etc/apt/keyrings/docker.gpg
+    state: present
+  register: apt_docker_repo
+
+- name: Install Docker
+  ansible.builtin.apt:
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - docker-buildx-plugin
+    - docker-compose-plugin
+    state: present
+    cache_valid_time: "{{ 0 if apt_docker_repo.changed else 600 }}"
+  register: apt_docker_packages
+  failed_when: not ansible_check_mode and apt_docker_packages.failed
