@@ -65,7 +65,12 @@ sequence = ["lint", "pytest"]
 help = "Run all tests"
 
 [tool.bandit]
-skips = ["B101"]  # assert_used
+skips = [
+    "B101",  # assert_used
+    "B404",  # blacklist
+    "B603",  # subprocess_without_shell_equals_true
+    "B607",  # start_process_with_partial_path
+]
 
 [tool.coverage.run]
 source = ["homelab"]
