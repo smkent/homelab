@@ -1,0 +1,22 @@
+{
+  "template": "https://github.com/smkent/cookie-python",
+  "commit": "33a8ea3d29a0e6b563029742ca1b16698b2b6c3a",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "homelab",
+      "project_slug": "homelab",
+      "project_description": "Self-hosted apps I run on my homelab and personal infrastructure. Deployments are managed by Ansible.",
+      "project_license": "GPL-3.0-or-later",
+      "enable_coverage": "yes",
+      "enable_pypi_publish": "no",
+      "enable_container_publish": "no",
+      "author_name": "Stephen Kent",
+      "author_email": "smkent@smkent.net",
+      "github_user": "smkent",
+      "_template": "https://github.com/smkent/cookie-python",
+      "_commit": "33a8ea3d29a0e6b563029742ca1b16698b2b6c3a"
+    }
+  },
+  "directory": null
+}
