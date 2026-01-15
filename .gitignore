@@ -7,6 +7,7 @@
 .venv/
 dist/
 ansible/.requirements.yml.sha256sum
+ansible/collections/
 ansible/vault/
 ansible/venv/
 apps/.env
