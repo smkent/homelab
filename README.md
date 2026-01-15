@@ -11,12 +11,14 @@ Deployments are managed by [Ansible][ansible].
 
 Before using this repository, perform these steps on the target machine.
 
-## [Linode][linode]
+## Operating system installation
 
-Select [Debian][debian] 11 (or the current stable version) when creating a new
+### [Linode][linode]
+
+Select [Debian][debian] 13 (or the current stable version) when creating a new
 Linode instance.
 
-## Home server
+### Home server
 
 Install [Debian stable][debian] using the [netinst][debian-netinst] installer
 media.
@@ -25,35 +27,26 @@ media.
 * The installer requires creation of an unprivileged user. This user should be
   manually deleted after installation, so choose a simple temporary username.
 
-Boot into the new installation and perform these steps:
+## First-run configuration
 
-1. Delete the unprivileged user created during installation:
-   `deluser --remove-all-files username`
-2. Install basic packages: `apt install -y sudo vim`
-3. Create the root user's ssh directory: `mkdir -m 0700 /root/.ssh`
-4. Create `/root/.ssh/authorized_keys` with your ssh public key
+Use `homerun bootstrap` to automatically remove the unprivileged user created
+during installation and replace it with the expected deployment user.
 
 # Deployment
 
 If not already present, add the target machine's hostname to
 `ansible/hosts.yml`.
 
-Use `./deploy` to set up one or more target machine(s). Arguments are passed
+Use `homerun` to set up one or more target machine(s). Command line options
+include inventory and playbook file selection. Additional arguments are passed
 through to [ansible-playbook][ansible-playbook-docs].
-
-## Configuration
-
-Environment variables may be set for configuration:
-
-* `ENV`: Inventory file selection. Choices: `live` (default) or `sandbox`.
-* `FQDN`: Host suffix domain name, such as `example.com`
 
 ## Invocation examples
 
-* Deploy to a single host (dry run): `./deploy -C -l target-host-name`
-* Deploy to a single host: `./deploy -l target-host-name`
-* Deploy to all configured hosts (dry run): `./deploy -C`
-* Deploy to all configured hosts: `./deploy`
+* Deploy to a single host (dry run): `homerun run -C -l target-host-name`
+* Deploy to a single host: `homerun run -l target-host-name`
+* Deploy to all configured hosts (dry run): `homerun run -C`
+* Deploy to all configured hosts: `homerun run`
 
 # Development
 
