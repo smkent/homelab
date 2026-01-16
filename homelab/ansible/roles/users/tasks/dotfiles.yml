@@ -1,4 +1,6 @@
-- include_tasks: resolve_user_home.yml
+- import_role:
+    name: common
+    tasks_from: resolve_user_home
   vars:
     resolve_home_user_name: "{{ user_name }}"
     resolve_home_user_def: "{{ user_def }}"

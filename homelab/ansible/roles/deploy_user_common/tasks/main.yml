@@ -28,13 +28,15 @@
   loop_control:
     loop_var: key
     label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+  register: deploy_authorized_keys_state
+  failed_when:
+  - not ansible_check_mode
+  - deploy_authorized_keys_state.failed
 
-- name: "Refresh passwd cache for {{ deploy_user }}"
-  getent:
-    database: passwd
-    key: "{{ deploy_user }}"
-    fail_key: false
-
-- name: "Locate home directory for {{ deploy_user }}"
-  set_fact:
-    deploy_user_home: "{{ ansible_facts.getent_passwd[deploy_user][4] }}"
+- import_role:
+    name: common
+    tasks_from: resolve_user_home
+  vars:
+    resolve_home_user_name: "{{ deploy_user }}"
+    resolve_home_user_def: "{{ create_users[deploy_user] }}"
+    resolve_home_set_fact: deploy_user_home

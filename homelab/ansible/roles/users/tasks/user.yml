@@ -11,7 +11,9 @@
     create_home: '{{ user_def.create_home|d(True) }}'
     state: present
 
-- include_tasks: resolve_user_home.yml
+- import_role:
+    name: common
+    tasks_from: resolve_user_home
   vars:
     resolve_home_user_name: "{{ user_name }}"
     resolve_home_user_def: "{{ user_def }}"
@@ -30,15 +32,3 @@
   failed_when:
   - not ansible_check_mode
   - user_authorized_keys.failed
-
-- name: "Ensure {{ user_home }}/.local exists"
-  file:
-    path: '{{ user_home }}/.local'
-    mode: 0755
-    owner: '{{ user_name }}'
-    group: '{{ user_name }}'
-    state: directory
-  register: user_local_dir
-  failed_when:
-  - not ansible_check_mode
-  - user_local_dir.failed
