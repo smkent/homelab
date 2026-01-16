@@ -23,6 +23,18 @@
     owner: '{{ deploy_user }}'
     group: '{{ deploy_user }}'
 
+- name: "Ensure {{ deploy_user_home }}/.local exists"
+  file:
+    path: '{{ deploy_user_home }}/.local'
+    mode: 0755
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
+    state: directory
+  register: deploy_user_local_dir
+  failed_when:
+  - not ansible_check_mode
+  - deploy_user_local_dir.failed
+
 - name: "Ensure {{ deploy_user_home }}/.local/shell-rc is populated"
   template:
     src: shell-rc.j2

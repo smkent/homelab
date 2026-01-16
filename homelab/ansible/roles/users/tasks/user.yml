@@ -30,15 +30,3 @@
   failed_when:
   - not ansible_check_mode
   - user_authorized_keys.failed
-
-- name: "Ensure {{ user_home }}/.local exists"
-  file:
-    path: '{{ user_home }}/.local'
-    mode: 0755
-    owner: '{{ user_name }}'
-    group: '{{ user_name }}'
-    state: directory
-  register: user_local_dir
-  failed_when:
-  - not ansible_check_mode
-  - user_local_dir.failed
