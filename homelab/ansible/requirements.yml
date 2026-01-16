@@ -1,4 +1,5 @@
 collections:
 - ansible.posix
+- community.docker
 - community.general
 - linode.cloud
