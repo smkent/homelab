@@ -4,6 +4,8 @@
   gather_facts: false
   become: true
   become_method: su
+  vars_files:
+  - vars/common.yml
   roles:
   - ssh
 
@@ -13,6 +15,8 @@
   remote_user: root
   become: true
   become_method: su
+  vars_files:
+  - vars/common.yml
   roles:
   - auth
   - bootstrap
@@ -24,5 +28,7 @@
   remote_user: deploy
   become: true
   become_method: sudo
+  vars_files:
+  - vars/common.yml
   vars:
     ansible_become_pass: "{{ create_users[deploy_user].password | mandatory }}"
