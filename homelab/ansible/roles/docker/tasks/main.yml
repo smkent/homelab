@@ -1,6 +1,6 @@
 - name: Ensure docker group exists
   ansible.builtin.group:
-    name: wheel
+    name: docker
     gid: 200
     state: present
 
