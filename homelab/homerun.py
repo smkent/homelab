@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from functools import cached_property, partial
 from importlib.resources import as_file, files
 from pathlib import Path
+from typing import Any
 
 from .util import gpg_fifo, run
 
@@ -26,6 +27,13 @@ class AnsibleCollections:
     def collections(self) -> Path:
         return self.requirements.parent / "collections"
 
+    @cached_property
+    def env(self) -> dict[str, str]:
+        return {
+            "ANSIBLE_GALAXY_COLLECTIONS_PATH_WARNING": "false",
+            "ANSIBLE_COLLECTIONS_PATH": str(self.collections.resolve()),
+        }
+
     def ensure(self) -> None:
         if not self._requirements_changed():
             return
@@ -39,11 +47,7 @@ class AnsibleCollections:
                 "-p",
                 str(self.collections),
             ],
-            env=os.environ
-            | {
-                "ANSIBLE_GALAXY_COLLECTIONS_PATH_WARNING": "false",
-                "ANSIBLE_COLLECTIONS_PATHS": str(self.collections.resolve()),
-            },
+            env=os.environ | self.env,
         )
         self._update_checksum()
 
@@ -70,8 +74,21 @@ class Homerun:
                 print(self.args)
                 self.args.func()
 
-    def action_bootstrap(self) -> None:
+    def _ansible_run(
+        self,
+        cmd: Sequence[str],
+        *,
+        env: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> Any:
         self.ansible_collections.ensure()
+        return run(
+            cmd,
+            env=env or (os.environ | self.ansible_collections.env),
+            **kwargs,
+        )
+
+    def action_bootstrap(self) -> None:
         with gpg_fifo(self.args.ansible_vault) as fifo:
             cmd = [
                 "ansible-playbook",
@@ -88,7 +105,7 @@ class Homerun:
                 "playbooks/bootstrap.yml",
             ]
             cmd += self.extra_args
-            run(cmd)
+            self._ansible_run(cmd)
 
     def action_hostvars(self) -> None:
         with gpg_fifo(self.args.ansible_vault) as fifo:
@@ -107,10 +124,9 @@ class Homerun:
                 "all",
             ]
             cmd += self.extra_args
-            run(cmd)
+            self._ansible_run(cmd)
 
     def action_run(self) -> None:
-        self.ansible_collections.ensure()
         with gpg_fifo(self.args.ansible_vault) as fifo:
             cmd = [
                 "ansible-playbook",
@@ -123,7 +139,7 @@ class Homerun:
                 f"playbooks/{self.args.playbook}",
             ]
             cmd += self.extra_args
-            run(cmd)
+            self._ansible_run(cmd)
 
     @cached_property
     def args(self) -> argparse.Namespace:
