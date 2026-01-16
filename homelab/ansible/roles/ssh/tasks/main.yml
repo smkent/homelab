@@ -1,6 +1,6 @@
 - name: Ensure root authorized_keys are present
   ansible.posix.authorized_key:
-    user: deploy
+    user: root
     key: '{{ key }}'
     state: present
   loop: '{{ ssh_root_authorized_keys }}'
