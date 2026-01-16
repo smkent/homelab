@@ -28,6 +28,10 @@
   loop_control:
     loop_var: key
     label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+  register: deploy_authorized_keys_state
+  failed_when:
+  - not ansible_check_mode
+  - deploy_authorized_keys_state.failed
 
 - import_role:
     name: common
