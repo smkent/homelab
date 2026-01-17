@@ -71,7 +71,6 @@ class Homerun:
         with as_file(files(__package__) / "ansible") as ansible_path:
             print("ansible_path", ansible_path)
             with chdir(ansible_path):
-                print(self.args)
                 self.args.func()
 
     def _ansible_run(
