@@ -10,6 +10,7 @@
     home: '{{ user_def.home|d(None) or omit }}'
     create_home: '{{ user_def.create_home|d(True) }}'
     state: present
+  when: ansible_ssh_user != user_name
 
 - import_role:
     name: common
