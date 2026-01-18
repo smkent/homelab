@@ -46,6 +46,7 @@
     - docker-buildx-plugin
     - docker-compose-plugin
     state: present
+    update_cache: true
     cache_valid_time: "{{ 0 if apt_docker_repo.changed else 600 }}"
   register: apt_docker_packages
   failed_when: not ansible_check_mode and apt_docker_packages.failed

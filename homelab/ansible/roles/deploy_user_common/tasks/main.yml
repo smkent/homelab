@@ -18,6 +18,7 @@
     create_home: true
     shell: /bin/bash
     state: present
+  when: ansible_ssh_user != deploy_user
 
 - name: Ensure deploy user authorized_keys are present
   ansible.posix.authorized_key:

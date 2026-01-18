@@ -3,6 +3,7 @@
     name: '{{ user_name }}'
     uid: '{{ user_def.uid|d(None) or omit }}'
     groups: '{{ user_def.groups|d([]) }}'
+    append: true
     password: "{{ (user_def.password | password_hash('sha512')) if user_def.password|d()
       else '!' }}"
     update_password: on_create
@@ -10,6 +11,7 @@
     home: '{{ user_def.home|d(None) or omit }}'
     create_home: '{{ user_def.create_home|d(True) }}'
     state: present
+  when: ansible_ssh_user != user_name
 
 - import_role:
     name: common
