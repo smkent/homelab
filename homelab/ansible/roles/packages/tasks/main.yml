@@ -18,4 +18,5 @@
     - universal-ctags
     - vim-nox
     state: present
+    update_cache: true
     cache_valid_time: 600
