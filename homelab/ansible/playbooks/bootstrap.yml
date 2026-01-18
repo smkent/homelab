@@ -4,6 +4,8 @@
   gather_facts: false
   become: true
   become_method: su
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=accept-new"
   vars_files:
   - vars/common.yml
   roles:
