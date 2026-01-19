@@ -6,3 +6,16 @@
     accept_hostkey: true
   environment:
     GIT_TERMINAL_PROMPT: 0
+
+- name: "Locate host profile directory for {{ inventory_hostname }}"
+  stat:
+    path: "{{ deploy_user_home }}/homelab/compose/hosts/{{ inventory_hostname }}"
+  register: host_profile_dir
+
+- name: "Ensure active host symlink targets {{ inventory_hostname }}"
+  file:
+    src: "{{ inventory_hostname }}"
+    dest: "{{ deploy_user_home }}/homelab/compose/hosts/active"
+    state: link
+    force: yes
+  when: host_profile_dir.stat.isdir | default(false)
