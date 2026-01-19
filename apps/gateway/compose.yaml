@@ -68,13 +68,11 @@ services:
     - POSTFIX_smtpd_sasl_auth_enable=yes
     - POSTFIX_smtpd_sasl_security_options=noanonymous
     - POSTFIX_broken_sasl_auth_clients=yes
-    - POSTFIX_smtpd_relay_restrictions=permit_mynetworks, 
-      permit_sasl_authenticated, reject
+    - POSTFIX_smtpd_relay_restrictions=permit_mynetworks, permit_sasl_authenticated, reject
     - POSTFIX_bounce_notice_recipient=root@localhost
     - POSTFIX_2bounce_notice_recipient=root@localhost
     - POSTFIX_smtpd_tls_chain_files=/etc/letsencrypt/live/${HOST?}/privkey.pem,/etc/letsencrypt/live/${HOST?}/fullchain.pem
-    - POSTFIXMASTER_submission__inet=submission inet n - y - - smtpd -o 
-      smtpd_tls_security_level=encrypt
+    - POSTFIXMASTER_submission__inet=submission inet n - y - - smtpd -o smtpd_tls_security_level=encrypt
     - OPENDKIM_DOMAINS=${POSTFIX_DKIM_HOST?}=${DKIM_SELECTOR-homelab}
     - SUBMIT_PASSWORD_FILE=/run/secrets/smtp-submit-password
     - RELAYHOST=${POSTFIX_RELAYHOST-}

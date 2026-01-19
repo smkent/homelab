@@ -11,7 +11,7 @@ repos:
   rev: v2.15.0
   hooks:
   - id: pretty-format-yaml
-    args: [--preserve-quotes, --autofix, --indent, '2', --line-width, '79']
+    args: [--preserve-quotes, --autofix, --indent, '2']
 - repo: https://github.com/koalaman/shellcheck-precommit
   rev: v0.11.0
   hooks:

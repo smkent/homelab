@@ -4,8 +4,7 @@
     uid: '{{ user_def.uid|d(None) or omit }}'
     groups: '{{ user_def.groups|d([]) }}'
     append: true
-    password: "{{ (user_def.password | password_hash('sha512')) if user_def.password|d()
-      else '!' }}"
+    password: "{{ (user_def.password | password_hash('sha512')) if user_def.password|d() else '!' }}"
     update_password: on_create
     shell: "{{ user_def.shell|d(None) or '/bin/bash' }}"
     home: '{{ user_def.home|d(None) or omit }}'
