@@ -1,0 +1,9 @@
+- name: Deploy Docker apps
+  hosts: all
+  remote_user: deploy
+  become: true
+  become_user: deploy
+  become_method: sudo
+  roles:
+  - apps
+  - composeapps
