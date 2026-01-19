@@ -1,0 +1,11 @@
+HTTP_PORT=3000
+FORCE_HTTPS=false
+PGSSLMODE=disable
+DATABASE_URL=postgres://outline:outline@db:5432/outline
+FILE_STORAGE=local
+FILE_STORAGE_UPLOAD_MAX_SIZE=26214400
+AWS_S3_FORCE_PATH_STYLE=false
+AWS_S3_ACL=private
+SMTP_HOST=smtp
+OIDC_SCOPES=openid profile email
+OIDC_USERNAME_CLAIM=preferred_username
