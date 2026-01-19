@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-homerun = "homelab.homerun:main"
+homestar = "homelab.homestar:main"
 
 [tool.poetry]
 requires-poetry = ">=2.0"

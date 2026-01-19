@@ -29,7 +29,7 @@ media.
 
 ## First-run configuration
 
-Use `homerun bootstrap` to automatically remove the unprivileged user created
+Use `homestar bootstrap` to automatically remove the unprivileged user created
 during installation and replace it with the expected deployment user.
 
 # Deployment
@@ -37,16 +37,16 @@ during installation and replace it with the expected deployment user.
 If not already present, add the target machine's hostname to
 `ansible/hosts.yml`.
 
-Use `homerun` to set up one or more target machine(s). Command line options
+Use `homestar` to set up one or more target machine(s). Command line options
 include inventory and playbook file selection. Additional arguments are passed
 through to [ansible-playbook][ansible-playbook-docs].
 
 ## Invocation examples
 
-* Deploy to a single host (dry run): `homerun run -C -l target-host-name`
-* Deploy to a single host: `homerun run -l target-host-name`
-* Deploy to all configured hosts (dry run): `homerun run -C`
-* Deploy to all configured hosts: `homerun run`
+* Deploy to a single host (dry run): `homestar run -C -l target-host-name`
+* Deploy to a single host: `homestar run -l target-host-name`
+* Deploy to all configured hosts (dry run): `homestar run -C`
+* Deploy to all configured hosts: `homestar run`
 
 # Development
 
