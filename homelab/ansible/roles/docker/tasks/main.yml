@@ -4,6 +4,12 @@
     gid: 200
     state: present
 
+- name: "Ensure {{ deploy_user }} user is in the docker group"
+  ansible.builtin.user:
+    user: "{{ deploy_user }}"
+    groups: docker
+    append: true
+
 - name: Remove legacy Docker apt_repository file
   ansible.builtin.file:
     path: /etc/apt/sources.list.d/download_docker_com_linux_debian.list
