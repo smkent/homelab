@@ -2,7 +2,7 @@
   - name: Clone homelab repository
     git:
       repo: https://github.com/smkent/homelab
-      dest: '{{ deploy_user_info.home }}/homelab'
+      dest: '{{ deploy_user_home }}/homelab'
       version: main
       accept_hostkey: true
     environment:
@@ -11,7 +11,7 @@
   - name: Symlink apps
     file:
       src: homelab/apps
-      dest: '{{ deploy_user_info.home }}/{{ apps_dir }}'
+      dest: '{{ deploy_user_home }}/{{ apps_dir }}'
       owner: '{{ deploy_user }}'
       group: '{{ deploy_user }}'
       state: link
@@ -20,7 +20,7 @@
   - name: Clone web repository
     git:
       repo: '{{ web_repo }}'
-      dest: '{{ deploy_user_info.home }}/homelab/apps/web/build'
+      dest: '{{ deploy_user_home }}/homelab/apps/web/build'
       version: main
       accept_hostkey: true
     environment:
@@ -29,15 +29,15 @@
   - name: Install global.env
     template:
       src: global.env.j2
-      dest: '{{ deploy_user_info.home }}/secrets/global.env'
+      dest: '{{ deploy_user_home }}/secrets/global.env'
       owner: '{{ deploy_user }}'
       group: '{{ deploy_user }}'
       mode: 0600
 
   - name: Symlink .env in apps
     file:
-      src: '{{ deploy_user_info.home }}/secrets/global.env'
-      dest: '{{ deploy_user_info.home }}/{{ apps_dir }}/.env'
+      src: '{{ deploy_user_home }}/secrets/global.env'
+      dest: '{{ deploy_user_home }}/{{ apps_dir }}/.env'
       owner: '{{ deploy_user }}'
       group: '{{ deploy_user }}'
       state: link
