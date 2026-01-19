@@ -12,16 +12,18 @@ from typing import Any
 def run(
     cmd: Sequence[str],
     *,
+    dry_run: bool = False,
     env: dict[str, str] | None = None,
     **kwargs: Any,
 ) -> Any:
     kwargs.setdefault("check", True)
     print("+", " ".join(shlex.quote(c) for c in cmd), file=sys.stderr)
-    subprocess.run(
-        cmd,
-        env=os.environ | {"ANSIBLE_NOCOWS": "true"} | (env or {}),
-        **kwargs,
-    )
+    if not dry_run:
+        subprocess.run(
+            cmd,
+            env=os.environ | {"ANSIBLE_NOCOWS": "true"} | (env or {}),
+            **kwargs,
+        )
 
 
 @contextmanager

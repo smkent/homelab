@@ -1,6 +1,6 @@
 import subprocess
-from collections.abc import Iterator
-from contextlib import chdir
+from collections.abc import Iterator, Mapping
+from contextlib import chdir, contextmanager
 from functools import cached_property
 from pathlib import Path
 
@@ -37,15 +37,28 @@ class ComposeStack:
         return fn
 
     @cached_property
-    def host_app_dirs(self) -> Iterator[Path]:
+    def host_apps(self) -> Mapping[str, Path]:
         with self.host_apps_config.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-            app_dirs = set()
+            app_dirs = {}
             for app_name in sorted(data.get("apps", [])):
                 app_dir = Path(self.stack_dir / "apps" / app_name)
                 if not app_dir.exists():
                     raise Exception(f"{app_dir} does not exist")
-                app_dirs.add(app_dir)
-            for app_dir in sorted(app_dirs):
-                with chdir(app_dir):
-                    yield app_dir
+                app_dirs[app_name] = app_dir
+        return app_dirs
+
+    @cached_property
+    def host_app_dirs(self) -> Iterator[Path]:
+        for app_name in sorted(self.host_apps):
+            app_dir = self.host_apps[app_name]
+            with chdir(app_dir):
+                yield app_dir
+
+    @contextmanager
+    def app(self, app_name: str) -> Iterator[Path]:
+        if app_name not in self.host_apps:
+            raise Exception(f"{app_name} is not configured on this host")
+        app_dir = self.host_apps[app_name]
+        with chdir(app_dir):
+            yield app_dir
