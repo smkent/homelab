@@ -24,6 +24,9 @@ fi
         | sort -u \
         | grep -ve gateway
 ) | while read -r dir; do
+    if [ "$(cd "${dir}" && docker compose config --services)" = "" ]; then
+        continue
+    fi
     (
         echo
         echo ">>> ${dir}"
