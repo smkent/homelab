@@ -1,6 +1,6 @@
 - name: Install helmet-copy script
   template:
-    dest: "{{ deploy_user_info.home }}/helmet-copy"
+    dest: "{{ deploy_user_home }}/helmet-copy"
     src: helmet-copy.j2
     mode: 0755
     owner: '{{ deploy_user }}'
@@ -12,7 +12,7 @@
     content: |
       [Service]
       Type=oneshot
-      ExecStart={{ deploy_user_info.home }}/helmet-copy %I
+      ExecStart={{ deploy_user_home }}/helmet-copy %I
     mode: 0644
     owner: root
     group: root

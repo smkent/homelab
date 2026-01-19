@@ -1,0 +1,4 @@
+app_config_templates:
+- backup-apps
+- certbot
+- samba
