@@ -1,0 +1,14 @@
+networks:
+  web:
+    external: true
+
+services:
+  cups:
+    build: build
+    ports:
+    - 631:631
+    networks:
+    - web
+    restart: unless-stopped
+    volumes:
+    - ./data/cups:/data/cups:rw
