@@ -1,13 +1,16 @@
 - name: Provision homelab host
   hosts: all
   roles:
-  - users
+  - system
+  - auth
+  - deploy_user
   - crypt_root
+  - docker
   - mta
   - packages
-  - system
-  - docker
-  - deploy_user
-  - {name: apps, become_user: '{{ deploy_user }}', when: deploy_user_info.exists}
-  - {name: helmet, when: '"onprem" in group_names'}
+  - users
+  - name: apps
+    become_user: "{{ deploy_user }}"
+  - name: helmet
+    when: '"onprem" in group_names'
   become: true
