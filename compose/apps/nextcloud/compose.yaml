@@ -1,0 +1,52 @@
+networks:
+  web:
+    external: true
+  local:
+    external: false
+
+secrets:
+  nextcloud-admin-password:
+    file: $HOME/secrets/nextcloud-admin-password
+
+services:
+  nextcloud:
+    image: nextcloud:31-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    env_files:
+    - host.env
+    environment:
+    - POSTGRES_HOST=db:5432
+    - POSTGRES_DB=nextcloud
+    - POSTGRES_USER=nextcloud
+    - POSTGRES_PASSWORD=nextcloud
+    - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud-admin-password
+    - NEXTCLOUD_ADMIN_USER=admin
+    networks:
+    - local
+    - web
+    restart: unless-stopped
+    secrets:
+    - nextcloud-admin-password
+    volumes:
+    - ./data/nextcloud:/var/www/html
+
+  db:
+    image: postgres:13
+    environment:
+    - POSTGRES_USER=nextcloud
+    - POSTGRES_PASSWORD=nextcloud
+    - POSTGRES_DB=nextcloud
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d nextcloud -U nextcloud"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    networks:
+    - local
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data
