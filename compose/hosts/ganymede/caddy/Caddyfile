@@ -1,0 +1,37 @@
+{
+    storage file_system {
+        root /data
+    }
+}
+
+(auth) {
+    forward_auth https://login.{env.NODE_DOMAIN} {
+        uri /api/verify?rd=https://login.{env.NODE_DOMAIN}
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+}
+
+:80 {
+    redir https://{host}{uri} 302
+}
+
+{env.NODE_FQDN} *.{env.NODE_FQDN} {
+    tls certs@{env.DOMAIN} {
+        dns linode "{$LINODE_TOKEN}"
+    }
+
+    @hello host hello.{env.NODE_FQDN}
+    handle @hello {
+        import auth
+        reverse_proxy hello:80
+    }
+
+    @web host {env.NODE_FQDN} www.{env.NODE_FQDN}
+    handle @web {
+        redir https://{env.DOMAIN}
+    }
+
+    handle {
+        redir https://{env.DOMAIN}
+    }
+}
