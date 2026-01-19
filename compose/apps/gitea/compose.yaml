@@ -1,0 +1,47 @@
+networks:
+  web:
+    external: true
+  local:
+    external: false
+
+services:
+  gitea:
+    image: docker.gitea.com/gitea:1.23
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+    - host.env
+    - gitea.env
+    networks:
+    - local
+    - web
+    ports:
+    - "2202:22"
+    restart: unless-stopped
+    volumes:
+    - ./files/sshd_config-template:/etc/templates/sshd_config:ro
+    - $HOME/secrets/gitea-ssh-ed25519-host-key:/data/ssh/ssh_host_ed25519_key:ro
+    - $HOME/secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
+    - $HOME/secrets/gitea-ssh-rsa-host-key:/data/ssh/ssh_host_rsa_key:ro
+    - $HOME/secrets/gitea-ssh-rsa-host-key-pub:/data/ssh/ssh_host_rsa_key.pub:ro
+    - ./data/gitea:/data
+
+  db:
+    image: postgres:13
+    environment:
+    - POSTGRES_USER=gitea
+    - POSTGRES_PASSWORD=gitea
+    - POSTGRES_DB=gitea
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d gitea -U gitea"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    networks:
+    - local
+    restart: unless-stopped
+    volumes:
+    - ./data/db:/var/lib/postgresql/data

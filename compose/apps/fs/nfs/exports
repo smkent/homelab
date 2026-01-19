@@ -1,0 +1,1 @@
+/export/data *(fsid=0,rw,async,insecure,no_root_squash,no_subtree_check,nohide)
