@@ -42,6 +42,7 @@ services:
         condition: service_healthy
     env_file:
     - host.env
+    - $HOME/secrets/authelia.env
     environment:
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: "/run/secrets/authelia-jwt-secret"
       AUTHELIA_SESSION_SECRET_FILE: "/run/secrets/authelia-session-secret"
