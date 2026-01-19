@@ -1,4 +1,13 @@
 - block:
+  - name: "Ensure homelab repository is present"
+    git:
+      repo: https://github.com/smkent/homelab
+      dest: '{{ deploy_user_home }}/homelab'
+      version: main
+      accept_hostkey: true
+    environment:
+      GIT_TERMINAL_PROMPT: 0
+
   - name: "Ensure {{ deploy_user_home }}/secrets exists"
     file:
       path: "{{ deploy_user_home }}/secrets"
