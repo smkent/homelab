@@ -14,7 +14,7 @@ services:
     ports:
     - 7777:7777
     profiles:
-    - onprem
+    - manual
     volumes:
     - ./data/worlds/:/world:rw
     - ./data/config:/config:rw

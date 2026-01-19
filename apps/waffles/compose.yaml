@@ -18,7 +18,7 @@ services:
       # WAFFLES_DEBUG: "true"
       TZ: PST8PDT
     profiles:
-    - cloud
+    - manual
     restart: unless-stopped
     volumes:
     - ./reply.html:/reply.html:ro

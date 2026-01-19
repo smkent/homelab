@@ -15,7 +15,7 @@ services:
     - 51413:51413
     - 51413:51413/udp
     profiles:
-    - onprem
+    - manual
     restart: unless-stopped
     volumes:
     - ./data/config:/config
@@ -36,5 +36,5 @@ services:
     - OAUTH2_PROXY_COOKIE_SECURE=true
     - OAUTH2_PROXY_EMAIL_DOMAINS=*
     profiles:
-    - onprem
+    - manual
     restart: unless-stopped

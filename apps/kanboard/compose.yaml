@@ -24,7 +24,7 @@ services:
     - default
     - local
     profiles:
-    - cloud
+    - manual
     restart: unless-stopped
     volumes:
     - ./data/kanboard/data:/var/www/app/data
@@ -40,7 +40,7 @@ services:
     networks:
     - local
     profiles:
-    - cloud
+    - manual
     restart: unless-stopped
     volumes:
     - ./data/db:/var/lib/postgresql/data
