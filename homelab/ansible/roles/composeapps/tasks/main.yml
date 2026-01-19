@@ -1,3 +1,9 @@
+- name: Ensure web Docker network exists
+  community.docker.docker_network:
+    name: web
+    driver: bridge
+    state: present
+
 - name: "Ensure web repository is present"
   git:
     repo: '{{ web_repo }}'
