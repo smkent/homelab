@@ -1,7 +1,18 @@
-- name: Install pipx packages
+- name: "Ensure pipx is installed for {{ user_name }} via pip if required"
+  ansible.builtin.pip:
+    name:
+    - "pipx >= 1.7.0"
+    extra_args: --user
+    state: present
+  become_user: '{{ user_name }}'
+  when:
+  - ansible_facts['distribution'] == 'Debian'
+  - ansible_facts['distribution_version'] | int < 12
+
+- name: "Install pipx packages for {{ user_name }}"
   community.general.pipx:
     name: '{{ item }}'
-    state: present
+    state: latest
   become_user: "{{ user_name }}"
   loop:
   - poetry
