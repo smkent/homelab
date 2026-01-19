@@ -14,3 +14,5 @@
   - name: helmet
     when: helmet_role|d(false)
   become: true
+  become_user: deploy
+  become_method: sudo
