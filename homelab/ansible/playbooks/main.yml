@@ -9,10 +9,10 @@
   - mta
   - packages
   - users
-  - apps
-  - composeapps
   - name: helmet
     when: helmet_role|d(false)
   become: true
-  become_user: deploy
+  become_user: root
   become_method: sudo
+
+- import_playbook: apps.yml
