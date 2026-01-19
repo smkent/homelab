@@ -66,7 +66,7 @@ class AnsibleCollections:
         )
 
 
-class Homerun:
+class Homestar:
     def main(self) -> None:
         with as_file(files(__package__) / "ansible") as ansible_path:
             print("ansible_path", ansible_path)
@@ -216,7 +216,7 @@ class Homerun:
 
         ap = argparse.ArgumentParser(
             description=(
-                "Homelab runner, not to be confused with Homestar Runner"
+                "Homelab provisioner, not to be confused with Homestar Runner"
             ),
         )
         subp = ap.add_subparsers(title="Subcommands", metavar="command")
@@ -251,4 +251,4 @@ class Homerun:
         return AnsibleCollections(Path() / "requirements.yml")
 
 
-main = partial(Homerun().main)
+main = partial(Homestar().main)
