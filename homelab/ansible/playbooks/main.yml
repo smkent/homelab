@@ -9,8 +9,7 @@
   - mta
   - packages
   - users
-  - name: apps
-    become_user: "{{ deploy_user }}"
+  - apps
   - name: helmet
     when: helmet_role|d(false)
   become: true
