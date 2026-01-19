@@ -1,2 +1,2 @@
 - name: update-initramfs
-  include_tasks: roles/packages/handlers/update-initramfs.yml
+  include_tasks: roles/crypt_root/handlers/update-initramfs.yml
