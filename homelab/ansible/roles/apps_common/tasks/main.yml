@@ -1,6 +1,6 @@
 - block:
   - name: "Ensure homelab repository is present"
-    git:
+    ansible.builtin.git:
       repo: https://github.com/smkent/homelab
       dest: '{{ deploy_user_home }}/homelab'
       version: main
@@ -9,7 +9,7 @@
       GIT_TERMINAL_PROMPT: 0
 
   - name: "Ensure {{ deploy_user_home }}/secrets exists"
-    file:
+    ansible.builtin.file:
       path: "{{ deploy_user_home }}/secrets"
       owner: "{{ deploy_user }}"
       group: "{{ deploy_user }}"
@@ -17,7 +17,7 @@
       state: directory
 
   - name: "Ensure app config templates are installed"
-    template:
+    ansible.builtin.template:
       src: '{{ item }}.env.j2'
       dest: '{{ deploy_user_home }}/secrets/{{ item }}.env'
       owner: '{{ deploy_user }}'
@@ -27,7 +27,7 @@
     loop: "{{ app_config_templates }}"
 
   - name: "Ensure Docker secrets are installed"
-    copy:
+    ansible.builtin.copy:
       dest: "{{ deploy_user_home }}/secrets/{{ item }}"
       content: "{{ compose_secrets[item] }}"
       owner: "{{ deploy_user }}"

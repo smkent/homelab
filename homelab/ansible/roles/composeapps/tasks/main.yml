@@ -5,7 +5,7 @@
     state: present
 
 - name: "Ensure web repository is present"
-  git:
+  ansible.builtin.git:
     repo: '{{ web_repo }}'
     dest: '{{ deploy_user_home }}/homelab/compose/apps/web/build'
     version: main
@@ -13,13 +13,13 @@
   environment:
     GIT_TERMINAL_PROMPT: 0
 
-- name: "Locate host profile directory for {{ inventory_hostname }}"
-  stat:
+- name: "Locate host profile directory"
+  ansible.builtin.stat:
     path: "{{ deploy_user_home }}/homelab/compose/hosts/{{ inventory_hostname }}"
   register: host_profile_dir
 
-- name: "Ensure active host symlink targets {{ inventory_hostname }}"
-  file:
+- name: "Ensure active host symlink exists"
+  ansible.builtin.file:
     src: "{{ inventory_hostname }}"
     dest: "{{ deploy_user_home }}/homelab/compose/hosts/active"
     state: link

@@ -1,13 +1,13 @@
-- name: Install helmet-copy script
-  template:
+- name: Ensure helmet-copy script is installed
+  ansible.builtin.template:
     dest: "{{ deploy_user_home }}/helmet-copy"
     src: helmet-copy.j2
     mode: 0755
     owner: '{{ deploy_user }}'
     group: '{{ deploy_user }}'
 
-- name: Install helmet-copy systemd service
-  copy:
+- name: Ensure helmet-copy systemd service is installed
+  ansible.builtin.copy:
     dest: "/etc/systemd/system/99-helmet-copy@.service"
     content: |
       [Service]
@@ -18,8 +18,8 @@
     group: root
   notify: reload-udev-rules
 
-- name: Install helmet-copy udev rule
-  copy:
+- name: Ensure helmet-copy udev rule is installed
+  ansible.builtin.copy:
     dest: "/etc/udev/rules.d/99-helmet-copy.rules"
     content: |
       ACTION=="add", SUBSYSTEM=="block", ATTRS{removable}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}="99-helmet-copy@%E{DEVNAME}.service"
