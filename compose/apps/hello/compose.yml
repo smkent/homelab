@@ -1,0 +1,13 @@
+x-common-service: &common-service
+  networks:
+  - web
+  restart: unless-stopped
+
+networks:
+  web:
+    external: true
+
+services:
+  hello:
+    <<: *common-service
+    image: nginxdemos/hello
