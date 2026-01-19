@@ -16,7 +16,7 @@ services:
     - USER=root
     privileged: true
     profiles:
-    - onprem
+    - manual
     restart: unless-stopped
     secrets:
     - nut-upsd-password

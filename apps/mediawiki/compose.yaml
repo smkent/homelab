@@ -8,11 +8,13 @@ networks:
 services:
   mediawiki:
     build: build
+    depends_on:
+    - mysql-db
     networks:
     - default
     - local
     profiles:
-    - cloud
+    - manual
     restart: unless-stopped
     volumes:
     - ./build/static:/var/www/html/app-static/
@@ -31,7 +33,7 @@ services:
     networks:
     - local
     profiles:
-    - cloud
+    - manual
     restart: unless-stopped
     volumes:
     - ./data/mysql-db:/var/lib/mysql
