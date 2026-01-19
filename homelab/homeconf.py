@@ -2,6 +2,7 @@ import argparse
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from functools import cached_property, partial
+from typing import Any
 
 from .stack import ComposeStack
 from .util import run
@@ -51,6 +52,13 @@ class Homeconf:
         aconf_p.set_defaults(
             func=self.action_aconf, stack="login", service="authelia"
         )
+        lldap_cli_p = subp.add_parser(
+            "lldapcli",
+            help="Install, authenticate, and start a shell with lldap-cli",
+        )
+        lldap_cli_p.set_defaults(
+            func=self.action_lldap_cli, stack="login", service="lldap"
+        )
         mkoidc_p = subp.add_parser(
             "mkoidc",
             help="Generate OIDC client ID and secret for new OIDC client",
@@ -67,19 +75,36 @@ class Homeconf:
 
         return ap.parse_known_args()
 
-    def run(self, cmd: list[str]) -> None:
-        cmd = [
-            "docker",
-            "compose",
-            "run",
-            "--rm",
-            "--no-deps",
-            self.args.service,
-        ] + cmd
-        run(cmd, dry_run=self.args.dry_run)
+    def run(self, cmd: list[str], exec: bool = False, **kwargs: Any) -> None:
+        action_cmd = ["exec", "-it"] if exec else ["run", "--rm", "--no-deps"]
+        cmd = ["docker", "compose"] + action_cmd + [self.args.service] + cmd
+        run(cmd, dry_run=self.args.dry_run, **kwargs)
 
     def action_reload_caddy(self) -> None:
         self.run(["caddy", "reload", "--config", "/etc/caddy/Caddyfile"])
+
+    def action_lldap_cli(self) -> None:
+        self.run(
+            [
+                "sh",
+                "-c",
+                (
+                    "apk update"
+                    " && apk add util-linux"
+                    " && curl -s https://raw.githubusercontent.com/Zepmann/lldap-cli/refs/heads/main/lldap-cli > /bin/lldap-cli"  # noqa: E501
+                    " && chmod +x /bin/lldap-cli"
+                    " && eval $("
+                    "LLDAP_CONFIG=/data/lldap_config.toml"
+                    " lldap-cli"
+                    " -D admin -w $(cat /run/secrets/lldap-ldap-user-pass)"
+                    " login)"
+                    " && lldap-cli group list"
+                    " && sh"
+                ),
+            ],
+            exec=True,
+            check=False,
+        )
 
     def action_aconf(self) -> None:
         for action in ["template", "validate"]:
