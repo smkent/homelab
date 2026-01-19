@@ -1,5 +1,5 @@
-- name: Remove unneeded exim4-daemon-light package
-  apt:
+- name: Ensure unneeded exim4-daemon-light package is removed
+  ansible.builtin.apt:
     pkg:
     - exim4-daemon-light
     state: absent
@@ -15,8 +15,8 @@
     update_cache: true
     cache_valid_time: 600
 
-- name: Configure msmtp
-  copy:
+- name: Ensure msmtp is configured
+  ansible.builtin.copy:
     dest: /etc/msmtprc
     content: |
       account default
@@ -30,8 +30,8 @@
     owner: root
     group: msmtp
 
-- name: Configure mail aliases
-  lineinfile:
+- name: Ensure mail aliases are configured
+  ansible.builtin.lineinfile:
     dest: /etc/aliases
     regexp: '^#?root:'
     line: 'root: {{ email }}'

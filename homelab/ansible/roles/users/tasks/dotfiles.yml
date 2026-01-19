@@ -6,7 +6,7 @@
     resolve_home_user_def: "{{ user_def }}"
 
 - name: Check if dotfiles repository is installed
-  stat:
+  ansible.builtin.stat:
     path: "{{ user_home }}/.git"
   become_user: '{{ user_name }}'
   register: dotfiles_git_stat
@@ -14,26 +14,26 @@
 - name: "Ensure dotfiles repository is installed for {{ user_name }}"
   block:
   - name: Clone dotfiles repository
-    git:
+    ansible.builtin.git:
       repo: "{{ repository }}"
       dest: "{{ temp_dir }}"
 
   - name: Move repository metadata directory into place
-    command: mv "{{ temp_dir }}/.git" "{{ user_home }}"
+    ansible.builtin.command: mv "{{ temp_dir }}/.git" "{{ user_home }}"
     args:
       chdir: '{{ user_home }}'
       removes: "{{ temp_dir }}/.git"
       creates: '{{ user_home }}/.git'
 
   - name: Check out dotfiles repository contents
-    git:
+    ansible.builtin.git:
       repo: "{{ repository }}"
       dest: '{{ user_home }}'
       clone: false
       force: true
 
   - name: Clean up temporary dotfiles repository directory
-    file:
+    ansible.builtin.file:
       path: "{{ temp_dir }}"
       state: absent
     diff: false

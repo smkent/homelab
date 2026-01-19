@@ -1,6 +1,6 @@
 - block:
-  - name: Symlink apps
-    file:
+  - name: Symlink apps directory
+    ansible.builtin.file:
       src: homelab/apps
       dest: '{{ deploy_user_home }}/{{ apps_dir }}'
       owner: '{{ deploy_user }}'
@@ -9,7 +9,7 @@
     ignore_errors: '{{ ansible_check_mode }}'
 
   - name: Clone web repository
-    git:
+    ansible.builtin.git:
       repo: '{{ web_repo }}'
       dest: '{{ deploy_user_home }}/homelab/apps/web/build'
       version: main
@@ -18,7 +18,7 @@
       GIT_TERMINAL_PROMPT: 0
 
   - name: Install global.env
-    template:
+    ansible.builtin.template:
       src: global.env.j2
       dest: '{{ deploy_user_home }}/secrets/global.env'
       owner: '{{ deploy_user }}'
@@ -26,7 +26,7 @@
       mode: 0600
 
   - name: Symlink .env in apps
-    file:
+    ansible.builtin.file:
       src: '{{ deploy_user_home }}/secrets/global.env'
       dest: '{{ deploy_user_home }}/{{ apps_dir }}/.env'
       owner: '{{ deploy_user }}'

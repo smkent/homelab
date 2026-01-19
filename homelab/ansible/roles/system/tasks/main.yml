@@ -1,2 +1,3 @@
-- ansible.builtin.hostname:
-    name: '{{ ansible_host }}'
+- name: "Ensure hostname is set"
+  ansible.builtin.hostname:
+    name: "{{ ansible_host }}"

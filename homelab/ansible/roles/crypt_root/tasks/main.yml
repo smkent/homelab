@@ -1,27 +1,27 @@
 - name: Check if root filesystem is encrypted
-  stat:
+  ansible.builtin.stat:
     path: /etc/crypttab
   register: crypttab_stat
 
 - block:
-  - name: Install dropbear-initramfs
-    apt:
+  - name: Ensure dropbear-initramfs is installed
+    ansible.builtin.apt:
       pkg:
       - dropbear-initramfs
       state: present
     notify:
     - update-initramfs
 
-  - name: Configure authorized_keys
-    copy:
+  - name: Ensure authorized_keys is configured for dropbear
+    ansible.builtin.copy:
       content: "{{ ssh_authorized_keys | join('\n') }}"
       dest: /etc/dropbear-initramfs/authorized_keys
       mode: 0600
     notify:
     - update-initramfs
 
-  - name: Configure dropbear login banner
-    copy:
+  - name: Ensure dropbear login banner is configured
+    ansible.builtin.copy:
       content: |
         #!/bin/sh
         mkdir -p "${DESTDIR}/etc/dropbear"
@@ -31,8 +31,8 @@
     notify:
     - update-initramfs
 
-  - name: Configure dropbear settings in initramfs
-    lineinfile:
+  - name: Ensure dropbear settings are configured in initramfs
+    ansible.builtin.lineinfile:
       dest: /etc/dropbear-initramfs/config
       regexp: ^#?DROPBEAR_OPTIONS=
       line: DROPBEAR_OPTIONS="-jks -I 120 -c cryptroot-unlock -b /etc/dropbear/banner -r /etc/dropbear/dropbear_ed25519_host_key"
