@@ -27,7 +27,7 @@ class Homedo:
         )
         if not (
             git_root.is_dir()
-            and (stack_dir := git_root / "docker").is_dir()
+            and (stack_dir := git_root / "compose").is_dir()
             and (stack_dir / "apps").is_dir()
             and (stack_dir / "hosts").is_dir()
         ):
