@@ -12,5 +12,5 @@
   - name: apps
     become_user: "{{ deploy_user }}"
   - name: helmet
-    when: '"onprem" in group_names'
+    when: helmet_role|d(false)
   become: true
