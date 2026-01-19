@@ -1,0 +1,147 @@
+#!/bin/sh
+
+api_root="https://api.linode.com/v4/domains"
+
+usage() {
+    (
+        echo "Usage: ${0}"
+        echo
+        echo "Update a Linode DNS record with this computer's public IP address"
+        echo
+        echo "Environment variables:"
+        echo "  LINODE_API_TOKEN or LINODE_API_TOKEN_FILE -" \
+            "Linode API token or path to file with token"
+        echo "  LINODE_FQDN or LINODE_DOMAIN/LINODE_SUBDOMAIN -" \
+            "DNS record to check update"
+        echo "  FORCE_UPDATE (optional) -" \
+            "If set, update Linode DNS even if current IP matches configured IP"
+        echo "  UPDATE_CALLBACK (optional) -" \
+            "Execute this command when IP address is updated"
+        echo
+        echo "Dependencies: curl, date, dig, jq"
+    ) >&2
+}
+
+case "${1}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+esac
+
+if [ -n "${LINODE_API_TOKEN_FILE}" ] && [ -f "${LINODE_API_TOKEN_FILE}" ]; then
+    LINODE_API_TOKEN=$(cat "${LINODE_API_TOKEN_FILE}")
+fi
+
+if [ -z "${LINODE_API_TOKEN}" ]; then
+    echo "Error: LINODE_API_TOKEN is empty" >&2
+    usage
+    exit 1
+fi
+
+if [ -n "${LINODE_FQDN}" ]; then
+    LINODE_SUBDOMAIN=${LINODE_FQDN%%.*}
+    LINODE_DOMAIN=${LINODE_FQDN#*.}
+fi
+
+if [ -z "${LINODE_DOMAIN}" ] || [ -z "${LINODE_SUBDOMAIN}" ]; then
+    echo "Error: LINODE_DOMAIN and LINODE_SUBDOMAIN must be set" >&2
+    usage
+    exit 1
+fi
+
+resolved_ip=$(
+    dig \
+        +timeout=2 \
+        +short \
+        -4t A \
+        "${LINODE_SUBDOMAIN?}.${LINODE_DOMAIN?}" \
+        || :
+)
+
+for _ in $(seq 1 5); do
+    current_ip=$(
+        dig \
+            +timeout=2 \
+            +short \
+            -4t A \
+            myip.opendns.com \
+            "@resolver$(($(date +%s) % 4 + 1)).opendns.com" \
+            || :)
+    if [ -n "${current_ip}" ]; then
+        break
+    fi
+done
+
+if [ -z "${current_ip}" ]; then
+    echo "Error: Unable to determine current IP address" >&2
+    exit 1
+fi
+
+if [ "${resolved_ip}" = "${current_ip}" ] && [ -z "${FORCE_UPDATE}" ]; then
+    # IP is up to date in public DNS
+    exit 0
+fi
+
+set -e
+
+domain_id=$(
+    curl -fsS -H "Authorization: Bearer ${LINODE_API_TOKEN?}" \
+        "${api_root}" \
+        | jq -r ".data[] | select(.domain == \"${LINODE_DOMAIN?}\") | .id"
+)
+
+if [ -z "${domain_id}" ]; then
+    echo "Error: No domain found for ${LINODE_DOMAIN}" >&2
+    exit 1
+fi
+
+record_id=$(
+    curl -sS -H "Authorization: Bearer ${LINODE_API_TOKEN?}" \
+        "${api_root}/${domain_id?}/records" \
+        | jq -r ".data[]
+            | select(.type == \"A\" and .name == \"${LINODE_SUBDOMAIN?}\")
+            | .id"
+)
+
+if [ -z "${record_id}" ]; then
+    echo \
+        "Error: No \"A\" record found for" \
+        "${LINODE_SUBDOMAIN}.${LINODE_DOMAIN}" >&2
+    exit 1
+fi
+
+configured_ip=$(
+    curl -sS \
+        -X GET \
+        -H "Authorization: Bearer ${LINODE_API_TOKEN?}" \
+        "${api_root}/${domain_id?}/records/${record_id?}" \
+        | jq -r '.target'
+)
+
+if [ "${configured_ip}" = "${current_ip}" ] && [ -z "${FORCE_UPDATE}" ]; then
+    # IP is up to date in Linode DNS configuration
+    exit 0
+fi
+
+echo "${LINODE_SUBDOMAIN}.${LINODE_DOMAIN}: ${resolved_ip} -> ${current_ip}"
+
+if [ -n "${DRY_RUN}" ]; then
+    exit 0
+fi
+
+curl -sS \
+    -X PUT \
+    -H "Authorization: Bearer ${LINODE_API_TOKEN?}" \
+    -H "Content-Type: application/json" \
+    -d "{\"target\": \"[remote_addr]\"}" \
+    "${api_root}/${domain_id?}/records/${record_id?}" \
+    | jq
+
+if [ -n "${UPDATE_CALLBACK}" ]; then
+    if type "${UPDATE_CALLBACK}" >/dev/null || [ -x "${UPDATE_CALLBACK}" ]; then
+        "${UPDATE_CALLBACK}" "${current_ip}"
+    else
+        echo "Warning: callback \"${UPDATE_CALLBACK}\" not found" >&2
+    fi
+fi

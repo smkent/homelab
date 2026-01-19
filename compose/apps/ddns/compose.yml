@@ -1,0 +1,20 @@
+secrets:
+  certbot-linode-key:
+    file: $HOME/secrets/certbot-linode-key
+
+services:
+  ddns:
+    build: ddns
+    environment:
+    - SMTPHOST=smtp
+    - HOST=${NODE_FQDN?}
+    - MAILTO=cron-to@${DOMAIN?}
+    - CRON_SCHEDULE=*/5 * * * *
+    - CRON_COMMAND=/update-linode-dns 2>&1
+    - EXPORT_LINODE_API_TOKEN_FILE=/run/secrets/certbot-linode-key
+    - EXPORT_LINODE_FQDN=${NODE_FQDN?}
+    restart: unless-stopped
+    secrets:
+    - certbot-linode-key
+    volumes:
+    - ./ddns/update-linode-dns:/update-linode-dns:ro

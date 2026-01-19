@@ -21,9 +21,11 @@ dependencies = [
     "ansible-core",
     "gnupg",
     "passlib",
+    "pyyaml",
 ]
 
 [project.scripts]
+homerun = "homelab.homerun:main"
 homestar = "homelab.homestar:main"
 
 [tool.poetry]
@@ -47,6 +49,7 @@ pytest-cov = "*"
 pytest-github-actions-annotate-failures = "*"
 pytest-sugar = "*"
 ruff = "*"
+types-pyyaml = "*"
 
 [tool.poetry-dynamic-versioning]
 enable = true

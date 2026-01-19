@@ -1,0 +1,120 @@
+x-common-service: &common-service
+  networks:
+  - web
+  restart: unless-stopped
+
+networks:
+  web:
+    external: true
+  local_db:
+    external: false
+  local_redis:
+    external: false
+
+secrets:
+  authelia-jwt-secret:
+    file: $HOME/secrets/authelia-jwt-secret
+  authelia-oidc-jwks-key:
+    file: $HOME/secrets/authelia-oidc-jwks-key
+  authelia-oidc-hmac-secret:
+    file: $HOME/secrets/authelia-oidc-hmac-secret
+  authelia-session-secret:
+    file: $HOME/secrets/authelia-session-secret
+  authelia-storage-encryption-key:
+    file: $HOME/secrets/authelia-storage-encryption-key
+  lldap-jwt-secret:
+    file: $HOME/secrets/lldap-jwt-secret
+  lldap-key-seed:
+    file: $HOME/secrets/lldap-key-seed
+  lldap-ldap-user-pass:
+    file: $HOME/secrets/lldap-ldap-user-pass
+
+services:
+  authelia:
+    <<: *common-service
+    image: docker.io/authelia/authelia:4
+    depends_on:
+      db:
+        condition: service_healthy
+      lldap:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    env_file:
+    - host.env
+    environment:
+      AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: "/run/secrets/authelia-jwt-secret"
+      AUTHELIA_SESSION_SECRET_FILE: "/run/secrets/authelia-session-secret"
+      AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: "/run/secrets/authelia-storage-encryption-key"
+      TZ: UTC
+      X_AUTHELIA_CONFIG_FILTERS: template
+    networks:
+    - local_db
+    - local_redis
+    - web
+    secrets:
+    - authelia-jwt-secret
+    - authelia-oidc-jwks-key
+    - authelia-oidc-hmac-secret
+    - authelia-session-secret
+    - authelia-storage-encryption-key
+    user: "1000:1000"
+    volumes:
+    - ./authelia:/config
+    - ./data/authelia:/data
+
+  lldap:
+    <<: *common-service
+    image: lldap/lldap:stable
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+    - host.env
+    - lldap.env
+    networks:
+    - local_db
+    - web
+    secrets:
+    - lldap-jwt-secret
+    - lldap-key-seed
+    - lldap-ldap-user-pass
+    volumes:
+    - ./data/lldap:/data
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d postgres -U admin"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    networks:
+    - local_db
+    - web
+    restart: unless-stopped
+    volumes:
+    - ./db:/docker-entrypoint-initdb.d:ro
+    - ./data/db:/var/lib/postgresql
+
+  redis:
+    image: redis:8
+    healthcheck:
+      test: ["CMD-SHELL", "[ \"$(redis-cli ping)\" = \"PONG\" ]"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+
+    networks:
+    - local_redis
+    restart: unless-stopped
+    volumes:
+    - ./data/redis:/data

@@ -1,0 +1,68 @@
+theme: dark
+
+server:
+  address: tcp://0.0.0.0:9091
+
+log:
+  level: info
+
+identity_validation:
+  elevated_session:
+    require_second_factor: true
+    skip_second_factor: true
+
+authentication_backend:
+  ldap:
+    implementation: lldap
+    address: ldap://lldap:3890
+    base_dn: '{{ env "LDAP_BASE_DN" }}'
+    user: 'uid=authelia,ou=people,{{ env "LDAP_BASE_DN" }}'
+    password: deadbeef123
+    users_filter: >-
+      (&(objectClass=person)({username_attribute}={input})(memberOf=cn=web,ou=groups,{{ env "LDAP_BASE_DN" }}))
+
+access_control:
+  default_policy: deny
+  rules:
+  - domain: 'lldap.{{ env "NODE_FQDN" }}'
+    policy: two_factor
+    subject:
+    - "group:web_admin"
+  - domain:
+    - '{{ env "NODE_FQDN" }}'
+    - '*.{{ env "NODE_FQDN" }}'
+    policy: two_factor
+
+session:
+  name: authelia_session
+  expiration: 1h
+  inactivity: 5m
+  cookies:
+  - domain: '{{ env "NODE_FQDN" }}'
+    authelia_url: 'https://login.{{ env "NODE_FQDN" }}'
+  redis:
+    host: redis
+    port: 6379
+
+storage:
+  postgres:
+    address: db:5432
+    database: 'authelia'
+    schema: 'public'
+    username: 'authelia'
+    password: 'authelia'
+    timeout: '5s'
+
+notifier:
+  smtp:
+    address: smtp:25
+    sender: 'Authelia <authelia@{{ env "NODE_FQDN" }}>'
+    disable_require_tls: true
+
+webauthn:
+  disable: false
+  display_name: '{{ env "NODE_FQDN" }} login'
+  attestation_conveyance_preference: indirect
+  selection_criteria:
+    user_verification: preferred
+  timeout: 60s

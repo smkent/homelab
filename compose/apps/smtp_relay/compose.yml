@@ -1,0 +1,22 @@
+networks:
+  web:
+    external: true
+
+secrets:
+  smtp-submit-password: {file: $HOME/secrets/smtp-submit-password}
+
+services:
+  smtp:
+    image: juanluisbaptiste/postfix:1
+    environment:
+      SMTP_SERVER: smkent.net
+      SMTP_PORT: 587
+      SMTP_USERNAME: "gomail"
+      SMTP_PASSWORD_FILE: "/run/secrets/smtp-submit-password"
+      SERVER_HOSTNAME: "localhost"
+      TZ: "UTC"
+    networks:
+    - web
+    restart: unless-stopped
+    secrets:
+    - smtp-submit-password

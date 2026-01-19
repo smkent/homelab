@@ -1,0 +1,55 @@
+x-common-service: &common-service
+  networks:
+  - web
+  restart: unless-stopped
+
+networks:
+  web:
+    external: true
+
+secrets:
+  smtp-submit-password:
+    file: $HOME/secrets/smtp-submit-password
+
+services:
+  caddy:
+    <<: *common-service
+    build: caddy
+    env_file:
+    - host.env
+    - $HOME/secrets/caddy.env
+    ports:
+    - 80:80
+    - 443:443
+    volumes:
+    - ./caddy/conf:/etc/caddy:ro
+    - ./data/caddy_data:/data
+    - ./data/caddy_config:/config
+
+  cert-sync:
+    <<: *common-service
+    build: cert-sync
+    depends_on:
+    - caddy
+    networks: []
+    volumes:
+    - ./data/caddy_data:/data/caddy:ro
+    - ./data/certs:/data/certs
+
+  smtp:
+    <<: *common-service
+    build: postfix
+    env_file:
+    - host.env
+    - postfix.env
+    ports:
+    - 25:25
+    - 587:587
+    secrets:
+    - smtp-submit-password
+    volumes:
+    - ./data/certs:/certs:ro
+    - ./data/postfix/lib:/var/lib/postfix:rw
+    - ./data/postfix/spool:/var/spool/postfix:rw
+    - ./data/postfix/mail:/var/mail:rw
+    - ./data/postfix/dkim:/etc/opendkim/keys:rw
