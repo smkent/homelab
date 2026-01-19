@@ -4,8 +4,7 @@
     state: absent
 
 - name: Copy ED25519 host key for Dropbear
-  command: dropbearconvert openssh dropbear /etc/ssh/ssh_host_ed25519_key 
-    /etc/dropbear-initramfs/dropbear_ed25519_host_key
+  command: dropbearconvert openssh dropbear /etc/ssh/ssh_host_ed25519_key /etc/dropbear-initramfs/dropbear_ed25519_host_key
 
 - name: Rebuild initramfs
   command: update-initramfs -u

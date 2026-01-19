@@ -8,7 +8,6 @@
   - system
   - docker
   - deploy_user
-  - {name: apps, become_user: '{{ deploy_user }}', when: 
-      deploy_user_info.exists}
+  - {name: apps, become_user: '{{ deploy_user }}', when: deploy_user_info.exists}
   - {name: helmet, when: '"onprem" in group_names'}
   become: true

@@ -44,5 +44,4 @@ runs:
     uses: actions/cache@v4
     with:
       path: ~/.cache/pre-commit
-      key: "pre-commit-${{ runner.os }}-python-${{ steps.setuppy.outputs.python-version
-        }}-${{ hashFiles('.pre-commit-config.yaml') }}"
+      key: "pre-commit-${{ runner.os }}-python-${{ steps.setuppy.outputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}"

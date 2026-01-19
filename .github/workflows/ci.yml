@@ -12,8 +12,7 @@ on:
 
 jobs:
   Test:
-    name: Python ${{ matrix.python-version }}, Poetry ${{ matrix.poetry-version
-      }}
+    name: Python ${{ matrix.python-version }}, Poetry ${{ matrix.poetry-version }}
 
     strategy:
       matrix:

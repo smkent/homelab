@@ -20,8 +20,7 @@
 
 - name: Add Docker GPG key
   ansible.builtin.get_url:
-    url: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower
-      }}/gpg"
+    url: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}/gpg"
     dest: /etc/apt/keyrings/docker.gpg
     mode: 0644
   when: not (ansible_check_mode and apt_keyring_dir.changed)
@@ -30,8 +29,7 @@
   ansible.builtin.deb822_repository:
     name: docker
     types: deb
-    uris: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower
-      }}"
+    uris: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}"
     suites: "{{ ansible_facts['distribution_release'] }}"
     components: stable
     signed_by: /etc/apt/keyrings/docker.gpg
