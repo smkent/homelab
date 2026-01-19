@@ -8,6 +8,7 @@
 - name: Check if dotfiles repository is installed
   stat:
     path: "{{ user_home }}/.git"
+  become_user: '{{ user_name }}'
   register: dotfiles_git_stat
 
 - name: "Ensure dotfiles repository is installed for {{ user_name }}"
