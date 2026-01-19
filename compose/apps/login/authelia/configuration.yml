@@ -66,3 +66,48 @@ webauthn:
   selection_criteria:
     user_verification: preferred
   timeout: 60s
+
+identity_providers:
+  oidc:
+    hmac_secret: {{ secret "/run/secrets/authelia-oidc-hmac-secret" }}
+    jwks:
+    - key: {{ secret "/run/secrets/authelia-oidc-jwks-key" | mindent 10 "|" | msquote }}
+    clients:
+    - client_id: {{ env "OIDC_GITEA_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_GITEA_CLIENT_SECRET" }}
+      consent_mode: implicit
+      redirect_uris:
+      - https://git.{{ env "NODE_FQDN" }}/user/oauth2/gitea/callback
+      scopes:
+      - openid
+      - profile
+      - email
+    - client_id: {{ env "OIDC_MEALIE_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_MEALIE_CLIENT_SECRET" }}
+      consent_mode: implicit
+      redirect_uris:
+      - https://mealie.{{ env "NODE_FQDN" }}/login
+      - https://mealie.{{ env "NODE_FQDN" }}/login?direct=1
+      scopes:
+      - openid
+      - profile
+      - email
+    - client_id: {{ env "OIDC_NEXTCLOUD_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_NEXTCLOUD_CLIENT_SECRET" }}
+      consent_mode: implicit
+      redirect_uris:
+      - https://nextcloud.{{ env "NODE_FQDN" }}/apps/oidc_login/oidc
+      scopes:
+      - openid
+      - profile
+      - email
+    - client_id: {{ env "OIDC_OUTLINE_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_OUTLINE_CLIENT_SECRET" }}
+      consent_mode: implicit
+      redirect_uris:
+      - https://outline.{{ env "NODE_FQDN" }}/auth/oidc.callback
+      scopes:
+      - openid
+      - profile
+      - email
+      token_endpoint_auth_method: client_secret_post
