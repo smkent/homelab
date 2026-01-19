@@ -10,6 +10,7 @@
   - packages
   - users
   - apps
+  - composeapps
   - name: helmet
     when: helmet_role|d(false)
   become: true
