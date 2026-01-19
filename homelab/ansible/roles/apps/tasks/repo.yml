@@ -16,17 +16,6 @@
     state: link
   ignore_errors: '{{ ansible_check_mode }}'
 
-- name: Create deployment directories
-  file:
-    path: '{{ deploy_user_info.home }}/{{ item.name }}'
-    mode: '{{ item.mode }}'
-    owner: '{{ item.owner|default(deploy_user) }}'
-    group: '{{ item.group|default(deploy_user) }}'
-    state: directory
-  loop:
-  - {name: secrets, mode: '0700'}
-  become_user: root
-
 - name: Clone web repository
   git:
     repo: '{{ web_repo }}'

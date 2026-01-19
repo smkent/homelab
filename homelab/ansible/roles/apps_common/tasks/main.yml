@@ -1,0 +1,55 @@
+- block:
+  - name: "Ensure {{ deploy_user_home }}/secrets exists"
+    file:
+      path: "{{ deploy_user_home }}/secrets"
+      owner: "{{ deploy_user }}"
+      group: "{{ deploy_user }}"
+      mode: 0700
+      state: directory
+
+  - name: "Ensure app config templates are installed"
+    template:
+      src: '{{ item }}.env.j2'
+      dest: '{{ deploy_user_home }}/secrets/{{ item }}.env'
+      owner: '{{ deploy_user }}'
+      group: '{{ deploy_user }}'
+      mode: 0600
+    diff: false
+    loop: "{{ app_config_templates }}"
+
+  - name: "Ensure Docker secrets are installed"
+    copy:
+      dest: "{{ deploy_user_home }}/secrets/{{ item }}"
+      content: "{{ compose_secrets[item] }}"
+      owner: "{{ deploy_user }}"
+      group: "{{ deploy_user }}"
+      mode: 0600
+    diff: false
+    loop: "{{ compose_secrets.keys() | sort }}"
+
+  - name: "Locate existing installed Docker secrets"
+    ansible.builtin.find:
+      paths: "{{ deploy_user_home }}/secrets"
+      file_type: file
+      excludes: >-
+        {{
+          compose_secrets.keys() | list
+          + (app_config_templates | map('regex_replace', '$', '.env') | list)
+        }}
+    register: existing_compose_secrets
+
+  - name: "Ensure unused Docker secrets are removed"
+    ansible.builtin.file:
+      path: "{{ deploy_user_home }}/secrets/{{ item }}"
+      state: absent
+    diff: false
+    loop: >-
+      {{
+        existing_compose_secrets.files
+        | map(attribute='path')
+        | map('basename')
+        | list
+        | sort
+      }}
+  become: "{{ ansible_ssh_user != deploy_user }}"
+  become_user: "{{ deploy_user }}"

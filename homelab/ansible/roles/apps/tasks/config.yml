@@ -14,28 +14,3 @@
     group: '{{ deploy_user }}'
     state: link
   ignore_errors: '{{ ansible_check_mode }}'
-
-- name: Install secrets
-  copy:
-    dest: '{{ deploy_user_info.home }}/secrets/{{ item.key  }}'
-    content: '{{ item.value }}'
-    owner: '{{ deploy_user }}'
-    group: '{{ deploy_user }}'
-    mode: 0600
-  diff: false
-  loop: '{{  compose_secrets|dict2items }}'
-  loop_control:
-    label: '{{ item.key }}'
-
-- name: Install app config templates
-  template:
-    src: '{{ item }}.env.j2'
-    dest: '{{ deploy_user_info.home }}/secrets/{{ item }}.env'
-    owner: '{{ deploy_user }}'
-    group: '{{ deploy_user }}'
-    mode: 0600
-  diff: false
-  loop:
-  - certbot
-  - samba
-  - backup-apps
