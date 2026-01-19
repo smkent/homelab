@@ -6,6 +6,7 @@
     state: present
   become_user: '{{ user_name }}'
   when:
+  - not ansible_check_mode
   - ansible_facts['distribution'] == 'Debian'
   - ansible_facts['distribution_version'] | int < 12
 
