@@ -14,6 +14,8 @@ networks:
 secrets:
   authelia-jwt-secret:
     file: $HOME/secrets/authelia-jwt-secret
+  authelia-ldap-password:
+    file: $HOME/secrets/authelia-ldap-password
   authelia-oidc-jwks-key:
     file: $HOME/secrets/authelia-oidc-jwks-key
   authelia-oidc-hmac-secret:
@@ -55,8 +57,9 @@ services:
     - web
     secrets:
     - authelia-jwt-secret
-    - authelia-oidc-jwks-key
+    - authelia-ldap-password
     - authelia-oidc-hmac-secret
+    - authelia-oidc-jwks-key
     - authelia-session-secret
     - authelia-storage-encryption-key
     user: "1000:1000"

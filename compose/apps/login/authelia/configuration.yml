@@ -17,7 +17,7 @@ authentication_backend:
     address: ldap://lldap:3890
     base_dn: '{{ env "LDAP_BASE_DN" }}'
     user: 'uid=authelia,ou=people,{{ env "LDAP_BASE_DN" }}'
-    password: deadbeef123
+    password: {{ secret "/run/secrets/authelia-ldap-password" }}
     users_filter: >-
       (&(objectClass=person)({username_attribute}={input})(memberOf=cn=web,ou=groups,{{ env "LDAP_BASE_DN" }}))
 
