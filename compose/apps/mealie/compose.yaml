@@ -23,7 +23,6 @@ services:
       PUID: 1000
       PGID: 1000
       TZ: America/Los_Angeles
-      BASE_URL: https://mealie.${NODE_FQDN}
       DB_ENGINE: postgres
       POSTGRES_SERVER: db
       POSTGRES_PORT: 5432
