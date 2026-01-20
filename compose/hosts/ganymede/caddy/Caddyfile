@@ -5,7 +5,7 @@
 }
 
 (auth) {
-    forward_auth login.{env.DOMAIN} {
+    forward_auth login.{env.DOMAIN}:443 {
         transport http {
             tls
         }
