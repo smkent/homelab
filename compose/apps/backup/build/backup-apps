@@ -90,6 +90,9 @@ for backup_host in $(echo "${BACKUP_HOSTS-${EXPORT_BACKUP_HOSTS}}" | sed -e 's:,
     all_vers="$(existing_vers "${backup_dest_host}")"
     if [ "$(echo "${all_vers}" | wc -l)" -gt "${backup_keep_count}" ]; then
         echo ">>> Removing old backups for ${backup_host}"
-        echo "${all_vers}" | head "-n-${backup_keep_count}" | xargs -t -n 1 rm -rf
+        (
+            cd "${backup_dest_host}"
+            echo "${all_vers}" | head "-n-${backup_keep_count}" | xargs -t -n 1 rm -rf
+        )
     fi
 done
