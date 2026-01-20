@@ -6,19 +6,15 @@ CADDY_DATA="${CADDY_DATA-/data/caddy}"
 DEST="${DEST-/data/certs}"
 
 find_cert_dirs() {
-    find "${CADDY_DATA}" \
-        -type d \
-        -path "*/certificates/acme-*" -and -name 'acme-*'
+    find "${CADDY_DATA}" -type d -path "*/certificates/*/*"
 }
 
 copy_certs() {
     echo "[$(date "+%Y-%m-%dT%H:%M:%S")] Checking certs"
-    find_cert_dirs | while read -r search_dir; do
-        find "${search_dir}" -mindepth 1 -type d | while read -r cert_dir; do
-            bn=$(basename "${cert_dir}")
-            mtime=$(stat -c %Y "${search_dir}")
-            echo "${bn} ${mtime} ${cert_dir}";
-        done
+    find_cert_dirs | while read -r cert_dir; do
+        bn=$(basename "${cert_dir}")
+        mtime=$(stat -c %Y "$(basename "${cert_dir}")")
+        echo "${bn} ${mtime} ${cert_dir}";
     done | sort -k1,1 -k2,2nr | awk '!seen[$1]++ {print $3}' | (
         while read -r nd; do
             copy_cert "${nd}"
