@@ -101,7 +101,7 @@ class Homeconf:
                     " -D admin -w $(cat /run/secrets/lldap-ldap-user-pass)"
                     " login)"
                     " && lldap-cli group list"
-                    " && sh"
+                    ' && PATH="${PATH}:/app" sh'
                 ),
             ],
             exec=True,
