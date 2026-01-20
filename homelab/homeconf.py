@@ -81,7 +81,9 @@ class Homeconf:
         run(cmd, dry_run=self.args.dry_run, **kwargs)
 
     def action_reload_caddy(self) -> None:
-        self.run(["caddy", "reload", "--config", "/etc/caddy/Caddyfile"])
+        self.run(
+            ["caddy", "reload", "--config", "/etc/caddy/Caddyfile"], exec=True
+        )
 
     def action_lldap_cli(self) -> None:
         self.run(
