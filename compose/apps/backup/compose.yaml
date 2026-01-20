@@ -1,0 +1,16 @@
+secrets:
+  backup-apps-ssh-key:
+    file: $HOME/secrets/backup-apps-ssh-key
+
+services:
+  backup-apps:
+    build: build
+    env_file:
+    - host.env
+    - backup-apps.env
+    - $HOME/secrets/backup-apps.env
+    restart: unless-stopped
+    secrets:
+    - backup-apps-ssh-key
+    volumes:
+    - /data/backup:/data/backup:rw

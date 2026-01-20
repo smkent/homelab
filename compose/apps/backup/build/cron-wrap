@@ -1,0 +1,3 @@
+#!/bin/sh
+
+( "${@}" | tee -a /proc/1/fd/1 ) 3>&1 1>&2 2>&3 | tee -a 2>/proc/1/fd/2
