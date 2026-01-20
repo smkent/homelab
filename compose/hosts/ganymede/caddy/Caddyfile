@@ -5,7 +5,10 @@
 }
 
 (auth) {
-    forward_auth https://login.{env.NODE_DOMAIN} {
+    forward_auth login.{env.NODE_DOMAIN} {
+        transport http {
+            tls
+        }
         uri /api/verify?rd=https://login.{env.NODE_DOMAIN}
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
