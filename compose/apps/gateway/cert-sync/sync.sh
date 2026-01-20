@@ -13,7 +13,7 @@ copy_certs() {
     echo "[$(date "+%Y-%m-%dT%H:%M:%S")] Checking certs"
     find_cert_dirs | while read -r cert_dir; do
         bn=$(basename "${cert_dir}")
-        mtime=$(stat -c %Y "$(basename "${cert_dir}")")
+        mtime=$(stat -c %Y "$(dirname "${cert_dir}")")
         echo "${bn} ${mtime} ${cert_dir}";
     done | sort -k1,1 -k2,2nr | awk '!seen[$1]++ {print $3}' | (
         while read -r nd; do
