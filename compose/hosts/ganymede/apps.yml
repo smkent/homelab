@@ -1,4 +1,9 @@
 apps:
+- backup
+- cups
+- ddns
+- fs
 - gateway
 - hello
+- mealie
 - plex
