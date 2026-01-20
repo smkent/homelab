@@ -1,3 +1,9 @@
+(tls_linode) {
+    tls certs@{env.DOMAIN} {
+        dns linode "{$LINODE_TOKEN}"
+    }
+}
+
 {
     storage file_system {
         root /data
@@ -16,9 +22,7 @@
 }
 
 {env.NODE_FQDN} *.{env.NODE_FQDN} {
-    tls certs@{env.DOMAIN} {
-        dns linode "{$LINODE_TOKEN}"
-    }
+    import tls_linode
 
     @authelia host login.{env.NODE_FQDN}
     handle @authelia {

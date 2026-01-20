@@ -11,19 +11,42 @@
     }
 }
 
+(tls_linode) {
+    tls certs@{env.DOMAIN} {
+        dns linode "{$LINODE_TOKEN}"
+    }
+}
+
 :80 {
     redir https://{host}{uri} 302
 }
 
+casa.{env.DOMAIN} {
+    import tls_linode
+    reverse_proxy casa.smkent.lan:8123
+}
+
+mealie.{env.DOMAIN} {
+    import tls_linode
+    reverse_proxy mealie:9000
+}
+
 {env.NODE_FQDN} *.{env.NODE_FQDN} {
-    tls certs@{env.DOMAIN} {
-        dns linode "{$LINODE_TOKEN}"
-    }
+    import tls_linode
 
     @hello host hello.{env.NODE_FQDN}
     handle @hello {
         import auth
         reverse_proxy hello:80
+    }
+
+    @plex host plex.{env.NODE_FQDN}
+    handle @plex {
+        reverse_proxy https://plex:32400 {
+            transport http {
+                tls_insecure_skip_verify
+            }
+        }
     }
 
     @web host {env.NODE_FQDN} www.{env.NODE_FQDN}

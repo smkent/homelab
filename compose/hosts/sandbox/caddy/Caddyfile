@@ -11,14 +11,18 @@
     }
 }
 
+(tls_linode) {
+    tls certs@{env.DOMAIN} {
+        dns linode "{$LINODE_TOKEN}"
+    }
+}
+
 :80 {
     redir https://{host}{uri} 302
 }
 
 {env.NODE_FQDN} *.{env.NODE_FQDN} {
-    tls certs@{env.NODE_FQDN} {
-        dns linode "{$LINODE_TOKEN}"
-    }
+    import tls_linode
 
     @authelia host login.{env.NODE_FQDN}
     handle @authelia {
