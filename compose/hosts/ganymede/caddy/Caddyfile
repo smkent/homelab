@@ -14,6 +14,7 @@
 (tls_linode) {
     tls certs@{env.DOMAIN} {
         dns linode "{$LINODE_TOKEN}"
+        propagation_delay 3m
     }
 }
 
