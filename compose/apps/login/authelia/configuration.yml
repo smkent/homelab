@@ -2,6 +2,7 @@ theme: dark
 
 server:
   address: tcp://0.0.0.0:9091
+  asset_path: /config/assets
 
 log:
   level: info
