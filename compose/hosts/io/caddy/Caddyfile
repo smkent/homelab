@@ -44,6 +44,27 @@
         reverse_proxy hello:80
     }
 
+    @gitea host git.{env.NODE_FQDN}
+    handle @gitea {
+        @login path /user/login
+        redir @login /user/oauth2/gitea?{query} 302
+
+        reverse_proxy gitea:3000
+    }
+
+    @outline host outline.{env.NODE_FQDN}
+    handle @outline {
+        reverse_proxy outline:3000
+        header {
+            Service-Worker-Allowed "/"
+        }
+    }
+
+    @nextcloud host nextcloud.{env.NODE_FQDN}
+    handle @nextcloud {
+        reverse_proxy nextcloud:80
+    }
+
     @web host {env.NODE_FQDN} www.{env.NODE_FQDN}
     handle @web {
         reverse_proxy web:5000

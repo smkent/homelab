@@ -1,5 +1,8 @@
 apps:
 - gateway
+- gitea
 - hello
 - login
+- nextcloud
+- outline
 - web
