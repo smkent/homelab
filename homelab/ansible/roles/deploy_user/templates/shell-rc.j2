@@ -1,4 +1,3 @@
 #!/bin/bash
 __c_prompt="\\[$(tput setaf 177)\\]${__bold}"
 prompt_hide_user=""
-{% if docker_compose_profiles is defined and docker_compose_profiles %}export COMPOSE_PROFILES="{{ docker_compose_profiles|join(',') }}"{% endif %}
