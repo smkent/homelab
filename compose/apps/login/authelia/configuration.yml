@@ -108,6 +108,12 @@ identity_providers:
       - https://outline.{{ env "NODE_FQDN" }}/auth/oidc.callback
       scopes:
       - openid
+      - offline_access
       - profile
       - email
+      response_types:
+      - code
+      grant_types:
+      - authorization_code
+      - refresh_token
       token_endpoint_auth_method: client_secret_post
