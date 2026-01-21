@@ -14,7 +14,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_files:
+    env_file:
     - host.env
     environment:
     - POSTGRES_HOST=db:5432
