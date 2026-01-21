@@ -1,6 +1,5 @@
 networks:
-  default:
-    name: gateway_default
+  web:
     external: true
 
 services:
@@ -10,8 +9,8 @@ services:
       CRON_SCHEDULE: "42 13 * * *"
       SMTPHOST: smtp
       SAFEWAY_ACCOUNTS_FILE: /accounts
-    profiles:
-    - manual
+    networks:
+    - web
     restart: unless-stopped
     volumes:
     - $HOME/secrets/safeway-accounts:/accounts:ro
