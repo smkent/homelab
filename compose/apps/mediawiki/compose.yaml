@@ -1,6 +1,5 @@
 networks:
-  default:
-    name: gateway_default
+  web:
     external: true
   local:
     external: false
@@ -10,11 +9,11 @@ services:
     build: build
     depends_on:
     - mysql-db
+    env_file:
+    - host.env
     networks:
-    - default
+    - web
     - local
-    profiles:
-    - manual
     restart: unless-stopped
     volumes:
     - ./build/static:/var/www/html/app-static/
@@ -32,8 +31,6 @@ services:
     - MYSQL_DATABASE=wiki
     networks:
     - local
-    profiles:
-    - manual
     restart: unless-stopped
     volumes:
     - ./data/mysql-db:/var/lib/mysql
