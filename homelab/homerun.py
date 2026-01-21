@@ -8,7 +8,7 @@ from .util import run
 
 
 @dataclass
-class Homedo:
+class Homerun:
     stack: ComposeStack = field(default_factory=ComposeStack)
 
     def main(self) -> None:
@@ -38,4 +38,4 @@ class Homedo:
         return ap.parse_known_args()
 
 
-main = partial(Homedo().main)
+main = partial(Homerun().main)

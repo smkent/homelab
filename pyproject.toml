@@ -25,7 +25,7 @@ dependencies = [
 ]
 
 [project.scripts]
-homeconf = "homelab.homeconf:main"
+homebase = "homelab.homebase:main"
 homerun = "homelab.homerun:main"
 homestar = "homelab.homestar:main"
 

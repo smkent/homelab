@@ -9,7 +9,7 @@ from .util import run
 
 
 @dataclass
-class Homeconf:
+class Homebase:
     stack: ComposeStack = field(default_factory=ComposeStack)
 
     def main(self) -> None:
@@ -178,4 +178,4 @@ class Homeconf:
             self.run(["php", "occ", "config:app:delete", "oidc_login", var])
 
 
-main = partial(Homeconf().main)
+main = partial(Homebase().main)
