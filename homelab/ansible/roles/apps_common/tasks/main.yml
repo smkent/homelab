@@ -44,7 +44,6 @@
         {{
           compose_secrets.keys() | list
           + (app_config_templates | map('regex_replace', '$', '.env') | list)
-          + ['global.env']
         }}
     register: existing_compose_secrets
 
