@@ -3,6 +3,3 @@ deploy_user: deploy
 ansible_connection: ssh
 ansible_ssh_user: "{{ deploy_user }}"
 ansible_become_pass: "{{ create_users[deploy_user].password | mandatory }}"
-
-plex_host: 'plex.ganymede.{{ host_suffix }}'
-postfix_relayhost: '[{{ host_suffix }}]:587'
