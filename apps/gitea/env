@@ -1,6 +1,7 @@
 GITEA__mailer__ENABLED=true
 GITEA__mailer__HOST=smtp:25
 GITEA__oauth2_client__ENABLE_AUTO_REGISTRATION=true
+GITEA__oauth2_client__ACCOUNT_LINKING=auto
 GITEA__openid__ENABLE_OPENID_SIGNIN=false
 GITEA__openid__ENABLE_OPENID_SIGNUP=false
 GITEA__repository__DEFAULT_BRANCH=main
