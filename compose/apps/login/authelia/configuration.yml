@@ -34,9 +34,9 @@ access_control:
     policy: two_factor
 
 session:
-  name: authelia_session
-  expiration: 1h
-  inactivity: 5m
+  name: sso_session
+  expiration: 30d
+  inactivity: 3d
   cookies:
   - domain: '{{ env "NODE_FQDN" }}'
     authelia_url: 'https://login.{{ env "NODE_FQDN" }}'
