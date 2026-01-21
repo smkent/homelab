@@ -10,11 +10,11 @@
   - ansible_facts['distribution'] == 'Debian'
   - ansible_facts['distribution_version'] | int < 12
 
-- name: "Install pipx packages for {{ user_name }}"
+- name: "Install poetry via pipx for {{ user_name }}"
   community.general.pipx:
-    name: '{{ item }}'
+    name: poetry
+    inject_packages:
+    - poetry-dynamic-versioning
     state: latest
   become_user: "{{ user_name }}"
-  loop:
-  - poetry
   when: not ansible_check_mode
