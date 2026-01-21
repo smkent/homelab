@@ -2,6 +2,7 @@ theme: dark
 
 server:
   address: tcp://0.0.0.0:9091
+  asset_path: /config/assets
 
 log:
   level: info
@@ -34,9 +35,9 @@ access_control:
     policy: two_factor
 
 session:
-  name: authelia_session
-  expiration: 1h
-  inactivity: 5m
+  name: sso_session
+  expiration: 30d
+  inactivity: 3d
   cookies:
   - domain: '{{ env "NODE_FQDN" }}'
     authelia_url: 'https://login.{{ env "NODE_FQDN" }}'
@@ -64,7 +65,8 @@ webauthn:
   display_name: '{{ env "NODE_FQDN" }} login'
   attestation_conveyance_preference: indirect
   selection_criteria:
-    user_verification: preferred
+    discoverability: discouraged
+    user_verification: discouraged
   timeout: 60s
 
 identity_providers:
