@@ -1,5 +1,0 @@
-#!/bin/sh
-set -ex
-cd "$(readlink -f "$(dirname "$(readlink -f "${0}")")")/.."
-docker-compose build certbot
-docker-compose run -e CERTBOT_INIT=1 certbot

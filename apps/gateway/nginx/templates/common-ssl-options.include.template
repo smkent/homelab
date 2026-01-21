@@ -1,5 +1,0 @@
-ssl_certificate /etc/letsencrypt/live/${NGINX_HOST}/fullchain.pem;
-ssl_certificate_key /etc/letsencrypt/live/${NGINX_HOST}/privkey.pem;
-
-include /etc/nginx/conf.d/certbot-options-ssl-nginx.include;
-ssl_dhparam /etc/nginx/conf.d/dhparams4096.pem;
