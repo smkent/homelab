@@ -1,0 +1,16 @@
+networks:
+  web:
+    external: true
+
+services:
+  safeway-coupons:
+    image: ghcr.io/smkent/safeway-coupons:latest
+    environment:
+      CRON_SCHEDULE: "42 13 * * *"
+      SMTPHOST: smtp
+      SAFEWAY_ACCOUNTS_FILE: /accounts
+    networks:
+    - web
+    restart: unless-stopped
+    volumes:
+    - $HOME/secrets/safeway-accounts:/accounts:ro

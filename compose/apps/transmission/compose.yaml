@@ -1,0 +1,34 @@
+networks:
+  default:
+    name: gateway_default
+    external: true
+
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission
+    environment:
+    - PUID=2000
+    - PGID=8888
+    - TZ=UTC
+    - TRANSMISSION_WEB_HOME=/flood-for-transmission/
+    ports:
+    - 51413:51413
+    - 51413:51413/udp
+    profiles:
+    - manual
+    restart: unless-stopped
+    volumes:
+    - ./data/config:/config
+    - ${FS_MEDIA_PATH-/data/media}/bt/downloads:/downloads:rw
+    - ${FS_MEDIA_PATH-/data/media}/bt/watch:/watch:rw
+
+  transmission-oidc:
+    image: quay.io/oauth2-proxy/oauth2-proxy
+    env_file:
+    - host.env
+    - transmission-oidc.env
+    - $HOME/secrets/transmission-oidc.env
+    environment:
+    profiles:
+    - manual
+    restart: unless-stopped

@@ -1,0 +1,19 @@
+networks:
+  web:
+    external: true
+
+services:
+  terraria:
+    build: https://github.com/kaysond/docker-terraria.git
+    environment:
+    - PUID=7777
+    - PGID=7777
+    restart: unless-stopped
+    tty: true
+    ports:
+    - 7777:7777
+    profiles:
+    - manual
+    volumes:
+    - ./data/worlds/:/world:rw
+    - ./data/config:/config:rw
