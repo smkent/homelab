@@ -44,6 +44,11 @@
         reverse_proxy hello:80
     }
 
+    @jobdb host jobs.{env.NODE_FQDN}
+    handle @jobdb {
+        reverse_proxy jobdb:8888
+    }
+
     @gitea host git.{env.NODE_FQDN}
     handle @gitea {
         @login path /user/login

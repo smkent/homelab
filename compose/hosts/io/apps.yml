@@ -2,6 +2,7 @@ apps:
 - gateway
 - gitea
 - hello
+- jobdb
 - login
 - nextcloud
 - outline
