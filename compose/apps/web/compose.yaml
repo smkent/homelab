@@ -13,8 +13,6 @@ secrets:
 services:
   web:
     build: build
-    depends_on:
-    - db
     env_file:
     - host.env
     - web.env
@@ -26,15 +24,3 @@ services:
     secrets:
     - flask-secret-key
     - flask-wtf-secret-key
-
-  db:
-    image: postgres:13
-    environment:
-    - POSTGRES_USER=web
-    - POSTGRES_PASSWORD=web
-    - POSTGRES_DB=web
-    networks:
-    - local
-    restart: unless-stopped
-    volumes:
-    - ./data/db:/var/lib/postgresql/data
