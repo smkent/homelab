@@ -72,6 +72,15 @@ class Homeconf:
         hashoidc_p.set_defaults(
             func=self.action_hashoidc, stack="login", service="authelia"
         )
+        ncflush = subp.add_parser(
+            "ncflush",
+            help="Flush cached Nextcloud OIDC provider info",
+        )
+        ncflush.set_defaults(
+            func=self.action_ncflush,
+            stack="nextcloud",
+            service="nextcloud",
+        )
 
         return ap.parse_known_args()
 
@@ -163,6 +172,10 @@ class Homeconf:
                 "rfc3986",
             ]
         )
+
+    def action_ncflush(self) -> None:
+        for var in ["well-known", "last_updated_well_known"]:
+            self.run(["php", "occ", "config:app:delete", "oidc_login", var])
 
 
 main = partial(Homeconf().main)
