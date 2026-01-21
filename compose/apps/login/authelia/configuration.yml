@@ -64,7 +64,8 @@ webauthn:
   display_name: '{{ env "NODE_FQDN" }} login'
   attestation_conveyance_preference: indirect
   selection_criteria:
-    user_verification: preferred
+    discoverability: discouraged
+    user_verification: discouraged
   timeout: 60s
 
 identity_providers:
