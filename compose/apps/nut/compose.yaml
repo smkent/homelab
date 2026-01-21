@@ -1,0 +1,17 @@
+secrets:
+  nut-upsd-password:
+    file: $HOME/secrets/nut-upsd-password
+
+services:
+  nut:
+    build: build
+    env_file:
+    - host.env
+    - nut.env
+    environment:
+    privileged: true
+    profiles:
+    - manual
+    restart: unless-stopped
+    secrets:
+    - nut-upsd-password
