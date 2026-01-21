@@ -5,5 +5,4 @@
   become_user: deploy
   become_method: sudo
   roles:
-  - apps
   - composeapps
