@@ -1,4 +1,5 @@
 import argparse
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from functools import cached_property, partial
@@ -81,8 +82,11 @@ class Homebase:
             stack="nextcloud",
             service="nextcloud",
         )
-
-        return ap.parse_known_args()
+        _args, _extra_args = ap.parse_known_args()
+        if not hasattr(_args, "func"):
+            ap.print_help()
+            sys.exit(1)
+        return _args, _extra_args
 
     def run(self, cmd: list[str], exec: bool = False, **kwargs: Any) -> None:
         action_cmd = ["exec", "-it"] if exec else ["run", "--rm", "--no-deps"]
