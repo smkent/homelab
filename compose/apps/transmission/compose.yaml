@@ -1,6 +1,5 @@
 networks:
-  default:
-    name: gateway_default
+  web:
     external: true
 
 services:
