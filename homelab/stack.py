@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from collections.abc import Iterator, Mapping, Sequence
 from contextlib import chdir, contextmanager
 from functools import cached_property
@@ -68,14 +69,14 @@ class ComposeStack:
             raise Exception(
                 f"App(s) do not exist: {', '.join(sorted(missing_apps))}"
             )
-        print("Would run on apps:", apps)
         for app, app_dir in [
             (app, self.stack_dir / "apps" / app) for app in sorted(apps)
         ]:
             if app not in self.host_apps:
                 print(
                     f"Warning: {app} is not in"
-                    f" {self.active_host_dir / 'apps.yml'}"
+                    f" {self.active_host_dir / 'apps.yml'}",
+                    file=sys.stderr,
                 )
             with chdir(app_dir):
                 yield app_dir
