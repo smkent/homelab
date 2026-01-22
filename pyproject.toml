@@ -21,7 +21,7 @@ dependencies = [
     "ansible-core",
     "gnupg",
     "passlib",
-    "pyyaml",
+    "ruamel-yaml (>=0.19.1,<0.20.0)",
 ]
 
 [project.scripts]
@@ -50,7 +50,6 @@ pytest-cov = "*"
 pytest-github-actions-annotate-failures = "*"
 pytest-sugar = "*"
 ruff = "*"
-types-pyyaml = "*"
 
 [tool.poetry-dynamic-versioning]
 enable = true

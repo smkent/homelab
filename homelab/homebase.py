@@ -1,10 +1,14 @@
 import argparse
+import subprocess
 import sys
 from collections.abc import Sequence
+from contextlib import nullcontext
 from dataclasses import dataclass, field
 from functools import cached_property, partial
+from pathlib import Path
 from typing import Any
 
+from .pg import PG
 from .stack import ComposeStack
 from .util import run
 
@@ -82,14 +86,73 @@ class Homebase:
             stack="nextcloud",
             service="nextcloud",
         )
+
+        pg_mixin = argparse.ArgumentParser(add_help=False)
+        pg_mixin.add_argument("stack", metavar="stack", help="App stack")
+
+        psql_p = subp.add_parser(
+            "psql", parents=[pg_mixin], help="Interact with Postgres"
+        )
+        psql_p.set_defaults(func=self.action_psql, service="db")
+
+        pgdump_p = subp.add_parser(
+            "pgdump", parents=[pg_mixin], help="Dump Postgres database to file"
+        )
+        pgdump_p.set_defaults(func=self.action_pgdump, service="db")
+        pgdump_p.add_argument(
+            "-f",
+            "--file",
+            dest="dump_file",
+            metavar="file",
+            default="./pg_dump.sql",
+            help="Dump file (default: %(default)s)",
+        )
+
+        pgupgrade_p = subp.add_parser(
+            "pgupgrade",
+            parents=[pg_mixin],
+            help="Upgrade PostgreSQL major version",
+        )
+        pgupgrade_p.set_defaults(func=self.action_pgupgrade, service="db")
+        pgupgrade_p.add_argument(
+            "-f",
+            "--file",
+            dest="dump_file",
+            metavar="file",
+            default="./pg_dump.sql",
+            help="Dump file (default: %(default)s)",
+        )
+        pgupgrade_p.add_argument(
+            "-V",
+            "--version",
+            dest="version",
+            metavar="version",
+            type=int,
+            default=18,
+            help=(
+                "Target PostgreSQL major version number (default: %(default)s)"
+            ),
+        )
+
         _args, _extra_args = ap.parse_known_args()
         if not hasattr(_args, "func"):
             ap.print_help()
             sys.exit(1)
         return _args, _extra_args
 
-    def run(self, cmd: list[str], exec: bool = False, **kwargs: Any) -> None:
-        action_cmd = ["exec", "-it"] if exec else ["run", "--rm", "--no-deps"]
+    def run(
+        self,
+        cmd: list[str],
+        exec: bool = False,
+        exec_args: list[str] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        if exec:
+            action_cmd = ["exec"] + (
+                exec_args if exec_args is not None else ["-i"]
+            )
+        else:
+            action_cmd = ["run", "--rm", "--no-deps"]
         cmd = ["docker", "compose"] + action_cmd + [self.args.service] + cmd
         run(cmd, dry_run=self.args.dry_run, **kwargs)
 
@@ -180,6 +243,82 @@ class Homebase:
     def action_ncflush(self) -> None:
         for var in ["well-known", "last_updated_well_known"]:
             self.run(["php", "occ", "config:app:delete", "oidc_login", var])
+
+    def action_psql(self) -> None:
+        pg = PG()
+        self.run(
+            ["psql", "-U", pg.admin_user, "-d", pg.admin_database], exec=True
+        )
+
+    def action_pgdump(self) -> None:
+        dump_file = Path(self.args.dump_file)
+        if dump_file.exists():
+            raise Exception(f"{dump_file.resolve()} already exists")
+        pg = PG()
+        with (
+            open(dump_file, "w") if not self.args.dry_run else nullcontext()
+        ) as f:
+            self.run(["pg_dumpall", "-U", pg.admin_user], exec=True, stdout=f)
+
+    def action_pgupgrade(self) -> None:
+        def _is_container_up() -> bool:
+            return bool(
+                run(
+                    ["docker", "compose", "ps", "-q", self.args.service],
+                    stdout=subprocess.PIPE,
+                    text=True,
+                ).stdout
+            )
+
+        def _start_container() -> None:
+            print(f"Starting {self.args.service} container")
+            run(
+                ["docker", "compose", "up", "--wait", self.args.service],
+                dry_run=self.args.dry_run,
+            )
+
+        def _stop_container() -> None:
+            print(f"Stopping {self.args.service} container")
+            run(
+                ["docker", "compose", "down", self.args.service],
+                dry_run=self.args.dry_run,
+            )
+
+        dump_file = Path(self.args.dump_file)
+        if dump_file.exists():
+            raise Exception(f"{dump_file.resolve()} already exists")
+        if (
+            new_data_dir := Path("data") / f"postgres{self.args.version}"
+        ).exists():
+            raise Exception(f"{new_data_dir.resolve()} already exists")
+        pg = PG(dry_run=self.args.dry_run)
+        if pg.source_volume.resolve() == new_data_dir.resolve():
+            raise Exception(
+                "Source and target volumes are the same:",
+                pg.source_volume.resolve(),
+            )
+        if not _is_container_up():
+            _start_container()
+        print(f"Dumping existing database data to {dump_file}")
+        self.action_pgdump()
+        _stop_container()
+        print("Updating container configuration")
+        pg.set_version(self.args.version)
+        pg.set_volume_source(new_data_dir.resolve())
+        run(
+            ["git", "--no-pager", "diff", "--", "compose.yaml"],
+            dry_run=self.args.dry_run,
+        )
+        _start_container()
+        print("Importing dumped database data")
+        with open(dump_file) if not self.args.dry_run else nullcontext() as f:
+            self.run(
+                ["psql", "-U", pg.admin_user],
+                exec=True,
+                exec_args=["-T"],
+                stdin=f,
+            )
+        print("Upgrade complete")
 
 
 main = partial(Homebase().main)

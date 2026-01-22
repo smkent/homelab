@@ -4,7 +4,7 @@ from contextlib import chdir, contextmanager
 from functools import cached_property
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
 
 
 class ComposeStack:
@@ -39,7 +39,7 @@ class ComposeStack:
     @cached_property
     def host_apps(self) -> Mapping[str, Path]:
         with self.host_apps_config.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+            data = YAML().load(f)
             app_dirs = {}
             for app_name in sorted(data.get("apps", [])):
                 app_dir = self.stack_dir / "apps" / app_name

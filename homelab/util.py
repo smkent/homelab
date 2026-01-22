@@ -19,7 +19,7 @@ def run(
     kwargs.setdefault("check", True)
     print("+", " ".join(shlex.quote(c) for c in cmd), file=sys.stderr)
     if not dry_run:
-        subprocess.run(
+        return subprocess.run(
             cmd,
             env=os.environ | {"ANSIBLE_NOCOWS": "true"} | (env or {}),
             **kwargs,
