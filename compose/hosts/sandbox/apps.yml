@@ -2,5 +2,5 @@ apps:
 - gateway
 - hello
 - login
-- postfix
+- smtp_relay
 - web
