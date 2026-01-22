@@ -36,8 +36,8 @@
   - deploy_user_local_dir.failed
 
 - name: "Ensure {{ deploy_user_home }}/.local/shell-rc is populated"
-  ansible.builtin.template:
-    src: shell-rc.j2
+  ansible.builtin.copy:
+    src: shell-rc
     dest: '{{ deploy_user_home }}/.local/shell-rc'
     owner: '{{ deploy_user }}'
     group: '{{ deploy_user }}'
