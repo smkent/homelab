@@ -6,4 +6,5 @@ apps:
 - login
 - nextcloud
 - outline
+- postfix
 - web

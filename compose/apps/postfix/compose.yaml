@@ -1,0 +1,31 @@
+x-common-service: &common-service
+  networks:
+  - web
+  restart: unless-stopped
+
+networks:
+  web:
+    external: true
+
+secrets:
+  smtp-submit-password:
+    file: $HOME/secrets/smtp-submit-password
+
+services:
+  smtp:
+    <<: *common-service
+    build: postfix
+    env_file:
+    - host.env
+    - postfix.env
+    ports:
+    - 25:25
+    - 587:587
+    secrets:
+    - smtp-submit-password
+    volumes:
+    - ./data/certs:/certs:ro
+    - ./data/postfix/lib:/var/lib/postfix:rw
+    - ./data/postfix/spool:/var/spool/postfix:rw
+    - ./data/postfix/mail:/var/mail:rw
+    - ./data/postfix/dkim:/etc/opendkim/keys:rw
