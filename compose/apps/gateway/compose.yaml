@@ -5,6 +5,11 @@ networks:
   web:
     external: true
 
+volumes:
+  tls_certs:
+    driver: local
+    name: tls_certs
+
 services:
   caddy:
     <<: *common-service
@@ -29,5 +34,5 @@ services:
     - caddy
     networks: []
     volumes:
+    - tls_certs:/data/certs
     - ./data/caddy_data:/data/caddy:ro
-    - ./data/certs:/data/certs

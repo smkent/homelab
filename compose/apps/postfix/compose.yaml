@@ -11,6 +11,10 @@ secrets:
   smtp-submit-password:
     file: $HOME/secrets/smtp-submit-password
 
+volumes:
+  tls_certs:
+    external: true
+
 services:
   smtp:
     <<: *common-service
@@ -24,7 +28,7 @@ services:
     secrets:
     - smtp-submit-password
     volumes:
-    - ./data/certs:/certs:ro
+    - tls_certs:/data/certs
     - ./data/postfix/lib:/var/lib/postfix:rw
     - ./data/postfix/spool:/var/spool/postfix:rw
     - ./data/postfix/mail:/var/mail:rw
