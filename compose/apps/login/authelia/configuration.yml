@@ -29,6 +29,8 @@ access_control:
     policy: two_factor
     subject:
     - "group:web_admin"
+  - domain: 'lldap.{{ env "NODE_FQDN" }}'
+    policy: deny
   - domain:
     - '{{ env "NODE_FQDN" }}'
     - '*.{{ env "NODE_FQDN" }}'
