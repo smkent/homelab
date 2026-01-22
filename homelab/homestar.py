@@ -69,8 +69,10 @@ class AnsibleCollections:
 class Homestar:
     def main(self) -> None:
         with as_file(files(__package__) / "ansible") as ansible_path:
-            print("ansible_path", ansible_path)
-            with chdir(ansible_path):
+            if getattr(self.args, "chdir", False):
+                with chdir(ansible_path):
+                    self.args.func()
+            else:
                 self.args.func()
 
     def _ansible_run(
@@ -84,6 +86,7 @@ class Homestar:
         return run(
             cmd,
             env=env or (os.environ | self.ansible_collections.env),
+            dry_run=self.args.dry_run,
             **kwargs,
         )
 
@@ -139,6 +142,27 @@ class Homestar:
             ]
             cmd += self.extra_args
             self._ansible_run(cmd)
+
+    def action_appdata(self) -> None:
+        for app in self.args.apps:
+            remote_path = (
+                f"root@{self.args.host}:"
+                f"/opt/deploy/homelab/compose/apps/{app}/data/"
+            )
+            local_path = (Path(self.args.local_dir) / app / "data").as_posix()
+            # run(["sudo", "-E", "env"])
+            if not local_path.endswith("/"):
+                local_path += "/"
+            cmd = ["sudo", "-E", "rsync", "-avHSP"]
+            if self.args.dry_run:
+                cmd += ["-n"]
+            if self.args.action == "get":
+                if not self.args.dry_run:
+                    os.makedirs(local_path, exist_ok=True)
+                cmd += [remote_path, local_path]
+            elif self.args.action == "put":
+                cmd += [local_path, remote_path]
+            run(cmd)
 
     @cached_property
     def args(self) -> argparse.Namespace:
@@ -219,14 +243,46 @@ class Homestar:
                 "Homelab provisioner, not to be confused with Homestar Runner"
             ),
         )
+        ap.add_argument(
+            "-n",
+            "--dry-run",
+            "--pretend",
+            dest="dry_run",
+            action="store_true",
+            help="Print commands to execute",
+        )
         subp = ap.add_subparsers(title="Subcommands", metavar="command")
+
+        appdata_p = subp.add_parser(
+            "appdata",
+            parents=[ansible_vault_mixin],
+            help="Get or put compose app(s) data from or onto a host",
+        )
+        appdata_p.set_defaults(func=self.action_appdata)
+        appdata_p.add_argument("action", choices=("get", "put"), help="Action")
+        appdata_p.add_argument("host", help="Target host")
+        appdata_p.add_argument(
+            "apps",
+            nargs="+",
+            metavar="app",
+            help="Selected application(s)",
+        )
+        appdata_p.add_argument(
+            "-d",
+            "--dir",
+            dest="local_dir",
+            metavar="path",
+            type=_str,
+            default=Path("app_data").resolve(),
+            help="Path for local data copy (default: %(default)s)",
+        )
 
         bootstrap_p = subp.add_parser(
             "bootstrap",
             parents=[ansible_vault_mixin],
             help="Bootstrap new host",
         )
-        bootstrap_p.set_defaults(func=self.action_bootstrap)
+        bootstrap_p.set_defaults(func=self.action_bootstrap, chdir=True)
         bootstrap_p.add_argument("host", help="Target host")
         bootstrap_p.add_argument("username", help="Username on target host")
 
@@ -235,16 +291,20 @@ class Homestar:
             parents=[ansible_mixin, ansible_vault_mixin],
             help="Deploy",
         )
-        run_p.set_defaults(func=self.action_run)
+        run_p.set_defaults(func=self.action_run, chdir=True)
 
         hostvars_p = subp.add_parser(
             "hostvars",
             parents=[ansible_mixin, ansible_vault_mixin],
             help="Print host variables",
         )
-        hostvars_p.set_defaults(func=self.action_hostvars)
+        hostvars_p.set_defaults(func=self.action_hostvars, chdir=True)
 
-        return ap.parse_known_args()
+        _args, _extra_args = ap.parse_known_args()
+        if not hasattr(_args, "func"):
+            ap.print_help()
+            sys.exit(1)
+        return _args, _extra_args
 
     @cached_property
     def ansible_collections(self) -> AnsibleCollections:
