@@ -6,4 +6,5 @@ apps:
 - gateway
 - hello
 - mealie
+- postfix
 - plex
