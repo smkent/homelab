@@ -1,5 +1,5 @@
 import subprocess
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from contextlib import chdir, contextmanager
 from functools import cached_property
 from pathlib import Path
@@ -42,7 +42,7 @@ class ComposeStack:
             data = yaml.safe_load(f)
             app_dirs = {}
             for app_name in sorted(data.get("apps", [])):
-                app_dir = Path(self.stack_dir / "apps" / app_name)
+                app_dir = self.stack_dir / "apps" / app_name
                 if not app_dir.exists():
                     raise Exception(f"{app_dir} does not exist")
                 app_dirs[app_name] = app_dir
@@ -52,6 +52,31 @@ class ComposeStack:
     def host_app_dirs(self) -> Iterator[Path]:
         for app_name in sorted(self.host_apps):
             app_dir = self.host_apps[app_name]
+            with chdir(app_dir):
+                yield app_dir
+
+    def each_host_app_dir(
+        self, apps: Sequence[str] | None = None
+    ) -> Iterator[Path]:
+        if not apps:
+            yield from self.host_app_dirs
+            return
+        missing_apps = {
+            app for app in apps if not (self.stack_dir / "apps" / app).is_dir()
+        }
+        if missing_apps:
+            raise Exception(
+                f"App(s) do not exist: {', '.join(sorted(missing_apps))}"
+            )
+        print("Would run on apps:", apps)
+        for app, app_dir in [
+            (app, self.stack_dir / "apps" / app) for app in sorted(apps)
+        ]:
+            if app not in self.host_apps:
+                print(
+                    f"Warning: {app} is not in"
+                    f" {self.active_host_dir / 'apps.yml'}"
+                )
             with chdir(app_dir):
                 yield app_dir
 

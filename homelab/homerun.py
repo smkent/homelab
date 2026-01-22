@@ -14,7 +14,9 @@ class Homerun:
     def main(self) -> None:
         if not self.extra_args:
             return
-        for i, app_dir in enumerate(self.stack.host_app_dirs):
+        for i, app_dir in enumerate(
+            self.stack.each_host_app_dir(self.args.apps)
+        ):
             if i:
                 print()
             print(f">>> {app_dir}")
@@ -33,6 +35,15 @@ class Homerun:
         ap = argparse.ArgumentParser(
             description=(
                 "Repeat `docker compose` commands for all enabled apps"
+            ),
+        )
+        ap.add_argument(
+            "-a",
+            "--app",
+            dest="apps",
+            action="append",
+            help=(
+                "Run command on the specified app, instead of all enabled apps"
             ),
         )
         return ap.parse_known_args()
