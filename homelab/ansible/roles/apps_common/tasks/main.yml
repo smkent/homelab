@@ -7,6 +7,15 @@
       accept_hostkey: true
     environment:
       GIT_TERMINAL_PROMPT: 0
+    register: homelab_git_repo
+
+  - name: "Ensure poetry project is initialized"
+    ansible.builtin.command:
+      cmd: poetry install
+      chdir: "{{ deploy_user_home }}/homelab"
+    when:
+    - not ansible_check_mode
+    - homelab_git_repo.changed
 
   - name: "Ensure {{ deploy_user_home }}/secrets exists"
     ansible.builtin.file:
