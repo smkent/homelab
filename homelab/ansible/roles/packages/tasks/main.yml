@@ -2,7 +2,6 @@
   ansible.builtin.apt:
     pkg:
     - curl
-    - git
     - gnupg
     - htop
     - libpam-modules
