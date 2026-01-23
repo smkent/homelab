@@ -229,7 +229,7 @@ class Homestar:
 
         ansible_vault_mixin = argparse.ArgumentParser(add_help=False)
         ansible_vault_mixin.add_argument(
-            "-v",
+            "-V",
             "--vault",
             dest="ansible_vault",
             metavar="path",
