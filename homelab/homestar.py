@@ -107,6 +107,8 @@ class Homestar:
                 f"@{fifo}",
                 "playbooks/bootstrap.yml",
             ]
+            if self.args.sudo:
+                cmd += ["-e", "bootstrap_become_method=sudo"]
             cmd += self.extra_args
             self._ansible_run(cmd)
 
@@ -292,6 +294,11 @@ class Homestar:
         bootstrap_p.set_defaults(func=self.action_bootstrap, chdir=True)
         bootstrap_p.add_argument("host", help="Target host")
         bootstrap_p.add_argument("username", help="Username on target host")
+        bootstrap_p.add_argument(
+            "--sudo",
+            action="store_true",
+            help="Use sudo instead of su for initial bootstrapping",
+        )
 
         run_p = subp.add_parser(
             "run",
