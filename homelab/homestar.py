@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import os
 import sys
+import textwrap
 from collections.abc import Sequence
 from contextlib import chdir
 from dataclasses import dataclass
@@ -112,21 +113,27 @@ class Homestar:
     def action_hostvars(self) -> None:
         with gpg_fifo(self.args.ansible_vault) as fifo:
             cmd = [
-                "ansible",
+                "ansible-playbook",
                 "-i",
                 f"inventories/{self.args.env}/hosts.yml",
                 "-e",
                 f"fqdn={self.args.fqdn}",
                 "-e",
                 f"@{fifo}",
-                "-a",
-                "msg={{hostvars[inventory_hostname]}}",
-                "-m",
-                "debug",
-                "all",
+                "/dev/stdin",
             ]
             cmd += self.extra_args
-            self._ansible_run(cmd)
+            playbook = textwrap.dedent(
+                f"""
+            - hosts: all
+              gather_facts: true
+              tasks:
+                - ansible.builtin.debug:
+                    msg: {self.args.message}
+            """
+            )
+            print(playbook)
+            self._ansible_run(cmd, input=playbook, text=True)
 
     def action_run(self) -> None:
         with gpg_fifo(self.args.ansible_vault) as fifo:
@@ -299,6 +306,17 @@ class Homestar:
             help="Print host variables",
         )
         hostvars_p.set_defaults(func=self.action_hostvars, chdir=True)
+        hostvars_p.add_argument(
+            "-m",
+            "--message",
+            dest="message",
+            metavar="expression",
+            default='"{{hostvars[inventory_hostname]}}"',
+            help=(
+                "Expression for Ansible `debug` module"
+                " (default: `%(default)s`)"
+            ),
+        )
 
         _args, _extra_args = ap.parse_known_args()
         if not hasattr(_args, "func"):
