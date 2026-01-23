@@ -70,3 +70,10 @@
     cache_valid_time: "{{ 0 if apt_docker_repo.changed else 600 }}"
   register: apt_docker_packages
   failed_when: not ansible_check_mode and apt_docker_packages.failed
+
+- name: Ensure web Docker network exists
+  community.docker.docker_network:
+    name: web
+    driver: bridge
+    state: present
+  ignore_errors: '{{ ansible_check_mode }}'
