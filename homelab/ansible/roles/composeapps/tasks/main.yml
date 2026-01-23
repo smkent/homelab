@@ -3,6 +3,7 @@
     name: web
     driver: bridge
     state: present
+  ignore_errors: '{{ ansible_check_mode }}'
 
 - name: "Ensure web repository is present"
   ansible.builtin.git:
@@ -12,6 +13,7 @@
     accept_hostkey: true
   environment:
     GIT_TERMINAL_PROMPT: 0
+  ignore_errors: '{{ ansible_check_mode }}'
 
 - name: "Locate host profile directory"
   ansible.builtin.stat:

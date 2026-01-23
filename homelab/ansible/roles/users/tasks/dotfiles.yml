@@ -16,6 +16,7 @@
     ansible.builtin.git:
       repo: "{{ repository }}"
       dest: "{{ temp_dir }}"
+    ignore_errors: '{{ ansible_check_mode }}'
 
   - name: Move repository metadata directory into place
     ansible.builtin.command: mv "{{ temp_dir }}/.git" "{{ user_home }}"
@@ -30,6 +31,7 @@
       dest: '{{ user_home }}'
       clone: false
       force: true
+    ignore_errors: '{{ ansible_check_mode }}'
 
   - name: Clean up temporary dotfiles repository directory
     ansible.builtin.file:
