@@ -3,12 +3,16 @@
     name: docker
     gid: 200
     state: present
+  register: docker_group
 
 - name: "Ensure {{ deploy_user }} user is in the docker group"
   ansible.builtin.user:
     user: "{{ deploy_user }}"
     groups: docker
     append: true
+  when:
+  - not ansible_check_mode
+  - not docker_group.changed
 
 - name: Ensure legacy Docker apt_repository file is removed
   ansible.builtin.file:
