@@ -8,6 +8,7 @@
     environment:
       GIT_TERMINAL_PROMPT: 0
     register: homelab_git_repo
+    ignore_errors: '{{ ansible_check_mode }}'
 
   - name: "Ensure poetry project is initialized"
     ansible.builtin.command:

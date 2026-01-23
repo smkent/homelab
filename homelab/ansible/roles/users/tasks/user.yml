@@ -11,6 +11,7 @@
     create_home: '{{ user_def.create_home|d(True) }}'
     state: present
   when: ansible_ssh_user != user_name
+  ignore_errors: '{{ ansible_check_mode }}'
 
 - import_role:
     name: common
