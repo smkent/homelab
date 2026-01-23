@@ -20,9 +20,9 @@
   vars_files:
   - vars/common.yml
   roles:
-  - auth
   - bootstrap
   - deploy_user_common
+  - auth
 
 - name: "Test configured connection to bootstrap host"
   hosts: all

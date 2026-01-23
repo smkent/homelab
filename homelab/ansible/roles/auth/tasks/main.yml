@@ -5,6 +5,22 @@
     update_cache: true
     cache_valid_time: 600
 
+- name: Ensure sudo is not configured with NOPASSWD or global timestamps
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ item }}"
+    state: absent
+  loop:
+  - 010_pi-nopasswd
+  - 010_global-tty
+
+- name: Ensure sudo timestamp type is set to ppid
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/888_timestamp
+    content: |
+      Defaults timestamp_type=ppid
+      Defaults timestamp_timeout=5
+    mode: '0440'
+
 - name: Ensure wheel group exists
   ansible.builtin.group:
     name: wheel
