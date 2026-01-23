@@ -54,6 +54,7 @@
     components: stable
     signed_by: /etc/apt/keyrings/docker.gpg
     state: present
+    install_python_debian: true
   register: apt_docker_repo
 
 - name: Ensure Docker is installed
