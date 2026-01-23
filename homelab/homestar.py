@@ -184,7 +184,7 @@ class Homestar:
             if not fn.endswith(".yml"):
                 fn += ".yml"
             path = Path(fn)
-            with chdir("playbooks"):
+            with chdir("ansible/playbooks"):
                 if not path.exists():
                     raise argparse.ArgumentTypeError(f"{path} does not exist")
             return path
