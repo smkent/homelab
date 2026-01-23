@@ -3,7 +3,7 @@
   ignore_unreachable: true
   gather_facts: false
   become: true
-  become_method: su
+  become_method: "{{ bootstrap_become_method|d('su') }}"
   vars:
     ansible_ssh_common_args: "-o StrictHostKeyChecking=accept-new"
   vars_files:
@@ -16,13 +16,15 @@
   gather_facts: false
   remote_user: root
   become: true
-  become_method: su
+  become_method: "{{ bootstrap_become_method|d('su') }}"
+  vars:
+    deploy_user_update_password: true
   vars_files:
   - vars/common.yml
   roles:
-  - auth
   - bootstrap
   - deploy_user_common
+  - auth
 
 - name: "Test configured connection to bootstrap host"
   hosts: all
