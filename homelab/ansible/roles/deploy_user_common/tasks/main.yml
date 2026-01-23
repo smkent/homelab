@@ -40,3 +40,28 @@
     resolve_home_user_name: "{{ deploy_user }}"
     resolve_home_user_def: "{{ create_users[deploy_user] }}"
     resolve_home_set_fact: deploy_user_home
+
+- name: "Ensure {{ deploy_user_home }}/.ssh exists"
+  ansible.builtin.file:
+    path: "{{ deploy_user_home }}/.ssh"
+    state: directory
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
+    mode: 0700
+
+- name: "Ensure SSH private key is installed for {{ deploy_user }}"
+  ansible.builtin.copy:
+    dest: '{{ deploy_user_home }}/.ssh/id_ed25519'
+    content: '{{ ssh_key_deploy }}'
+    mode: 0600
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
+  diff: false
+
+- name: "Ensure SSH public key is installed for {{ deploy_user }}"
+  ansible.builtin.copy:
+    dest: '{{ deploy_user_home }}/.ssh/id_ed25519.pub'
+    content: '{{ ssh_key_deploy_pub }}'
+    mode: 0644
+    owner: '{{ deploy_user }}'
+    group: '{{ deploy_user }}'
