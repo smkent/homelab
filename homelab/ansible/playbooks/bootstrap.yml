@@ -17,6 +17,8 @@
   remote_user: root
   become: true
   become_method: "{{ bootstrap_become_method|d('su') }}"
+  vars:
+    deploy_user_update_password: true
   vars_files:
   - vars/common.yml
   roles:
