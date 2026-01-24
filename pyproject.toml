@@ -26,6 +26,7 @@ dependencies = [
 ]
 
 [project.scripts]
+hm = "homelab.homerun:Homerun.app"
 homerun = "homelab.homerun:Homerun.app"
 homestar = "homelab.homestar:Homestar.app"
 
