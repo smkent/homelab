@@ -37,7 +37,7 @@ services:
     - ./data/mealie:/app/data/
 
   db:
-    image: postgres:17
+    image: postgres:18
     environment:
     - POSTGRES_USER=mealie
     - POSTGRES_PASSWORD=mealie
@@ -53,4 +53,4 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/db:/var/lib/postgresql/data
+    - ./data/postgres18:/var/lib/postgresql
