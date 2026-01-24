@@ -46,7 +46,7 @@ def stack_app_dir(stack: str | None = None, service: str | None = None) -> Any:
             stack_name = stack or kwargs.get("stack")
             ctx.obj.service = service or kwargs.get("service")
             if stack_name:
-                with ctx.obj.stack.stack_name(stack_name):
+                with ctx.obj.stack.app_stack(stack_name):
                     return func(ctx, *args, **kwargs)
             return func(ctx, *args, **kwargs)
 
