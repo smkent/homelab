@@ -15,7 +15,7 @@ from .util import run
 
 
 @dataclass
-class HomebaseBase:
+class HomerunBase:
     dry_run: bool = False
     service: str | None = None
     stack: ComposeStack = field(default_factory=ComposeStack)
@@ -56,7 +56,7 @@ def stack_app_dir(stack: str | None = None, service: str | None = None) -> Any:
 
 
 @dataclass
-class Homebase(HomelabCLIApp):
+class Homerun(HomelabCLIApp):
     cli = Typer(
         help="Perform configured administration actions",
         add_completion=False,
@@ -79,7 +79,7 @@ class Homebase(HomelabCLIApp):
             ),
         ] = False,
     ) -> None:
-        ctx.obj = HomebaseBase(dry_run=dry_run)
+        ctx.obj = HomerunBase(dry_run=dry_run)
 
     @cli.command(help="Render and validate Authelia configuration template")
     @stack_app_dir("login", "authelia")
@@ -288,7 +288,7 @@ class Homebase(HomelabCLIApp):
         if not _is_container_up():
             _start_container()
         print(f"Dumping existing database data to {dump_file}")
-        Homebase.pgdump(ctx, stack, dump_file)
+        Homerun.pgdump(ctx, stack, dump_file)
         _stop_container()
         print("Updating container configuration")
         pg.set_version(version)
