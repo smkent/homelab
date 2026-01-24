@@ -26,6 +26,16 @@
     - not ansible_check_mode
     - homelab_git_repo.changed
 
+  - name: "Install homelab package via pipx"
+    community.general.pipx:
+      name: poetry
+      source: "{{ deploy_user_home }}/homelab"
+      state: present
+      force: true
+    when:
+    - not ansible_check_mode
+    - homelab_git_repo.changed
+
   - name: "Ensure {{ deploy_user_home }}/secrets exists"
     ansible.builtin.file:
       path: "{{ deploy_user_home }}/secrets"
