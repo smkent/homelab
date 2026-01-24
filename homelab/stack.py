@@ -8,6 +8,8 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
+from .app import CLIError
+
 HOMELAB_ENV = "HOMELAB"
 
 
@@ -22,7 +24,7 @@ class ComposeStack:
         if homelab_value := os.environ.get(HOMELAB_ENV):
             if _is_stack_dir(path := (Path(homelab_value) / "compose")):
                 return path
-            raise Exception(
+            raise CLIError(
                 f"{homelab_value} (via {HOMELAB_ENV}) does not exist"
             )
         git_root = Path(
@@ -34,18 +36,18 @@ class ComposeStack:
             return path
         if _is_stack_dir(path := (Path.home() / "homelab" / "compose")):
             return path
-        raise Exception("Unable to locate stack directory")
+        raise CLIError("Unable to locate stack directory")
 
     @cached_property
     def active_host_dir(self) -> Path:
         if not (active_dir := self.stack_dir / "hosts" / "active").is_dir():
-            raise Exception(f"{active_dir} does not exist")
+            raise CLIError(f"{active_dir} does not exist")
         return active_dir
 
     @cached_property
     def host_apps_config(self) -> Path:
         if not (fn := self.active_host_dir / "apps.yml").is_file():
-            raise Exception(f"{fn} does not exist")
+            raise CLIError(f"{fn} does not exist")
         return fn
 
     @cached_property
@@ -56,7 +58,7 @@ class ComposeStack:
             for app_name in sorted(data.get("apps", [])):
                 app_dir = self.stack_dir / "apps" / app_name
                 if not app_dir.exists():
-                    raise Exception(f"{app_dir} does not exist")
+                    raise CLIError(f"{app_dir} does not exist")
                 app_dirs[app_name] = app_dir
         return app_dirs
 
@@ -77,7 +79,7 @@ class ComposeStack:
             app for app in apps if not (self.stack_dir / "apps" / app).is_dir()
         }
         if missing_apps:
-            raise Exception(
+            raise CLIError(
                 f"App(s) do not exist: {', '.join(sorted(missing_apps))}"
             )
         for app, app_dir in [
@@ -95,7 +97,7 @@ class ComposeStack:
     @contextmanager
     def app(self, app_name: str) -> Iterator[Path]:
         if app_name not in self.host_apps:
-            raise Exception(f"{app_name} is not configured on this host")
+            raise CLIError(f"{app_name} is not configured on this host")
         app_dir = self.host_apps[app_name]
         with chdir(app_dir):
             yield app_dir

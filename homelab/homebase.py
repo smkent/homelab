@@ -4,17 +4,18 @@ import sys
 from collections.abc import Sequence
 from contextlib import nullcontext
 from dataclasses import dataclass, field
-from functools import cached_property, partial
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from .app import CLIError, HomelabCLIApp
 from .pg import PG
 from .stack import ComposeStack
 from .util import run
 
 
 @dataclass
-class Homebase:
+class Homebase(HomelabCLIApp):
     stack: ComposeStack = field(default_factory=ComposeStack)
 
     def main(self) -> None:
@@ -253,7 +254,7 @@ class Homebase:
     def action_pgdump(self) -> None:
         dump_file = Path(self.args.dump_file)
         if dump_file.exists():
-            raise Exception(f"{dump_file.resolve()} already exists")
+            raise CLIError(f"{dump_file.resolve()} already exists")
         pg = PG()
         with (
             open(dump_file, "w") if not self.args.dry_run else nullcontext()
@@ -286,14 +287,14 @@ class Homebase:
 
         dump_file = Path(self.args.dump_file)
         if dump_file.exists():
-            raise Exception(f"{dump_file.resolve()} already exists")
+            raise CLIError(f"{dump_file.resolve()} already exists")
         if (
             new_data_dir := Path("data") / f"postgres{self.args.version}"
         ).exists():
-            raise Exception(f"{new_data_dir.resolve()} already exists")
+            raise CLIError(f"{new_data_dir.resolve()} already exists")
         pg = PG(dry_run=self.args.dry_run)
         if pg.source_volume.resolve() == new_data_dir.resolve():
-            raise Exception(
+            raise CLIError(
                 "Source and target volumes are the same:",
                 pg.source_volume.resolve(),
             )
@@ -319,6 +320,3 @@ class Homebase:
                 stdin=f,
             )
         print("Upgrade complete")
-
-
-main = partial(Homebase().main)
