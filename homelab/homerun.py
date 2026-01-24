@@ -331,7 +331,7 @@ class Homerun(HomelabCLIApp):
         )
 
     @cli.command(help="Reload Caddy from current Caddyfile")
-    @StackAppDir("caddy", "caddy")
+    @StackAppDir("gateway", "caddy")
     @staticmethod
     def reloadcaddy(ctx: Context) -> None:
         ctx.obj.run(
