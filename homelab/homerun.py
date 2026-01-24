@@ -2,7 +2,7 @@ import subprocess
 from collections.abc import Callable
 from contextlib import nullcontext
 from dataclasses import dataclass, field
-from functools import wraps
+from functools import cached_property, wraps
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -19,6 +19,12 @@ class HomerunBase:
     dry_run: bool = False
     service: str | None = None
     stack: ComposeStack = field(default_factory=ComposeStack)
+
+    @cached_property
+    def pg(self) -> PG:
+        if not self.service:
+            raise CLIError("Service name is required")
+        return PG(service_name=self.service, dry_run=self.dry_run)
 
     def run(
         self,
@@ -224,12 +230,13 @@ class Homerun(HomelabCLIApp):
     ) -> None:
         if dump_file.exists():
             raise CLIError(f"{dump_file.resolve()} already exists")
-        pg = PG()
         with (
             open(dump_file, "w") if not ctx.obj.dry_run else nullcontext()
         ) as f:
             ctx.obj.run(
-                ["pg_dumpall", "-U", pg.admin_user], exec=True, stdout=f
+                ["pg_dumpall", "-U", ctx.obj.pg.admin_user],
+                exec=True,
+                stdout=f,
             )
 
     @cli.command(help="Upgrade PostgreSQL major version")
@@ -278,7 +285,7 @@ class Homerun(HomelabCLIApp):
             raise CLIError(f"{dump_file.resolve()} already exists")
         if (new_data_dir := Path("data") / f"postgres{version}").exists():
             raise CLIError(f"{new_data_dir.resolve()} already exists")
-        pg = PG(dry_run=ctx.obj.dry_run)
+        pg = ctx.obj.pg
         if pg.source_volume.resolve() == new_data_dir.resolve():
             raise CLIError(
                 "Source and target volumes are the same:",
@@ -314,7 +321,7 @@ class Homerun(HomelabCLIApp):
         ctx: Context,
         stack: Annotated[str, Argument(metavar="stack", help="App stack")],
     ) -> None:
-        pg = PG()
+        pg = ctx.obj.pg
         ctx.obj.run(
             ["psql", "-U", pg.admin_user, "-d", pg.admin_database], exec=True
         )
