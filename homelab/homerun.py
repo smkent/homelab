@@ -300,7 +300,7 @@ class Homerun(HomelabCLIApp):
         print("Importing dumped database data")
         with open(dump_file) if not ctx.obj.dry_run else nullcontext() as f:
             ctx.obj.run(
-                ["psql", "-U", pg.admin_user],
+                ["psql", "-U", pg.admin_user, "-d", pg.admin_database],
                 exec=True,
                 exec_args=["-T"],
                 stdin=f,
