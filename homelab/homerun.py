@@ -121,10 +121,9 @@ class Homerun(HomelabCLIApp):
             ),
         ] = None,
     ) -> None:
-        stack = ComposeStack()
         if not ctx.args:
             return
-        for i, app_dir in enumerate(stack.each_host_app_dir(apps)):
+        for i, app_dir in enumerate(ctx.obj.stack.each_host_app_dir(apps)):
             if i:
                 print()
             print(f">>> {app_dir}")
