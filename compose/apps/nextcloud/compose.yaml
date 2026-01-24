@@ -33,7 +33,7 @@ services:
     - ./data/nextcloud:/var/www/html
 
   db:
-    image: postgres:13
+    image: postgres:18
     environment:
     - POSTGRES_USER=nextcloud
     - POSTGRES_PASSWORD=nextcloud
@@ -49,4 +49,4 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/db:/var/lib/postgresql/data
+    - ./data/postgres18:/var/lib/postgresql
