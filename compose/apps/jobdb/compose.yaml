@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16
+    image: postgres:18
     environment:
     - POSTGRES_USER=jobdb
     - POSTGRES_PASSWORD=jobdb
@@ -36,4 +36,4 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/db:/var/lib/postgresql/data
+    - ./data/postgres18:/var/lib/postgresql

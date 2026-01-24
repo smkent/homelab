@@ -28,7 +28,7 @@ services:
     - ./data/gitea:/data
 
   db:
-    image: postgres:13
+    image: postgres:18
     environment:
     - POSTGRES_USER=gitea
     - POSTGRES_PASSWORD=gitea
@@ -44,4 +44,4 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/db:/var/lib/postgresql/data
+    - ./data/postgres18:/var/lib/postgresql
