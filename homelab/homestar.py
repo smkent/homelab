@@ -117,16 +117,6 @@ class HomestarOptions:
             help="Ansible inventory",
         ),
     ]
-    fqdn = Annotated[
-        str,
-        Option(
-            "-f",
-            "--fqdn",
-            metavar="fqdn",
-            default_factory="smkent.net",
-            help="Domain name",
-        ),
-    ]
     ansible_vault = Annotated[
         Path,
         Option(
@@ -299,7 +289,6 @@ class Homestar(HomelabCLIApp):
     @staticmethod
     def hostvars(
         ctx: Context,
-        fqdn: HomestarOptions.fqdn,
         env: HomestarOptions.env,
         ansible_vault: HomestarOptions.ansible_vault,
         message: Annotated[
@@ -317,8 +306,6 @@ class Homestar(HomelabCLIApp):
                 "ansible-playbook",
                 "-i",
                 f"inventories/{env}/hosts.yml",
-                "-e",
-                f"fqdn={fqdn}",
                 "-e",
                 f"@{fifo}",
                 "/dev/stdin",
@@ -346,7 +333,6 @@ class Homestar(HomelabCLIApp):
     @staticmethod
     def run(
         ctx: Context,
-        fqdn: HomestarOptions.fqdn,
         playbook: HomestarOptions.playbook,
         env: HomestarOptions.env,
         ansible_vault: HomestarOptions.ansible_vault,
@@ -365,8 +351,6 @@ class Homestar(HomelabCLIApp):
                 "ansible-playbook",
                 "-i",
                 f"inventories/{env}/hosts.yml",
-                "-e",
-                f"fqdn={fqdn}",
                 "-e",
                 f"@{fifo}",
                 f"playbooks/{playbook}",
