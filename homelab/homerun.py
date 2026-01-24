@@ -286,10 +286,14 @@ class Homerun(HomelabCLIApp):
         if (new_data_dir := Path("data") / f"postgres{version}").exists():
             raise CLIError(f"{new_data_dir.resolve()} already exists")
         pg = ctx.obj.pg
+        if pg.version >= version:
+            raise CLIError(
+                f"No upgrade needed for current version {pg.version}"
+            )
         if pg.source_volume.resolve() == new_data_dir.resolve():
             raise CLIError(
-                "Source and target volumes are the same:",
-                pg.source_volume.resolve(),
+                "Source and target volumes are the same: "
+                + pg.source_volume.resolve()
             )
         if not _is_container_up():
             _start_container()

@@ -37,6 +37,8 @@ class PostgresConfig:
         with open(self.compose_file, "w") as f:
             return yaml.dump(self.yaml, f)
         del self.yaml
+        del self.yaml_svc
+        del self.version
 
     @property
     def yaml_svc(self) -> Any:
