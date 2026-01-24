@@ -6,6 +6,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+from .app import CLIError
 from .util import run
 
 yaml = YAML()
@@ -66,9 +67,9 @@ class PG:
         for volume in self.compose_config["volumes"]:
             if volume["target"].startswith("/var/lib/postgresql"):
                 if not (path := Path(volume["source"])).is_dir():
-                    raise Exception(f"Source volume {path} is not a directory")
+                    raise CLIError(f"Source volume {path} is not a directory")
                 return path
-        raise Exception("Unable to locate source volume")
+        raise CLIError("Unable to locate source volume")
 
     def set_version(self, version: int) -> None:
         self.yaml_svc["image"] = f"postgres:{version}"
@@ -81,5 +82,5 @@ class PG:
                 self.yaml_svc["volumes"][i] = f"{rel}:/var/lib/postgresql"
                 break
         else:
-            raise Exception("Unable to locate data directory volume")
+            raise CLIError("Unable to locate data directory volume")
         self.write_yaml()
