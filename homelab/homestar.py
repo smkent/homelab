@@ -101,7 +101,7 @@ class HomestarOptions:
 
         @classmethod
         def _playbook_path(cls, value: str) -> Path:
-            fn = cls._str(value)
+            fn = cls._str(str(value))
             if not fn.endswith(".yml"):
                 fn += ".yml"
             path = Path(fn)
