@@ -14,7 +14,7 @@ yaml.preserve_quotes = True
 
 
 @dataclass
-class PG:
+class PostgresConfig:
     service_name: str = "db"
     compose_file: Path = field(default_factory=lambda: Path("compose.yaml"))
     dry_run: bool = False

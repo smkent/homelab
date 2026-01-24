@@ -9,7 +9,7 @@ from typing import Annotated, Any
 from typer import Argument, Context, Option, Typer
 
 from .app import CLIError, HomelabCLIApp
-from .pg import PG
+from .pg import PostgresConfig
 from .stack import ComposeStack
 from .util import run
 
@@ -21,10 +21,10 @@ class HomerunBase:
     stack: ComposeStack = field(default_factory=ComposeStack)
 
     @cached_property
-    def pg(self) -> PG:
+    def pg(self) -> PostgresConfig:
         if not self.service:
             raise CLIError("Service name is required")
-        return PG(service_name=self.service, dry_run=self.dry_run)
+        return PostgresConfig(service_name=self.service, dry_run=self.dry_run)
 
     def run(
         self,
