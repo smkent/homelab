@@ -1,14 +1,15 @@
 import argparse
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from functools import cached_property, partial
+from functools import cached_property
 
+from .app import HomelabCLIApp
 from .stack import ComposeStack
 from .util import run
 
 
 @dataclass
-class Homerun:
+class Homerun(HomelabCLIApp):
     stack: ComposeStack = field(default_factory=ComposeStack)
 
     def main(self) -> None:
@@ -47,6 +48,3 @@ class Homerun:
             ),
         )
         return ap.parse_known_args()
-
-
-main = partial(Homerun().main)

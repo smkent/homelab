@@ -25,9 +25,9 @@ dependencies = [
 ]
 
 [project.scripts]
-homebase = "homelab.homebase:main"
-homerun = "homelab.homerun:main"
-homestar = "homelab.homestar:main"
+homebase = "homelab.homebase:Homebase.app"
+homerun = "homelab.homerun:Homerun.app"
+homestar = "homelab.homestar:Homestar.app"
 
 [tool.poetry]
 requires-poetry = ">=2.0"

@@ -4,17 +4,18 @@ import sys
 from collections.abc import Sequence
 from contextlib import nullcontext
 from dataclasses import dataclass, field
-from functools import cached_property, partial
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from .app import HomelabCLIApp
 from .pg import PG
 from .stack import ComposeStack
 from .util import run
 
 
 @dataclass
-class Homebase:
+class Homebase(HomelabCLIApp):
     stack: ComposeStack = field(default_factory=ComposeStack)
 
     def main(self) -> None:
@@ -319,6 +320,3 @@ class Homebase:
                 stdin=f,
             )
         print("Upgrade complete")
-
-
-main = partial(Homebase().main)

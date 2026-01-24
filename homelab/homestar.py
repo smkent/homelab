@@ -6,11 +6,12 @@ import textwrap
 from collections.abc import Sequence
 from contextlib import chdir
 from dataclasses import dataclass
-from functools import cached_property, partial
+from functools import cached_property
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
 
+from .app import HomelabCLIApp
 from .util import gpg_fifo, run
 
 
@@ -67,7 +68,7 @@ class AnsibleCollections:
         )
 
 
-class Homestar:
+class Homestar(HomelabCLIApp):
     def main(self) -> None:
         with as_file(files(__package__) / "ansible") as ansible_path:
             if getattr(self.args, "chdir", False):
@@ -334,6 +335,3 @@ class Homestar:
     @cached_property
     def ansible_collections(self) -> AnsibleCollections:
         return AnsibleCollections(Path() / "requirements.yml")
-
-
-main = partial(Homestar().main)
