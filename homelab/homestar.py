@@ -133,6 +133,7 @@ class HomestarOptions:
 @dataclass
 class Homestar(HomelabCLIApp):
     dry_run: bool = False
+    invoke_cwd: Path = Path(".").resolve()
 
     cli = Typer(
         help="Homelab setup",
@@ -212,8 +213,9 @@ class Homestar(HomelabCLIApp):
                 "-d",
                 "--dir",
                 metavar="path",
-                help="Path for local data copy (default: %(default)s)",
-                default_factory=lambda: Path("app_data").resolve(),
+                help="Path for local data copy",
+                default_factory=lambda: Homestar.invoke_cwd / "app_data",
+                show_default="./app_data",
             ),
         ],
     ) -> None:
