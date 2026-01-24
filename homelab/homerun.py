@@ -300,7 +300,7 @@ class Homerun(HomelabCLIApp):
         pg.set_version(version)
         pg.set_volume_source(new_data_dir.resolve())
         run(
-            ["git", "--no-pager", "diff", "--", "compose.yaml"],
+            ["git", "--no-pager", "diff", "--", pg.compose_file],
             dry_run=ctx.obj.dry_run,
         )
         _start_container()
