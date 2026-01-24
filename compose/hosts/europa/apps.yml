@@ -1,0 +1,6 @@
+apps:
+- gateway
+- hello
+- login
+- smtp_relay
+- web
