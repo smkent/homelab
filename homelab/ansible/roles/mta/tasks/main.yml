@@ -22,7 +22,7 @@
       account default
       host localhost
       port 587
-      from sys@{{ ansible_host }}
+      from sys@{{ node_fqdn }}
       aliases /etc/aliases
       tls on
       tls_certcheck off

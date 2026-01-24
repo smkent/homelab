@@ -1,3 +1,4 @@
 dependencies:
 - role: deploy_user_common
+- role: facts_common
 - role: packages_common

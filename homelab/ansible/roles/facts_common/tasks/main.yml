@@ -1,0 +1,14 @@
+- name: Get the configured domain name from host.env
+  shell: |
+    set -e
+    cd $(git rev-parse --show-toplevel)
+    . compose/hosts/{{ inventory_hostname }}/host.env && echo "${DOMAIN}"
+  register: host_env_domain_result
+  become: false
+  delegate_to: localhost
+  changed_when: false
+  check_mode: false  # Run in check mode
+
+- name: Set the detected FQDN as a fact
+  set_fact:
+    node_fqdn: "{{ inventory_hostname }}.{{ host_env_domain_result.stdout }}"
