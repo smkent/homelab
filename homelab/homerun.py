@@ -39,20 +39,20 @@ class HomerunBase:
         run(cmd, dry_run=self.dry_run, **kwargs)
 
 
-def stack_app_dir(stack: str | None = None, service: str | None = None) -> Any:
-    def _decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+@dataclass
+class StackAppDir:
+    stack: str | None = None
+    service: str | None = None
+
+    def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
         def _wrapper(ctx: Context, *args: Any, **kwargs: Any) -> Any:
-            stack_name = stack or kwargs.get("stack")
-            ctx.obj.service = service or kwargs.get("service")
-            if stack_name:
-                with ctx.obj.stack.app_stack(stack_name):
-                    return func(ctx, *args, **kwargs)
-            return func(ctx, *args, **kwargs)
+            stack = self.stack or kwargs.get("stack")
+            ctx.obj.service = self.service or kwargs.get("service")
+            with ctx.obj.stack.app_stack(stack) if stack else nullcontext():
+                return func(ctx, *args, **kwargs)
 
         return _wrapper
-
-    return _decorator
 
 
 @dataclass
@@ -82,7 +82,7 @@ class Homerun(HomelabCLIApp):
         ctx.obj = HomerunBase(dry_run=dry_run)
 
     @cli.command(help="Render and validate Authelia configuration template")
-    @stack_app_dir("login", "authelia")
+    @StackAppDir("login", "authelia")
     @staticmethod
     def aconf(ctx: Context) -> None:
         for action in ["template", "validate"]:
@@ -131,7 +131,7 @@ class Homerun(HomelabCLIApp):
             run(["docker", "compose"] + ctx.args, dry_run=ctx.obj.dry_run)
 
     @cli.command(help="Create PBKDF2 hash of input OIDC client secret")
-    @stack_app_dir("login", "authelia")
+    @StackAppDir("login", "authelia")
     @staticmethod
     def hashoidc(ctx: Context) -> None:
         ctx.obj.run(
@@ -149,7 +149,7 @@ class Homerun(HomelabCLIApp):
     @cli.command(
         help="Install, authenticate, and start a shell with lldap-cli"
     )
-    @stack_app_dir("login", "lldap")
+    @StackAppDir("login", "lldap")
     @staticmethod
     def lldapcli(ctx: Context) -> None:
         ctx.obj.run(
@@ -175,7 +175,7 @@ class Homerun(HomelabCLIApp):
         )
 
     @cli.command(help="Generate OIDC client ID and secret for new OIDC client")
-    @stack_app_dir("login", "authelia")
+    @StackAppDir("login", "authelia")
     @staticmethod
     def mkoidc(ctx: Context) -> None:
         ctx.obj.run(
@@ -207,15 +207,15 @@ class Homerun(HomelabCLIApp):
         )
 
     @cli.command(help="Flush cached Nextcloud OIDC provider info")
+    @StackAppDir("nextcloud", "nextcloud")
     @staticmethod
-    @stack_app_dir("nextcloud", "nextcloud")
     def ncflush(ctx: Context) -> None:
         for var in ["well-known", "last_updated_well_known"]:
             ctx.obj.run(["php", "occ", "config:app:delete", "oidc_login", var])
 
     @cli.command(help="Dump Postgres database to file")
+    @StackAppDir(None, "db")
     @staticmethod
-    @stack_app_dir(None, "db")
     def pgdump(
         ctx: Context,
         stack: Annotated[str, Argument(metavar="stack", help="App stack")],
@@ -234,8 +234,8 @@ class Homerun(HomelabCLIApp):
             )
 
     @cli.command(help="Upgrade PostgreSQL major version")
+    @StackAppDir(None, "db")
     @staticmethod
-    @stack_app_dir(None, "db")
     def pgupgrade(
         ctx: Context,
         stack: Annotated[str, Argument(metavar="stack", help="App stack")],
@@ -309,8 +309,8 @@ class Homerun(HomelabCLIApp):
         print("Upgrade complete")
 
     @cli.command(help="Interact with PostgreSQL")
+    @StackAppDir(None, "db")
     @staticmethod
-    @stack_app_dir(None, "db")
     def psql(
         ctx: Context,
         stack: Annotated[str, Argument(metavar="stack", help="App stack")],
@@ -321,8 +321,8 @@ class Homerun(HomelabCLIApp):
         )
 
     @cli.command(help="Reload Caddy from current Caddyfile")
+    @StackAppDir("caddy", "caddy")
     @staticmethod
-    @stack_app_dir("caddy", "caddy")
     def reloadcaddy(ctx: Context) -> None:
         ctx.obj.run(
             ["caddy", "reload", "--config", "/etc/caddy/Caddyfile"],
