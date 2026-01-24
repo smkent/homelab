@@ -14,7 +14,7 @@ yaml.preserve_quotes = True
 
 
 @dataclass
-class PG:
+class PostgresConfig:
     service_name: str = "db"
     compose_file: Path = field(default_factory=lambda: Path("compose.yaml"))
     dry_run: bool = False
@@ -37,6 +37,8 @@ class PG:
         with open(self.compose_file, "w") as f:
             return yaml.dump(self.yaml, f)
         del self.yaml
+        del self.yaml_svc
+        del self.version
 
     @property
     def yaml_svc(self) -> Any:

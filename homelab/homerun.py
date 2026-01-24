@@ -2,14 +2,14 @@ import subprocess
 from collections.abc import Callable
 from contextlib import nullcontext
 from dataclasses import dataclass, field
-from functools import wraps
+from functools import cached_property, wraps
 from pathlib import Path
 from typing import Annotated, Any
 
 from typer import Argument, Context, Option, Typer
 
 from .app import CLIError, HomelabCLIApp
-from .pg import PG
+from .pg import PostgresConfig
 from .stack import ComposeStack
 from .util import run
 
@@ -19,6 +19,12 @@ class HomerunBase:
     dry_run: bool = False
     service: str | None = None
     stack: ComposeStack = field(default_factory=ComposeStack)
+
+    @cached_property
+    def pg(self) -> PostgresConfig:
+        if not self.service:
+            raise CLIError("Service name is required")
+        return PostgresConfig(service_name=self.service, dry_run=self.dry_run)
 
     def run(
         self,
@@ -224,12 +230,13 @@ class Homerun(HomelabCLIApp):
     ) -> None:
         if dump_file.exists():
             raise CLIError(f"{dump_file.resolve()} already exists")
-        pg = PG()
         with (
             open(dump_file, "w") if not ctx.obj.dry_run else nullcontext()
         ) as f:
             ctx.obj.run(
-                ["pg_dumpall", "-U", pg.admin_user], exec=True, stdout=f
+                ["pg_dumpall", "-U", ctx.obj.pg.admin_user],
+                exec=True,
+                stdout=f,
             )
 
     @cli.command(help="Upgrade PostgreSQL major version")
@@ -278,11 +285,15 @@ class Homerun(HomelabCLIApp):
             raise CLIError(f"{dump_file.resolve()} already exists")
         if (new_data_dir := Path("data") / f"postgres{version}").exists():
             raise CLIError(f"{new_data_dir.resolve()} already exists")
-        pg = PG(dry_run=ctx.obj.dry_run)
+        pg = ctx.obj.pg
+        if pg.version >= version:
+            raise CLIError(
+                f"No upgrade needed for current version {pg.version}"
+            )
         if pg.source_volume.resolve() == new_data_dir.resolve():
             raise CLIError(
-                "Source and target volumes are the same:",
-                pg.source_volume.resolve(),
+                "Source and target volumes are the same: "
+                + pg.source_volume.resolve()
             )
         if not _is_container_up():
             _start_container()
@@ -293,14 +304,14 @@ class Homerun(HomelabCLIApp):
         pg.set_version(version)
         pg.set_volume_source(new_data_dir.resolve())
         run(
-            ["git", "--no-pager", "diff", "--", "compose.yaml"],
+            ["git", "--no-pager", "diff", "--", pg.compose_file],
             dry_run=ctx.obj.dry_run,
         )
         _start_container()
         print("Importing dumped database data")
         with open(dump_file) if not ctx.obj.dry_run else nullcontext() as f:
             ctx.obj.run(
-                ["psql", "-U", pg.admin_user],
+                ["psql", "-U", pg.admin_user, "-d", pg.admin_database],
                 exec=True,
                 exec_args=["-T"],
                 stdin=f,
@@ -314,7 +325,7 @@ class Homerun(HomelabCLIApp):
         ctx: Context,
         stack: Annotated[str, Argument(metavar="stack", help="App stack")],
     ) -> None:
-        pg = PG()
+        pg = ctx.obj.pg
         ctx.obj.run(
             ["psql", "-U", pg.admin_user, "-d", pg.admin_database], exec=True
         )
