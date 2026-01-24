@@ -2,10 +2,10 @@ import hashlib
 import os
 import sys
 import textwrap
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from contextlib import chdir
 from dataclasses import dataclass
-from functools import cached_property, wraps
+from functools import cached_property
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Annotated, Any, Literal
@@ -69,21 +69,6 @@ class AnsibleCollections:
         )
 
 
-def ansible_dir() -> Any:
-    def _decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        @wraps(func)
-        def _wrapper(ctx: Context, *args: Any, **kwargs: Any) -> Any:
-            with (
-                as_file(files(__package__) / "ansible") as ansible_path,
-                chdir(ansible_path),
-            ):
-                return func(ctx, *args, **kwargs)
-
-        return _wrapper
-
-    return _decorator
-
-
 class HomestarOptions:
     class Validators:
         @classmethod
@@ -105,7 +90,7 @@ class HomestarOptions:
             if not fn.endswith(".yml"):
                 fn += ".yml"
             path = Path(fn)
-            with chdir("ansible/playbooks"):
+            with chdir("playbooks"):
                 if not path.exists():
                     raise BadParameter(f"{path} does not exist")
             return path
@@ -166,6 +151,14 @@ class Homestar(HomelabCLIApp):
         pretty_exceptions_enable=False,
         rich_markup_mode=None,
     )
+
+    @classmethod
+    def app(cls) -> None:
+        with (
+            as_file(files(__package__) / "ansible") as ansible_path,
+            chdir(ansible_path),
+        ):
+            return super().app()
 
     @cached_property
     def ansible_collections(self) -> AnsibleCollections:
@@ -259,7 +252,6 @@ class Homestar(HomelabCLIApp):
         },
         help="Bootstrap new host",
     )
-    @ansible_dir()
     @staticmethod
     def bootstrap(
         ctx: Context,
@@ -304,7 +296,6 @@ class Homestar(HomelabCLIApp):
         },
         help="Print host variables",
     )
-    @ansible_dir()
     @staticmethod
     def hostvars(
         ctx: Context,
@@ -352,7 +343,6 @@ class Homestar(HomelabCLIApp):
         },
         help="Deploy",
     )
-    @ansible_dir()
     @staticmethod
     def run(
         ctx: Context,
