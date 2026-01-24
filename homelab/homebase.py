@@ -98,6 +98,38 @@ class Homebase(HomelabCLIApp):
                 ]
             )
 
+    @cli.command(
+        context_settings={
+            "allow_extra_args": True,
+            "ignore_unknown_options": True,
+        },
+        help="Repeat `docker compose` commands for all enabled apps",
+    )
+    @staticmethod
+    def dcp(
+        ctx: Context,
+        apps: Annotated[
+            list[str] | None,
+            Option(
+                "-a",
+                "--app",
+                metavar="app",
+                help=(
+                    "Run command on the specified app,"
+                    " instead of all enabled apps"
+                ),
+            ),
+        ] = None,
+    ) -> None:
+        stack = ComposeStack()
+        if not ctx.args:
+            return
+        for i, app_dir in enumerate(stack.each_host_app_dir(apps)):
+            if i:
+                print()
+            print(f">>> {app_dir}")
+            run(["docker", "compose"] + ctx.args, dry_run=ctx.obj.dry_run)
+
     @cli.command(help="Create PBKDF2 hash of input OIDC client secret")
     @stack_app_dir("login", "authelia")
     @staticmethod
