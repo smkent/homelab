@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 from collections.abc import Iterator, Mapping, Sequence
@@ -7,23 +8,33 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
+HOMELAB_ENV = "HOMELAB"
+
 
 class ComposeStack:
     @cached_property
     def stack_dir(self) -> Path:
+        def _is_stack_dir(path: Path) -> bool:
+            return path.is_dir() and all(
+                (path / d).is_dir() for d in ("apps", "hosts")
+            )
+
+        if homelab_value := os.environ.get(HOMELAB_ENV):
+            if _is_stack_dir(path := (Path(homelab_value) / "compose")):
+                return path
+            raise Exception(
+                f"{homelab_value} (via {HOMELAB_ENV}) does not exist"
+            )
         git_root = Path(
             subprocess.check_output(
                 ["git", "rev-parse", "--show-toplevel"], text=True
             ).strip()
         )
-        if not (
-            git_root.is_dir()
-            and (stack_dir := git_root / "compose").is_dir()
-            and (stack_dir / "apps").is_dir()
-            and (stack_dir / "hosts").is_dir()
-        ):
-            raise Exception("Unable to locate stack directory")
-        return stack_dir
+        if _is_stack_dir(path := git_root / "compose"):
+            return path
+        if _is_stack_dir(path := (Path.home() / "homelab" / "compose")):
+            return path
+        raise Exception("Unable to locate stack directory")
 
     @cached_property
     def active_host_dir(self) -> Path:
