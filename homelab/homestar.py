@@ -1,15 +1,16 @@
-import argparse
 import hashlib
 import os
 import sys
 import textwrap
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from contextlib import chdir
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cached_property, wraps
 from importlib.resources import as_file, files
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Literal
+
+from typer import Argument, BadParameter, Context, Option, Typer
 
 from .app import HomelabCLIApp
 from .util import gpg_fifo, run
@@ -68,14 +69,107 @@ class AnsibleCollections:
         )
 
 
+def ansible_dir() -> Any:
+    def _decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
+        def _wrapper(ctx: Context, *args: Any, **kwargs: Any) -> Any:
+            with (
+                as_file(files(__package__) / "ansible") as ansible_path,
+                chdir(ansible_path),
+            ):
+                return func(ctx, *args, **kwargs)
+
+        return _wrapper
+
+    return _decorator
+
+
+class HomestarOptions:
+    class Validators:
+        @classmethod
+        def _str(cls, value: str) -> str:
+            if not value:
+                raise BadParameter("Value cannot be empty")
+            return value
+
+        @classmethod
+        def _file(cls, value: str) -> Path:
+            path = Path(cls._str(value))
+            if not path.exists():
+                raise BadParameter(f"{path} does not exist")
+            return path
+
+        @classmethod
+        def _playbook_path(cls, value: str) -> Path:
+            fn = cls._str(value)
+            if not fn.endswith(".yml"):
+                fn += ".yml"
+            path = Path(fn)
+            with chdir("ansible/playbooks"):
+                if not path.exists():
+                    raise BadParameter(f"{path} does not exist")
+            return path
+
+    playbook = Annotated[
+        Path,
+        Option(
+            "-p",
+            "--playbook",
+            metavar="playbook",
+            callback=Validators._playbook_path,
+            default_factory="main",
+            help="Ansible playbook",
+        ),
+    ]
+    env = Annotated[
+        str,
+        Option(
+            "-e",
+            "--env",
+            metavar="env",
+            callback=Validators._str,
+            default_factory="live",
+            help="Ansible inventory",
+        ),
+    ]
+    fqdn = Annotated[
+        str,
+        Option(
+            "-f",
+            "--fqdn",
+            metavar="fqdn",
+            default_factory="smkent.net",
+            help="Domain name",
+        ),
+    ]
+    ansible_vault = Annotated[
+        Path,
+        Option(
+            "-V",
+            "--vault",
+            metavar="path",
+            callback=Validators._file,
+            default_factory=Path("vault/ansible.asc"),
+            help="Path to Ansible vault",
+        ),
+    ]
+
+
+@dataclass
 class Homestar(HomelabCLIApp):
-    def main(self) -> None:
-        with as_file(files(__package__) / "ansible") as ansible_path:
-            if getattr(self.args, "chdir", False):
-                with chdir(ansible_path):
-                    self.args.func()
-            else:
-                self.args.func()
+    dry_run: bool = False
+
+    cli = Typer(
+        help="Homelab setup",
+        add_completion=False,
+        no_args_is_help=True,
+        pretty_exceptions_enable=False,
+        rich_markup_mode=None,
+    )
+
+    @cached_property
+    def ansible_collections(self) -> AnsibleCollections:
+        return AnsibleCollections(Path() / "requirements.yml")
 
     def _ansible_run(
         self,
@@ -88,250 +182,204 @@ class Homestar(HomelabCLIApp):
         return run(
             cmd,
             env=env or (os.environ | self.ansible_collections.env),
-            dry_run=self.args.dry_run,
+            dry_run=self.dry_run,
             **kwargs,
         )
 
-    def action_bootstrap(self) -> None:
-        with gpg_fifo(self.args.ansible_vault) as fifo:
+    @cli.callback()
+    @staticmethod
+    def setup(
+        ctx: Context,
+        ansible_help: Annotated[
+            bool,
+            Option(
+                "-H",
+                "--ansible-help",
+                help="Show ansible-playbook help message and exit",
+            ),
+        ] = False,
+        dry_run: Annotated[
+            bool,
+            Option(
+                "-n",
+                "--dry-run",
+                "--pretend",
+                help="Print commands to execute",
+            ),
+        ] = False,
+    ) -> None:
+        if ansible_help:
+            run(["ansible-playbook", "--help"])
+            sys.exit(0)
+        ctx.obj = Homestar(dry_run=dry_run)
+
+    @cli.command(help="Get or put compose app(s) data from or onto a host")
+    @staticmethod
+    def appdata(
+        ctx: Context,
+        ansible_vault: HomestarOptions.ansible_vault,
+        action: Annotated[Literal["get", "put"], Argument(help="Action")],
+        host: Annotated[str, Argument(metavar="host", help="Target host")],
+        apps: Annotated[
+            list[str], Argument(metavar="app", help="Selected application(s)")
+        ],
+        local_dir: Annotated[
+            Path,
+            Option(
+                "-d",
+                "--dir",
+                metavar="path",
+                help="Path for local data copy (default: %(default)s)",
+                default_factory=lambda: Path("app_data").resolve(),
+            ),
+        ],
+    ) -> None:
+        for app in apps:
+            remote_path = (
+                f"root@{host}:/opt/deploy/homelab/compose/apps/{app}/data/"
+            )
+            local_path = (Path(local_dir) / app / "data").as_posix()
+            if not local_path.endswith("/"):
+                local_path += "/"
+            cmd = ["sudo", "-E", "rsync", "-avHSP"]
+            if ctx.obj.dry_run:
+                cmd += ["-n"]
+            if action == "get":
+                if not ctx.obj.dry_run:
+                    os.makedirs(local_path, exist_ok=True)
+                cmd += [remote_path, local_path]
+            elif action == "put":
+                cmd += [local_path, remote_path]
+            run(cmd)
+
+    @cli.command(
+        context_settings={
+            "allow_extra_args": True,
+            "ignore_unknown_options": True,
+        },
+        help="Bootstrap new host",
+    )
+    @ansible_dir()
+    @staticmethod
+    def bootstrap(
+        ctx: Context,
+        ansible_vault: HomestarOptions.ansible_vault,
+        host: Annotated[str, Argument(metavar="host", help="Target host")],
+        username: Annotated[
+            str, Argument(metavar="username", help="Username on target host")
+        ],
+        sudo: Annotated[
+            bool,
+            Option(
+                "--sudo",
+                help="User sudo instead of su for initial bootstrapping",
+            ),
+        ] = False,
+    ) -> None:
+        with gpg_fifo(ansible_vault) as fifo:
             cmd = [
                 "ansible-playbook",
                 "-i",
-                f"{self.args.host},",
+                f"{host},",
                 "-u",
-                self.args.username,
+                username,
                 "--ask-pass",
                 "--ask-become-pass",
                 "-e",
-                f"installation_user={self.args.username}",
+                f"installation_user={username}",
                 "-e",
                 f"@{fifo}",
                 "playbooks/bootstrap.yml",
             ]
-            if self.args.sudo:
+            if sudo:
                 cmd += ["-e", "bootstrap_become_method=sudo"]
-            cmd += self.extra_args
-            self._ansible_run(cmd)
+            cmd += ctx.args
+            print(cmd)
+            ctx.obj._ansible_run(cmd)
 
-    def action_hostvars(self) -> None:
-        with gpg_fifo(self.args.ansible_vault) as fifo:
+    @cli.command(
+        context_settings={
+            "allow_extra_args": True,
+            "ignore_unknown_options": True,
+        },
+        help="Print host variables",
+    )
+    @ansible_dir()
+    @staticmethod
+    def hostvars(
+        ctx: Context,
+        fqdn: HomestarOptions.fqdn,
+        env: HomestarOptions.env,
+        ansible_vault: HomestarOptions.ansible_vault,
+        message: Annotated[
+            str,
+            Option(
+                "-m",
+                "--message",
+                metavar="expression",
+                help="Expression for Ansible `debug` module",
+            ),
+        ] = '"{{hostvars[inventory_hostname]}}"',
+    ) -> None:
+        with gpg_fifo(ansible_vault) as fifo:
             cmd = [
                 "ansible-playbook",
                 "-i",
-                f"inventories/{self.args.env}/hosts.yml",
+                f"inventories/{env}/hosts.yml",
                 "-e",
-                f"fqdn={self.args.fqdn}",
+                f"fqdn={fqdn}",
                 "-e",
                 f"@{fifo}",
                 "/dev/stdin",
             ]
-            cmd += self.extra_args
-            playbook = textwrap.dedent(
+            cmd += ctx.args
+            hostvars_playbook = textwrap.dedent(
                 f"""
             - hosts: all
               gather_facts: true
               tasks:
                 - ansible.builtin.debug:
-                    msg: {self.args.message}
+                    msg: {message}
             """
             )
-            print(playbook)
-            self._ansible_run(cmd, input=playbook, text=True)
+            print(hostvars_playbook)
+            ctx.obj._ansible_run(cmd, input=hostvars_playbook, text=True)
 
-    def action_run(self) -> None:
-        with gpg_fifo(self.args.ansible_vault) as fifo:
+    @cli.command(
+        context_settings={
+            "allow_extra_args": True,
+            "ignore_unknown_options": True,
+        },
+        help="Deploy",
+    )
+    @ansible_dir()
+    @staticmethod
+    def run(
+        ctx: Context,
+        fqdn: HomestarOptions.fqdn,
+        playbook: HomestarOptions.playbook,
+        env: HomestarOptions.env,
+        ansible_vault: HomestarOptions.ansible_vault,
+        message: Annotated[
+            str,
+            Option(
+                "-m",
+                "--message",
+                metavar="expression",
+                help="Expression for Ansible `debug` module",
+            ),
+        ] = '"{{hostvars[inventory_hostname]}}"',
+    ) -> None:
+        with gpg_fifo(ansible_vault) as fifo:
             cmd = [
                 "ansible-playbook",
                 "-i",
-                f"inventories/{self.args.env}/hosts.yml",
+                f"inventories/{env}/hosts.yml",
                 "-e",
-                f"fqdn={self.args.fqdn}",
+                f"fqdn={fqdn}",
                 "-e",
                 f"@{fifo}",
-                f"playbooks/{self.args.playbook}",
+                f"playbooks/{playbook}",
             ]
-            cmd += self.extra_args
-            self._ansible_run(cmd)
-
-    def action_appdata(self) -> None:
-        for app in self.args.apps:
-            remote_path = (
-                f"root@{self.args.host}:"
-                f"/opt/deploy/homelab/compose/apps/{app}/data/"
-            )
-            local_path = (Path(self.args.local_dir) / app / "data").as_posix()
-            # run(["sudo", "-E", "env"])
-            if not local_path.endswith("/"):
-                local_path += "/"
-            cmd = ["sudo", "-E", "rsync", "-avHSP"]
-            if self.args.dry_run:
-                cmd += ["-n"]
-            if self.args.action == "get":
-                if not self.args.dry_run:
-                    os.makedirs(local_path, exist_ok=True)
-                cmd += [remote_path, local_path]
-            elif self.args.action == "put":
-                cmd += [local_path, remote_path]
-            run(cmd)
-
-    @cached_property
-    def args(self) -> argparse.Namespace:
-        return self._args[0]
-
-    @cached_property
-    def extra_args(self) -> Sequence[str]:
-        return self._args[1]
-
-    @cached_property
-    def _args(self) -> tuple[argparse.Namespace, Sequence[str]]:
-        def _str(value: str) -> str:
-            if not value:
-                raise argparse.ArgumentTypeError("Value cannot be empty")
-            return value
-
-        def _playbook_path(value: str) -> Path:
-            fn = _str(value)
-            if not fn.endswith(".yml"):
-                fn += ".yml"
-            path = Path(fn)
-            with chdir("ansible/playbooks"):
-                if not path.exists():
-                    raise argparse.ArgumentTypeError(f"{path} does not exist")
-            return path
-
-        class AnsibleHelp(argparse.Action):
-            def __call__(self, *args: object, **kwargs: object) -> None:
-                run(["ansible-playbook", "--help"])
-                sys.exit(0)
-
-        ansible_mixin = argparse.ArgumentParser(add_help=False)
-        ansible_mixin.add_argument(
-            "-H",
-            "--ansible-help",
-            nargs=0,
-            action=AnsibleHelp,
-            help="show ansible-playbook help message and exit",
-        )
-        ansible_mixin.add_argument(
-            "-p",
-            "--playbook",
-            metavar="playbook",
-            type=_playbook_path,
-            default="main",
-            help="Ansible playbook (default: %(default)s)",
-        )
-        ansible_mixin.add_argument(
-            "-e",
-            "--env",
-            metavar="env",
-            type=_str,
-            default="live",
-            help="Ansible inventory (default: %(default)s)",
-        )
-        ansible_mixin.add_argument(
-            "-f",
-            "--fqdn",
-            metavar="fqdn",
-            type=_str,
-            default="smkent.net",
-            help="Domain name (default: %(default)s)",
-        )
-
-        ansible_vault_mixin = argparse.ArgumentParser(add_help=False)
-        ansible_vault_mixin.add_argument(
-            "-V",
-            "--vault",
-            dest="ansible_vault",
-            metavar="path",
-            type=_str,
-            default="vault/ansible.asc",
-            help="Path to Ansible vault (default: %(default)s)",
-        )
-
-        ap = argparse.ArgumentParser(
-            description=(
-                "Homelab provisioner, not to be confused with Homestar Runner"
-            ),
-        )
-        ap.add_argument(
-            "-n",
-            "--dry-run",
-            "--pretend",
-            dest="dry_run",
-            action="store_true",
-            help="Print commands to execute",
-        )
-        subp = ap.add_subparsers(title="Subcommands", metavar="command")
-
-        appdata_p = subp.add_parser(
-            "appdata",
-            parents=[ansible_vault_mixin],
-            help="Get or put compose app(s) data from or onto a host",
-        )
-        appdata_p.set_defaults(func=self.action_appdata)
-        appdata_p.add_argument("action", choices=("get", "put"), help="Action")
-        appdata_p.add_argument("host", help="Target host")
-        appdata_p.add_argument(
-            "apps",
-            nargs="+",
-            metavar="app",
-            help="Selected application(s)",
-        )
-        appdata_p.add_argument(
-            "-d",
-            "--dir",
-            dest="local_dir",
-            metavar="path",
-            type=_str,
-            default=Path("app_data").resolve(),
-            help="Path for local data copy (default: %(default)s)",
-        )
-
-        bootstrap_p = subp.add_parser(
-            "bootstrap",
-            parents=[ansible_vault_mixin],
-            help="Bootstrap new host",
-        )
-        bootstrap_p.set_defaults(func=self.action_bootstrap, chdir=True)
-        bootstrap_p.add_argument("host", help="Target host")
-        bootstrap_p.add_argument("username", help="Username on target host")
-        bootstrap_p.add_argument(
-            "--sudo",
-            action="store_true",
-            help="Use sudo instead of su for initial bootstrapping",
-        )
-
-        run_p = subp.add_parser(
-            "run",
-            parents=[ansible_mixin, ansible_vault_mixin],
-            help="Deploy",
-        )
-        run_p.set_defaults(func=self.action_run, chdir=True)
-
-        hostvars_p = subp.add_parser(
-            "hostvars",
-            parents=[ansible_mixin, ansible_vault_mixin],
-            help="Print host variables",
-        )
-        hostvars_p.set_defaults(func=self.action_hostvars, chdir=True)
-        hostvars_p.add_argument(
-            "-m",
-            "--message",
-            dest="message",
-            metavar="expression",
-            default='"{{hostvars[inventory_hostname]}}"',
-            help=(
-                "Expression for Ansible `debug` module"
-                " (default: `%(default)s`)"
-            ),
-        )
-
-        _args, _extra_args = ap.parse_known_args()
-        if not hasattr(_args, "func"):
-            ap.print_help()
-            sys.exit(1)
-        return _args, _extra_args
-
-    @cached_property
-    def ansible_collections(self) -> AnsibleCollections:
-        return AnsibleCollections(Path() / "requirements.yml")
+            cmd += ctx.args
+            ctx.obj._ansible_run(cmd)

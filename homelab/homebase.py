@@ -1,12 +1,12 @@
-import argparse
 import subprocess
-import sys
-from collections.abc import Sequence
+from collections.abc import Callable
 from contextlib import nullcontext
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
+
+from typer import Argument, Context, Option, Typer
 
 from .app import CLIError, HomelabCLIApp
 from .pg import PG
@@ -15,131 +15,10 @@ from .util import run
 
 
 @dataclass
-class Homebase(HomelabCLIApp):
+class HomebaseBase:
+    dry_run: bool = False
+    service: str | None = None
     stack: ComposeStack = field(default_factory=ComposeStack)
-
-    def main(self) -> None:
-        with self.stack.app(self.args.stack):
-            self.args.func()
-
-    @cached_property
-    def args(self) -> argparse.Namespace:
-        return self._args[0]
-
-    @cached_property
-    def extra_args(self) -> Sequence[str]:
-        return self._args[1]
-
-    @cached_property
-    def _args(self) -> tuple[argparse.Namespace, Sequence[str]]:
-        ap = argparse.ArgumentParser(
-            description=("Perform configured administration actions"),
-        )
-        ap.add_argument(
-            "-n",
-            "--dry-run",
-            "--pretend",
-            dest="dry_run",
-            action="store_true",
-            help="Print commands to execute",
-        )
-        subp = ap.add_subparsers(title="Subcommands", metavar="command")
-        reloadcaddy_p = subp.add_parser(
-            "reloadcaddy",
-            help="Reload Caddy from current Caddyfile",
-        )
-        reloadcaddy_p.set_defaults(
-            func=self.action_reload_caddy, stack="gateway", service="caddy"
-        )
-        aconf_p = subp.add_parser(
-            "aconf",
-            help="Render and validate Authelia configuration template",
-        )
-        aconf_p.set_defaults(
-            func=self.action_aconf, stack="login", service="authelia"
-        )
-        lldap_cli_p = subp.add_parser(
-            "lldapcli",
-            help="Install, authenticate, and start a shell with lldap-cli",
-        )
-        lldap_cli_p.set_defaults(
-            func=self.action_lldap_cli, stack="login", service="lldap"
-        )
-        mkoidc_p = subp.add_parser(
-            "mkoidc",
-            help="Generate OIDC client ID and secret for new OIDC client",
-        )
-        mkoidc_p.set_defaults(
-            func=self.action_mkoidc, stack="login", service="authelia"
-        )
-        hashoidc_p = subp.add_parser(
-            "hashoidc", help="Create PBKDF2 hash of input OIDC client secret"
-        )
-        hashoidc_p.set_defaults(
-            func=self.action_hashoidc, stack="login", service="authelia"
-        )
-        ncflush = subp.add_parser(
-            "ncflush",
-            help="Flush cached Nextcloud OIDC provider info",
-        )
-        ncflush.set_defaults(
-            func=self.action_ncflush,
-            stack="nextcloud",
-            service="nextcloud",
-        )
-
-        pg_mixin = argparse.ArgumentParser(add_help=False)
-        pg_mixin.add_argument("stack", metavar="stack", help="App stack")
-
-        psql_p = subp.add_parser(
-            "psql", parents=[pg_mixin], help="Interact with Postgres"
-        )
-        psql_p.set_defaults(func=self.action_psql, service="db")
-
-        pgdump_p = subp.add_parser(
-            "pgdump", parents=[pg_mixin], help="Dump Postgres database to file"
-        )
-        pgdump_p.set_defaults(func=self.action_pgdump, service="db")
-        pgdump_p.add_argument(
-            "-f",
-            "--file",
-            dest="dump_file",
-            metavar="file",
-            default="./pg_dump.sql",
-            help="Dump file (default: %(default)s)",
-        )
-
-        pgupgrade_p = subp.add_parser(
-            "pgupgrade",
-            parents=[pg_mixin],
-            help="Upgrade PostgreSQL major version",
-        )
-        pgupgrade_p.set_defaults(func=self.action_pgupgrade, service="db")
-        pgupgrade_p.add_argument(
-            "-f",
-            "--file",
-            dest="dump_file",
-            metavar="file",
-            default="./pg_dump.sql",
-            help="Dump file (default: %(default)s)",
-        )
-        pgupgrade_p.add_argument(
-            "-V",
-            "--version",
-            dest="version",
-            metavar="version",
-            type=int,
-            default=18,
-            help=(
-                "Target PostgreSQL major version number (default: %(default)s)"
-            ),
-        )
-
-        _args, _extra_args = ap.parse_known_args()
-        if not hasattr(_args, "func"):
-            ap.print_help()
-            sys.exit(1)
-        return _args, _extra_args
 
     def run(
         self,
@@ -148,22 +27,100 @@ class Homebase(HomelabCLIApp):
         exec_args: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
+        if not self.service:
+            raise Exception("service is required")
         if exec:
             action_cmd = ["exec"] + (
                 exec_args if exec_args is not None else ["-i"]
             )
         else:
             action_cmd = ["run", "--rm", "--no-deps"]
-        cmd = ["docker", "compose"] + action_cmd + [self.args.service] + cmd
-        run(cmd, dry_run=self.args.dry_run, **kwargs)
+        cmd = ["docker", "compose"] + action_cmd + [self.service] + cmd
+        run(cmd, dry_run=self.dry_run, **kwargs)
 
-    def action_reload_caddy(self) -> None:
-        self.run(
-            ["caddy", "reload", "--config", "/etc/caddy/Caddyfile"], exec=True
+
+def stack_app_dir(stack: str | None = None, service: str | None = None) -> Any:
+    def _decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
+        def _wrapper(ctx: Context, *args: Any, **kwargs: Any) -> Any:
+            stack_name = stack or kwargs.get("stack")
+            ctx.obj.service = service or kwargs.get("service")
+            if stack_name:
+                with ctx.obj.stack.stack_name(stack_name):
+                    return func(ctx, *args, **kwargs)
+            return func(ctx, *args, **kwargs)
+
+        return _wrapper
+
+    return _decorator
+
+
+@dataclass
+class Homebase(HomelabCLIApp):
+    cli = Typer(
+        help="Perform configured administration actions",
+        add_completion=False,
+        no_args_is_help=True,
+        pretty_exceptions_enable=False,
+        rich_markup_mode=None,
+    )
+
+    @cli.callback()
+    @staticmethod
+    def setup(
+        ctx: Context,
+        dry_run: Annotated[
+            bool,
+            Option(
+                "-n",
+                "--dry-run",
+                "--pretend",
+                help="Print commands to execute",
+            ),
+        ] = False,
+    ) -> None:
+        ctx.obj = HomebaseBase(dry_run=dry_run)
+
+    @cli.command(help="Render and validate Authelia configuration template")
+    @stack_app_dir("login", "authelia")
+    @staticmethod
+    def aconf(ctx: Context) -> None:
+        for action in ["template", "validate"]:
+            ctx.obj.run(
+                [
+                    "authelia",
+                    "--config",
+                    "/config/configuration.yml",
+                    "--config.experimental.filters",
+                    "template",
+                    "config",
+                    action,
+                ]
+            )
+
+    @cli.command(help="Create PBKDF2 hash of input OIDC client secret")
+    @stack_app_dir("login", "authelia")
+    @staticmethod
+    def hashoidc(ctx: Context) -> None:
+        ctx.obj.run(
+            [
+                "authelia",
+                "crypto",
+                "hash",
+                "generate",
+                "pbkdf2",
+                "--variant",
+                "sha512",
+            ]
         )
 
-    def action_lldap_cli(self) -> None:
-        self.run(
+    @cli.command(
+        help="Install, authenticate, and start a shell with lldap-cli"
+    )
+    @stack_app_dir("login", "lldap")
+    @staticmethod
+    def lldapcli(ctx: Context) -> None:
+        ctx.obj.run(
             [
                 "sh",
                 "-c",
@@ -185,35 +142,11 @@ class Homebase(HomelabCLIApp):
             check=False,
         )
 
-    def action_aconf(self) -> None:
-        for action in ["template", "validate"]:
-            self.run(
-                [
-                    "authelia",
-                    "--config",
-                    "/config/configuration.yml",
-                    "--config.experimental.filters",
-                    "template",
-                    "config",
-                    action,
-                ]
-            )
-
-    def action_hashoidc(self) -> None:
-        self.run(
-            [
-                "authelia",
-                "crypto",
-                "hash",
-                "generate",
-                "pbkdf2",
-                "--variant",
-                "sha512",
-            ]
-        )
-
-    def action_mkoidc(self) -> None:
-        self.run(
+    @cli.command(help="Generate OIDC client ID and secret for new OIDC client")
+    @stack_app_dir("login", "authelia")
+    @staticmethod
+    def mkoidc(ctx: Context) -> None:
+        ctx.obj.run(
             [
                 "authelia",
                 "crypto",
@@ -224,7 +157,7 @@ class Homebase(HomelabCLIApp):
                 "rfc3986",
             ]
         )
-        self.run(
+        ctx.obj.run(
             [
                 "authelia",
                 "crypto",
@@ -241,58 +174,80 @@ class Homebase(HomelabCLIApp):
             ]
         )
 
-    def action_ncflush(self) -> None:
+    @cli.command(help="Flush cached Nextcloud OIDC provider info")
+    @staticmethod
+    @stack_app_dir("nextcloud", "nextcloud")
+    def ncflush(ctx: Context) -> None:
         for var in ["well-known", "last_updated_well_known"]:
-            self.run(["php", "occ", "config:app:delete", "oidc_login", var])
+            ctx.obj.run(["php", "occ", "config:app:delete", "oidc_login", var])
 
-    def action_psql(self) -> None:
-        pg = PG()
-        self.run(
-            ["psql", "-U", pg.admin_user, "-d", pg.admin_database], exec=True
-        )
-
-    def action_pgdump(self) -> None:
-        dump_file = Path(self.args.dump_file)
+    @cli.command(help="Dump Postgres database to file")
+    @staticmethod
+    @stack_app_dir(None, "db")
+    def pgdump(
+        ctx: Context,
+        stack: Annotated[str, Argument(metavar="stack", help="App stack")],
+        dump_file: Annotated[
+            Path, Option("-f", "--file", metavar="file", help="Dump file")
+        ] = Path("./pg_dump.sql"),
+    ) -> None:
         if dump_file.exists():
             raise CLIError(f"{dump_file.resolve()} already exists")
         pg = PG()
         with (
-            open(dump_file, "w") if not self.args.dry_run else nullcontext()
+            open(dump_file, "w") if not ctx.obj.dry_run else nullcontext()
         ) as f:
-            self.run(["pg_dumpall", "-U", pg.admin_user], exec=True, stdout=f)
+            ctx.obj.run(
+                ["pg_dumpall", "-U", pg.admin_user], exec=True, stdout=f
+            )
 
-    def action_pgupgrade(self) -> None:
+    @cli.command(help="Upgrade PostgreSQL major version")
+    @staticmethod
+    @stack_app_dir(None, "db")
+    def pgupgrade(
+        ctx: Context,
+        stack: Annotated[str, Argument(metavar="stack", help="App stack")],
+        dump_file: Annotated[
+            Path, Option("-f", "--file", metavar="file", help="Dump file")
+        ] = Path("./pg_dump.sql"),
+        version: Annotated[
+            int,
+            Option(
+                "-V",
+                "--version",
+                metavar="version",
+                help="Target PostgreSQL major version number",
+            ),
+        ] = 18,
+    ) -> None:
         def _is_container_up() -> bool:
             return bool(
                 run(
-                    ["docker", "compose", "ps", "-q", self.args.service],
+                    ["docker", "compose", "ps", "-q", ctx.obj.service],
                     stdout=subprocess.PIPE,
                     text=True,
                 ).stdout
             )
 
         def _start_container() -> None:
-            print(f"Starting {self.args.service} container")
+            print(f"Starting {ctx.obj.service} container")
             run(
-                ["docker", "compose", "up", "--wait", self.args.service],
-                dry_run=self.args.dry_run,
+                ["docker", "compose", "up", "--wait", ctx.obj.service],
+                dry_run=ctx.obj.dry_run,
             )
 
         def _stop_container() -> None:
-            print(f"Stopping {self.args.service} container")
+            print(f"Stopping {ctx.obj.service} container")
             run(
-                ["docker", "compose", "down", self.args.service],
-                dry_run=self.args.dry_run,
+                ["docker", "compose", "down", ctx.obj.service],
+                dry_run=ctx.obj.dry_run,
             )
 
-        dump_file = Path(self.args.dump_file)
         if dump_file.exists():
             raise CLIError(f"{dump_file.resolve()} already exists")
-        if (
-            new_data_dir := Path("data") / f"postgres{self.args.version}"
-        ).exists():
+        if (new_data_dir := Path("data") / f"postgres{version}").exists():
             raise CLIError(f"{new_data_dir.resolve()} already exists")
-        pg = PG(dry_run=self.args.dry_run)
+        pg = PG(dry_run=ctx.obj.dry_run)
         if pg.source_volume.resolve() == new_data_dir.resolve():
             raise CLIError(
                 "Source and target volumes are the same:",
@@ -301,22 +256,43 @@ class Homebase(HomelabCLIApp):
         if not _is_container_up():
             _start_container()
         print(f"Dumping existing database data to {dump_file}")
-        self.action_pgdump()
+        Homebase.pgdump(ctx, stack, dump_file)
         _stop_container()
         print("Updating container configuration")
-        pg.set_version(self.args.version)
+        pg.set_version(version)
         pg.set_volume_source(new_data_dir.resolve())
         run(
             ["git", "--no-pager", "diff", "--", "compose.yaml"],
-            dry_run=self.args.dry_run,
+            dry_run=ctx.obj.dry_run,
         )
         _start_container()
         print("Importing dumped database data")
-        with open(dump_file) if not self.args.dry_run else nullcontext() as f:
-            self.run(
+        with open(dump_file) if not ctx.obj.dry_run else nullcontext() as f:
+            ctx.obj.run(
                 ["psql", "-U", pg.admin_user],
                 exec=True,
                 exec_args=["-T"],
                 stdin=f,
             )
         print("Upgrade complete")
+
+    @cli.command(help="Interact with PostgreSQL")
+    @staticmethod
+    @stack_app_dir(None, "db")
+    def psql(
+        ctx: Context,
+        stack: Annotated[str, Argument(metavar="stack", help="App stack")],
+    ) -> None:
+        pg = PG()
+        ctx.obj.run(
+            ["psql", "-U", pg.admin_user, "-d", pg.admin_database], exec=True
+        )
+
+    @cli.command(help="Reload Caddy from current Caddyfile")
+    @staticmethod
+    @stack_app_dir("caddy", "caddy")
+    def reloadcaddy(ctx: Context) -> None:
+        ctx.obj.run(
+            ["caddy", "reload", "--config", "/etc/caddy/Caddyfile"],
+            exec=True,
+        )
