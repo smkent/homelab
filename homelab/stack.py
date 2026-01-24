@@ -95,7 +95,7 @@ class ComposeStack:
                 yield app_dir
 
     @contextmanager
-    def app(self, app_name: str) -> Iterator[Path]:
+    def app_stack(self, app_name: str) -> Iterator[Path]:
         if app_name not in self.host_apps:
             raise CLIError(f"{app_name} is not configured on this host")
         app_dir = self.host_apps[app_name]
