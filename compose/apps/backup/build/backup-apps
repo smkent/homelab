@@ -25,6 +25,9 @@ case "${1}" in
         ;;
 esac
 
+exec 8> "/tmp/backup-apps.lock.tmp"
+flock -n 8 || { echo "Backup already running, exiting"; exit 0; }
+
 backup_keep_count="${BACKUP_KEEP_COUNT-${EXPORT_BACKUP_KEEP_COUNT-14}}"
 if [ -z "${backup_keep_count}" ] || [ "${backup_keep_count}" -lt "3" ]; then
     echo "Error: BACKUP_KEEP_COUNT must be set to 3 or more" >&2
