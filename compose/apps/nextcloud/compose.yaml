@@ -39,7 +39,7 @@ services:
     - POSTGRES_PASSWORD=nextcloud
     - POSTGRES_DB=nextcloud
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d nextcloud -U nextcloud"]
+      test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
       interval: 1m
       timeout: 5s
       retries: 3

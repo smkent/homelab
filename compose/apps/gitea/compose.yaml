@@ -34,7 +34,7 @@ services:
     - POSTGRES_PASSWORD=gitea
     - POSTGRES_DB=gitea
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d gitea -U gitea"]
+      test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
       interval: 1m
       timeout: 5s
       retries: 3
