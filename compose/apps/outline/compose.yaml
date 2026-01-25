@@ -31,7 +31,7 @@ services:
     - POSTGRES_PASSWORD=outline
     - POSTGRES_DB=outline
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d outline -U outline"]
+      test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
       interval: 1m
       timeout: 5s
       retries: 3
