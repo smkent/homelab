@@ -82,7 +82,7 @@ for backup_host in $(echo "${BACKUP_HOSTS-${EXPORT_BACKUP_HOSTS}}" | sed -e 's:,
         ionice -c 3 nice -n 19 \
             rsync \
                 -e "ssh -i ${ssh_key_file} -o UserKnownHostsFile=${known_hosts_file} -o StrictHostKeyChecking=accept-new" \
-                -P -avHSPAX --numeric-ids --delete \
+                -P -aHSAX --stats --numeric-ids --delete \
                 ${link_dest} \
                 root@"${backup_host}":/opt/deploy/. \
                 "${backup_dest_host_id}/" \
