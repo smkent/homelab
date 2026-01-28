@@ -5,6 +5,16 @@
     }
 }
 
+(ddns_linode) {
+    dynamic_dns {
+        provider linode "{$LINODE_TOKEN}"
+        domains {
+            {$DOMAIN} {args[:]}
+        }
+        check_interval 5m
+    }
+}
+
 (servers) {
     servers {
         listener_wrappers {

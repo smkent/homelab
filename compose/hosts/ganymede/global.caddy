@@ -1,1 +1,2 @@
 # Host-specific Caddy global section configuration
+import ddns_linode ganymede
