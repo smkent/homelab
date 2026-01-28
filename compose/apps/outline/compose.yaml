@@ -1,7 +1,9 @@
 networks:
   web:
     external: true
-  local:
+  local_db:
+    external: false
+  local_redis:
     external: false
 
 services:
@@ -17,7 +19,8 @@ services:
     - outline.env
     - $HOME/secrets/outline.env
     networks:
-    - local
+    - local_db
+    - local_redis
     - web
     restart: unless-stopped
     user: root
@@ -38,7 +41,7 @@ services:
       start_period: 30s
       start_interval: 2s
     networks:
-    - local
+    - local_db
     restart: unless-stopped
     volumes:
     - ./data/postgres18:/var/lib/postgresql
@@ -53,5 +56,5 @@ services:
       start_period: 30s
       start_interval: 2s
     networks:
-    - local
+    - local_redis
     restart: unless-stopped
