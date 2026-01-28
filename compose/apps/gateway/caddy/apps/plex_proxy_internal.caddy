@@ -1,0 +1,9 @@
+@plex expression `{host}.startsWith("plex.")`
+handle @plex {
+    reverse_proxy https://ganymede:443 {
+        header_up host "plex.ganymede.{$DOMAIN}"
+        transport http {
+            tls_server_name "plex.ganymede.{$DOMAIN}"
+        }
+    }
+}
