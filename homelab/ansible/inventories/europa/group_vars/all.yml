@@ -1,4 +1,0 @@
-deploy_user: deploy
-
-ansible_connection: ssh
-ansible_ssh_user: root
