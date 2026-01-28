@@ -40,7 +40,7 @@ class HomerunBase:
                 exec_args if exec_args is not None else ["-i"]
             )
         else:
-            action_cmd = ["run", "--rm", "--no-deps"]
+            action_cmd = ["run", "--rm", "--no-deps", "--quiet"]
         cmd = ["docker", "compose"] + action_cmd + [self.service] + cmd
         run(cmd, dry_run=self.dry_run, **kwargs)
 
