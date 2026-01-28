@@ -1,0 +1,81 @@
+networks:
+  web:
+    external: true
+  local_db:
+    external: false
+  local_gotenberg:
+    external: false
+  local_tika:
+    external: false
+  local_valkey:
+    external: false
+
+services:
+  paperless:
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.20
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    env_file:
+    - host.env
+    - $HOME/secrets/paperless.env
+    - paperless.env
+    networks:
+    - local_db
+    - local_gotenberg
+    - local_tika
+    - local_valkey
+    - web
+    volumes:
+    - ./data/paperless_data:/usr/src/paperless/data
+    - ./data/paperless_media:/usr/src/paperless/media
+    - ./data/paperless_export:/usr/src/paperless/export
+    - ./data/paperless_consume:/usr/src/paperless/consume
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+      POSTGRES_DB: paperless
+    healthcheck:
+      test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    networks:
+    - local_db
+    restart: unless-stopped
+    volumes:
+    - ./data/postgres18:/var/lib/postgresql
+
+  valkey:
+    image: docker.io/valkey/valkey:9
+    healthcheck:
+      test: valkey-cli ping || exit 1
+    networks:
+    - local_valkey
+    restart: unless-stopped
+    volumes:
+    - ./data/valkey:/data
+
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8.25
+    networks:
+    - local_gotenberg
+    restart: unless-stopped
+    command:
+    - "gotenberg"
+    - "--chromium-disable-javascript=true"
+    - "--chromium-allow-list=file:///tmp/.*"
+
+  tika:
+    image: docker.io/apache/tika:latest
+    networks:
+    - local_tika
+    restart: unless-stopped

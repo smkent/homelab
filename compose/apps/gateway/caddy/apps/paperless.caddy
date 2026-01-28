@@ -1,0 +1,4 @@
+@paperless expression `{host}.startsWith("paperless.")`
+handle @paperless {
+    reverse_proxy paperless:8000
+}
