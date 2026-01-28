@@ -1,0 +1,10 @@
+@authelia expression `{host}.startsWith("login.")`
+handle @authelia {
+    reverse_proxy authelia:9091
+}
+
+@lldap expression `{host}.startsWith("lldap.")`
+handle @lldap {
+    import auth
+    reverse_proxy lldap:17170
+}

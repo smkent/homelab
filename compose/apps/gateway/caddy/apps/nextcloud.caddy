@@ -1,0 +1,4 @@
+@nextcloud expression `{host}.startsWith("nextcloud.")`
+handle @nextcloud {
+    reverse_proxy nextcloud:80
+}

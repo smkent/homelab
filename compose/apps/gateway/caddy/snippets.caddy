@@ -1,0 +1,30 @@
+(auth) {
+    forward_auth authelia:9091 {
+        uri /api/verify?rd=https://login.{env.NODE_FQDN}
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+    }
+}
+
+(servers) {
+    servers {
+        listener_wrappers {
+            http_redirect
+            tls
+        }
+    }
+}
+
+(storage) {
+    storage file_system {
+        root /data
+    }
+}
+
+(tls_linode) {
+    tls certs@{env.DOMAIN} {
+        dns linode "{$LINODE_TOKEN}"
+        propagation_delay 1m
+        propagation_timeout 5m
+        resolvers 1.1.1.1 8.8.8.8
+    }
+}

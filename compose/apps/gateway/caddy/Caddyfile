@@ -1,0 +1,9 @@
+import snippets.caddy
+
+{
+    import servers
+    import storage
+    import host/global*.caddy
+}
+
+import host/sites.caddy

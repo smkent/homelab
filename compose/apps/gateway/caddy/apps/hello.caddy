@@ -1,0 +1,4 @@
+@hello expression `{host}.startsWith("hello.")`
+handle @hello {
+    reverse_proxy hello:80
+}
