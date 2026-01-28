@@ -121,3 +121,12 @@ identity_providers:
       - authorization_code
       - refresh_token
       token_endpoint_auth_method: client_secret_post
+    - client_id: {{ env "OIDC_PAPERLESS_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_PAPERLESS_CLIENT_SECRET" }}
+      consent_mode: implicit
+      redirect_uris:
+      - https://paperless.{{ env "NODE_FQDN" }}/accounts/oidc/{{ env "DOMAIN" }}/login/callback/
+      scopes:
+      - openid
+      - profile
+      - email
