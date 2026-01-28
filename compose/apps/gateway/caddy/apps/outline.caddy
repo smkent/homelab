@@ -1,0 +1,7 @@
+@outline expression `{host}.startsWith("outline.")`
+handle @outline {
+    reverse_proxy outline:3000
+    header {
+        Service-Worker-Allowed "/"
+    }
+}

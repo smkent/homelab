@@ -1,0 +1,7 @@
+@gitea expression `{host}.startsWith("git.")`
+handle @gitea {
+    @login path /user/login
+    redir @login /user/oauth2/gitea?{query} 302
+
+    reverse_proxy gitea:3000
+}

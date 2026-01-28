@@ -1,0 +1,4 @@
+@casa expression `{host}.startsWith("casa.")`
+handle @casa {
+    reverse_proxy casa.smkent.lan:8123
+}

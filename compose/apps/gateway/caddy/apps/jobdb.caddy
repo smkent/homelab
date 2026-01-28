@@ -1,0 +1,4 @@
+@jobdb expression `{host}.startsWith("jobs.")`
+handle @jobdb {
+    reverse_proxy jobdb:8888
+}

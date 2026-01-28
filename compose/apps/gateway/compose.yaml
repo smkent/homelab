@@ -29,7 +29,8 @@ services:
     - 443:443
     volumes:
     - caddy_socket:/opt/caddy
-    - ./caddy/conf:/etc/caddy:ro
+    - ./caddy:/etc/caddy:ro
+    - ./host:/etc/caddy/host:ro
     - ./data/caddy_data:/data
     - ./data/caddy_config:/config
 

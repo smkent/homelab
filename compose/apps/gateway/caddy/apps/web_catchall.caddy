@@ -1,0 +1,3 @@
+handle {
+    reverse_proxy web:5000
+}

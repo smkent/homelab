@@ -1,0 +1,19 @@
+casa.{env.DOMAIN} {
+    import tls_linode
+    import ../apps/casa_proxy.caddy
+}
+
+mealie.{env.DOMAIN} {
+    import tls_linode
+    import ../apps/mealie.caddy
+}
+
+{env.NODE_FQDN} *.{env.NODE_FQDN} {
+    import tls_linode
+
+    import ../apps/login.caddy
+    import ../apps/hello.caddy
+    import ../apps/plex.caddy
+    import ../apps/web.caddy
+    import ../apps/web_catchall.caddy
+}

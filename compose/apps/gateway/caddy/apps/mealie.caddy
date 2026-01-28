@@ -1,0 +1,4 @@
+@mealie expression `{host}.startsWith("mealie.")`
+handle @mealie {
+    reverse_proxy mealie:9000
+}

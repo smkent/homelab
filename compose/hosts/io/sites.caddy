@@ -1,0 +1,12 @@
+{env.NODE_FQDN} *.{env.NODE_FQDN} {
+    import tls_linode
+
+    import ../apps/login.caddy
+    import ../apps/hello.caddy
+    import ../apps/jobdb.caddy
+    import ../apps/gitea.caddy
+    import ../apps/outline.caddy
+    import ../apps/nextcloud.caddy
+    import ../apps/web.caddy
+    import ../apps/web_catchall.caddy
+}
