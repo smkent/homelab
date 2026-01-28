@@ -1,6 +1,8 @@
 apps:
 - gateway
 - hello
+- immich
 - mealie
+- paperless
 - smtp_relay
 - web
