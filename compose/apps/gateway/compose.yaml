@@ -6,6 +6,9 @@ networks:
     external: true
 
 volumes:
+  caddy_socket:
+    driver: local
+    name: caddy_socket
   tls_certs:
     driver: local
     name: tls_certs
@@ -17,12 +20,15 @@ services:
     env_file:
     - host.env
     - $HOME/secrets/caddy.env
+    environment:
+      CADDY_ADMIN: "unix//opt/caddy/caddy_admin.socket"
     networks:
     - web
     ports:
     - 80:80
     - 443:443
     volumes:
+    - caddy_socket:/opt/caddy
     - ./caddy/conf:/etc/caddy:ro
     - ./data/caddy_data:/data
     - ./data/caddy_config:/config
