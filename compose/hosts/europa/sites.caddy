@@ -3,9 +3,19 @@ casa.{env.DOMAIN} {
     import ../apps/casa_proxy.caddy
 }
 
+immich.{env.DOMAIN} {
+    import tls_linode
+    import ../apps/immich.caddy
+}
+
 mealie.{env.DOMAIN} {
     import tls_linode
     import ../apps/mealie.caddy
+}
+
+paperless.{env.DOMAIN} {
+    import tls_linode
+    import ../apps/paperless.caddy
 }
 
 {env.NODE_FQDN} *.{env.NODE_FQDN} {
