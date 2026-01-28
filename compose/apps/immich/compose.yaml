@@ -1,0 +1,68 @@
+networks:
+  web:
+    external: true
+  local_db:
+    external: false
+  local_ml:
+    external: false
+  local_valkey:
+    external: false
+
+services:
+  immich:
+    image: ghcr.io/immich-app/immich-server:v2
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    environment:
+      DB_URL: postgresql://immich:immich@db/immich
+      REDIS_HOSTNAME: valkey
+    networks:
+    - local_db
+    - local_ml
+    - local_valkey
+    - web
+    restart: unless-stopped
+    volumes:
+    - ./data/immich_uploads:/data
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:v2
+    volumes:
+    - ./data/immich_model_cache:/cache
+    networks:
+    - local_ml
+    restart: unless-stopped
+
+  db:
+    image: ghcr.io/immich-app/postgres:18-vectorchord0.5.3-pgvector0.8.1
+    environment:
+      POSTGRES_USER: immich
+      POSTGRES_PASSWORD: immich
+      POSTGRES_DB: immich
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    healthcheck:
+      test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    networks:
+    - local_db
+    restart: unless-stopped
+    shm_size: 128mb
+    volumes:
+    - ./data/postgres18:/var/lib/postgresql
+
+  valkey:
+    image: docker.io/valkey/valkey:9
+    healthcheck:
+      test: valkey-cli ping || exit 1
+    networks:
+    - local_valkey
+    restart: unless-stopped
+    volumes:
+    - ./data/valkey:/data
