@@ -1,0 +1,4 @@
+@immich expression `{host}.startsWith("immich.")`
+handle @immich {
+    reverse_proxy immich:2283
+}
