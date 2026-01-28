@@ -6,13 +6,13 @@ from collections.abc import Sequence
 from contextlib import chdir
 from dataclasses import dataclass
 from functools import cached_property
-from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from typer import Argument, BadParameter, Context, Option, Typer
 
 from .app import HomelabCLIApp
+from .project import HomelabProject
 from .util import gpg_fifo, run
 
 
@@ -145,10 +145,8 @@ class Homestar(HomelabCLIApp):
 
     @classmethod
     def app(cls) -> None:
-        with (
-            as_file(files(__package__) / "ansible") as ansible_path,
-            chdir(ansible_path),
-        ):
+        project = HomelabProject()
+        with chdir(project.ansible_dir):
             return super().app()
 
     @cached_property
