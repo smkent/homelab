@@ -86,6 +86,17 @@ identity_providers:
       - openid
       - profile
       - email
+    - client_id: {{ env "OIDC_IMMICH_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_IMMICH_CLIENT_SECRET" }}
+      consent_mode: implicit
+      redirect_uris:
+      - app.immich:///oauth-callback
+      - https://immich.{{ env "NODE_FQDN" }}/auth/login
+      - https://immich.{{ env "NODE_FQDN" }}/user-settings
+      scopes:
+      - openid
+      - profile
+      - email
     - client_id: {{ env "OIDC_MEALIE_CLIENT_ID" }}
       client_secret: {{ env "OIDC_MEALIE_CLIENT_SECRET" }}
       consent_mode: implicit
