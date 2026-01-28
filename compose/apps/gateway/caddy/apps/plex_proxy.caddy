@@ -1,0 +1,8 @@
+@plex expression `{host}.startsWith("plex.")`
+handle @plex {
+    reverse_proxy https://plex:32400 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}

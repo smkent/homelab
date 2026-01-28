@@ -13,7 +13,7 @@ mealie.{env.DOMAIN} {
 
     import ../apps/login.caddy
     import ../apps/hello.caddy
-    import ../apps/plex.caddy
+    import ../apps/plex_proxy.caddy
     import ../apps/web.caddy
     import ../apps/web_catchall.caddy
 }
