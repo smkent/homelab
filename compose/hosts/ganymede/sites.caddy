@@ -11,7 +11,6 @@ mealie.{env.DOMAIN} {
 {env.NODE_FQDN} *.{env.NODE_FQDN} {
     import tls_linode
 
-    import ../apps/login.caddy
     import ../apps/hello.caddy
     import ../apps/plex.caddy
     import ../apps/web.caddy
