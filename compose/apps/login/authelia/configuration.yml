@@ -44,7 +44,7 @@ session:
   - domain: '{{ env "NODE_FQDN" }}'
     authelia_url: 'https://login.{{ env "NODE_FQDN" }}'
   redis:
-    host: redis
+    host: valkey
     port: 6379
 
 storage:

@@ -3,7 +3,7 @@ networks:
     external: true
   local_db:
     external: false
-  local_redis:
+  local_valkey:
     external: false
 
 services:
@@ -12,7 +12,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      redis:
+      valkey:
         condition: service_healthy
     env_file:
     - host.env
@@ -20,7 +20,7 @@ services:
     - $HOME/secrets/outline.env
     networks:
     - local_db
-    - local_redis
+    - local_valkey
     - web
     restart: unless-stopped
     user: root
@@ -46,15 +46,15 @@ services:
     volumes:
     - ./data/postgres18:/var/lib/postgresql
 
-  redis:
-    image: redis:8
+  valkey:
+    image: valkey/valkey:9
     healthcheck:
-      test: ["CMD-SHELL", "[ \"$(redis-cli ping)\" = \"PONG\" ]"]
+      test: ["CMD-SHELL", "[ \"$(valkey-cli ping)\" = \"PONG\" ]"]
       interval: 1m
       timeout: 5s
       retries: 3
       start_period: 30s
       start_interval: 2s
     networks:
-    - local_redis
+    - local_valkey
     restart: unless-stopped
