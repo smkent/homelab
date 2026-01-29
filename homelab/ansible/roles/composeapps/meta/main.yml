@@ -1,2 +1,3 @@
 dependencies:
 - role: apps_common
+- role: docker_common
