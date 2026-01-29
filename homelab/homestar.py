@@ -26,17 +26,6 @@ class AnsibleCollections:
             self.requirements.parent / f".{self.requirements.name}.sha256sum"
         )
 
-    @cached_property
-    def collections(self) -> Path:
-        return self.requirements.parent / "collections"
-
-    @cached_property
-    def env(self) -> dict[str, str]:
-        return {
-            "ANSIBLE_GALAXY_COLLECTIONS_PATH_WARNING": "false",
-            "ANSIBLE_COLLECTIONS_PATH": str(self.collections.resolve()),
-        }
-
     def ensure(self) -> None:
         if not self._requirements_changed():
             return
@@ -47,10 +36,7 @@ class AnsibleCollections:
                 "install",
                 "-r",
                 str(self.requirements),
-                "-p",
-                str(self.collections),
             ],
-            env=os.environ | self.env,
         )
         self._update_checksum()
 
@@ -156,17 +142,11 @@ class Homestar(HomelabCLIApp):
     def _ansible_run(
         self,
         cmd: Sequence[str],
-        *,
-        env: dict[str, str] | None = None,
+        *args: Any,
         **kwargs: Any,
     ) -> Any:
         self.ansible_collections.ensure()
-        return run(
-            cmd,
-            env=env or (os.environ | self.ansible_collections.env),
-            dry_run=self.dry_run,
-            **kwargs,
-        )
+        return run(cmd, *args, dry_run=self.dry_run, **kwargs)
 
     @cli.callback()
     @staticmethod
