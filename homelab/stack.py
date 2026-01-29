@@ -1,46 +1,25 @@
-import os
-import subprocess
 import sys
 from collections.abc import Iterator, Mapping, Sequence
 from contextlib import chdir, contextmanager
+from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
 
 from ruamel.yaml import YAML
 
 from .app import CLIError
+from .project import HomelabProject
 
-HOMELAB_ENV = "HOMELAB"
 
-
+@dataclass
 class ComposeStack:
-    @cached_property
-    def stack_dir(self) -> Path:
-        def _is_stack_dir(path: Path) -> bool:
-            return path.is_dir() and all(
-                (path / d).is_dir() for d in ("apps", "hosts")
-            )
-
-        if homelab_value := os.environ.get(HOMELAB_ENV):
-            if _is_stack_dir(path := (Path(homelab_value) / "compose")):
-                return path
-            raise CLIError(
-                f"{homelab_value} (via {HOMELAB_ENV}) does not exist"
-            )
-        git_root = Path(
-            subprocess.check_output(
-                ["git", "rev-parse", "--show-toplevel"], text=True
-            ).strip()
-        )
-        if _is_stack_dir(path := git_root / "compose"):
-            return path
-        if _is_stack_dir(path := (Path.home() / "homelab" / "compose")):
-            return path
-        raise CLIError("Unable to locate stack directory")
+    project: HomelabProject = field(default_factory=HomelabProject)
 
     @cached_property
     def active_host_dir(self) -> Path:
-        if not (active_dir := self.stack_dir / "hosts" / "active").is_dir():
+        if not (
+            active_dir := self.project.stack_dir / "hosts" / "active"
+        ).is_dir():
             raise CLIError(f"{active_dir} does not exist")
         return active_dir
 
@@ -56,7 +35,7 @@ class ComposeStack:
             data = YAML().load(f)
             app_dirs = {}
             for app_name in sorted(data.get("apps", [])):
-                app_dir = self.stack_dir / "apps" / app_name
+                app_dir = self.project.stack_dir / "apps" / app_name
                 if not app_dir.exists():
                     raise CLIError(f"{app_dir} does not exist")
                 app_dirs[app_name] = app_dir
@@ -76,14 +55,17 @@ class ComposeStack:
             yield from self.host_app_dirs
             return
         missing_apps = {
-            app for app in apps if not (self.stack_dir / "apps" / app).is_dir()
+            app
+            for app in apps
+            if not (self.project.stack_dir / "apps" / app).is_dir()
         }
         if missing_apps:
             raise CLIError(
                 f"App(s) do not exist: {', '.join(sorted(missing_apps))}"
             )
         for app, app_dir in [
-            (app, self.stack_dir / "apps" / app) for app in sorted(apps)
+            (app, self.project.stack_dir / "apps" / app)
+            for app in sorted(apps)
         ]:
             if app not in self.host_apps:
                 print(
