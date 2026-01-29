@@ -1,6 +1,7 @@
 services:
   cups:
     build: build
+    platform: linux/amd64
     ports:
     - 631:631
     restart: unless-stopped
