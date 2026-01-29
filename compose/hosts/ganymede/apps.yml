@@ -1,6 +1,5 @@
 apps:
 - backup
-- cups
 - fs
 - gateway
 - hello
