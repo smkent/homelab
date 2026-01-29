@@ -115,25 +115,34 @@ class Homerun(HomelabCLIApp):
     def dcp(
         ctx: Context,
         apps: Annotated[
-            list[str] | None,
+            list[str],
             Option(
                 "-a",
                 "--app",
                 metavar="app",
+                default_factory=list,
+                show_default="all apps",
                 help=(
                     "Run command on the specified app,"
                     " instead of all enabled apps"
                 ),
             ),
-        ] = None,
+        ],
     ) -> None:
-        if not ctx.args:
+        dcp_args = []
+        for arg in ctx.args:
+            if arg.startswith("@") and len(arg) > 1:
+                if (app := arg[1:]) not in apps:
+                    apps.append(app)
+                continue
+            dcp_args.append(arg)
+        if not dcp_args:
             return
         for i, app_dir in enumerate(ctx.obj.stack.each_host_app_dir(apps)):
             if i:
                 print()
             print(f">>> {app_dir}")
-            run(["docker", "compose"] + ctx.args, dry_run=ctx.obj.dry_run)
+            run(["docker", "compose"] + dcp_args, dry_run=ctx.obj.dry_run)
 
     @cli.command(help="Create PBKDF2 hash of input OIDC client secret")
     @StackAppDir("login", "authelia")
