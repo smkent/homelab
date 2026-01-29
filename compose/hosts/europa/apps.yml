@@ -1,4 +1,5 @@
 apps:
+- cups
 - gateway
 - hello
 - immich
