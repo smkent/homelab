@@ -4,38 +4,31 @@ import sys
 import textwrap
 from collections.abc import Sequence
 from contextlib import chdir
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
-from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from typer import Argument, BadParameter, Context, Option, Typer
 
 from .app import HomelabCLIApp
+from .project import HomelabProject
 from .util import gpg_fifo, run
 
 
 @dataclass
 class AnsibleCollections:
-    requirements: Path
+    project: HomelabProject = field(default_factory=HomelabProject)
+
+    @cached_property
+    def requirements(self) -> Path:
+        return self.project.ansible_dir / "requirements.yml"
 
     @cached_property
     def checksum(self) -> Path:
         return (
             self.requirements.parent / f".{self.requirements.name}.sha256sum"
         )
-
-    @cached_property
-    def collections(self) -> Path:
-        return self.requirements.parent / "collections"
-
-    @cached_property
-    def env(self) -> dict[str, str]:
-        return {
-            "ANSIBLE_GALAXY_COLLECTIONS_PATH_WARNING": "false",
-            "ANSIBLE_COLLECTIONS_PATH": str(self.collections.resolve()),
-        }
 
     def ensure(self) -> None:
         if not self._requirements_changed():
@@ -47,10 +40,7 @@ class AnsibleCollections:
                 "install",
                 "-r",
                 str(self.requirements),
-                "-p",
-                str(self.collections),
             ],
-            env=os.environ | self.env,
         )
         self._update_checksum()
 
@@ -134,6 +124,9 @@ class HomestarOptions:
 class Homestar(HomelabCLIApp):
     dry_run: bool = False
     invoke_cwd: Path = Path(".").resolve()
+    ansible_collections: AnsibleCollections = field(
+        default_factory=AnsibleCollections
+    )
 
     cli = Typer(
         help="Homelab setup",
@@ -145,30 +138,18 @@ class Homestar(HomelabCLIApp):
 
     @classmethod
     def app(cls) -> None:
-        with (
-            as_file(files(__package__) / "ansible") as ansible_path,
-            chdir(ansible_path),
-        ):
+        project = HomelabProject()
+        with chdir(project.ansible_dir):
             return super().app()
-
-    @cached_property
-    def ansible_collections(self) -> AnsibleCollections:
-        return AnsibleCollections(Path() / "requirements.yml")
 
     def _ansible_run(
         self,
         cmd: Sequence[str],
-        *,
-        env: dict[str, str] | None = None,
+        *args: Any,
         **kwargs: Any,
     ) -> Any:
         self.ansible_collections.ensure()
-        return run(
-            cmd,
-            env=env or (os.environ | self.ansible_collections.env),
-            dry_run=self.dry_run,
-            **kwargs,
-        )
+        return run(cmd, *args, dry_run=self.dry_run, **kwargs)
 
     @cli.callback()
     @staticmethod
