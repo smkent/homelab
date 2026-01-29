@@ -4,7 +4,7 @@ import sys
 import textwrap
 from collections.abc import Sequence
 from contextlib import chdir
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
 from typing import Annotated, Any, Literal
@@ -18,7 +18,11 @@ from .util import gpg_fifo, run
 
 @dataclass
 class AnsibleCollections:
-    requirements: Path
+    project: HomelabProject = field(default_factory=HomelabProject)
+
+    @cached_property
+    def requirements(self) -> Path:
+        return self.project.ansible_dir / "requirements.yml"
 
     @cached_property
     def checksum(self) -> Path:
@@ -120,6 +124,9 @@ class HomestarOptions:
 class Homestar(HomelabCLIApp):
     dry_run: bool = False
     invoke_cwd: Path = Path(".").resolve()
+    ansible_collections: AnsibleCollections = field(
+        default_factory=AnsibleCollections
+    )
 
     cli = Typer(
         help="Homelab setup",
@@ -134,10 +141,6 @@ class Homestar(HomelabCLIApp):
         project = HomelabProject()
         with chdir(project.ansible_dir):
             return super().app()
-
-    @cached_property
-    def ansible_collections(self) -> AnsibleCollections:
-        return AnsibleCollections(Path() / "requirements.yml")
 
     def _ansible_run(
         self,
