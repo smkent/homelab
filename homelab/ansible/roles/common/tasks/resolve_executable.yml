@@ -1,8 +1,0 @@
-- name: "Determine {{ resolve_executable_search_name }} executable location"
-  ansible.builtin.stat:
-    path: "{{ resolve_executable_try_path }}/{{ resolve_executable_search_name }}"
-  register: resolve_executable_stat
-
-- name: "Set {{ resolve_executable_search_name }} location fact"
-  ansible.builtin.set_fact:
-    "{{ resolve_executable_set_fact|default('resolve_executable_found_path') }}": "{{ resolve_executable_stat.stat.exists | ternary(resolve_executable_try_path + '/' + resolve_executable_search_name, resolve_executable_search_name) }}"
