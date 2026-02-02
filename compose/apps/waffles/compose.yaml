@@ -1,6 +1,6 @@
 secrets:
   jmap-api-token:
-    file: $HOME/secrets/jmap-api-token
+    file: ../../secrets/jmap-api-token
 
 services:
   waffles:

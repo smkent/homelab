@@ -21,7 +21,7 @@ services:
         condition: service_healthy
     env_file:
     - host.env
-    - $HOME/secrets/paperless.env
+    - ../../secrets/paperless.env
     - paperless.env
     networks:
     - local_db

@@ -17,7 +17,7 @@ services:
     env_file:
     - host.env
     - mealie.env
-    - $HOME/secrets/mealie.env
+    - ../../secrets/mealie.env
     environment:
       ALLOW_SIGNUP: "false"
       PUID: 1000

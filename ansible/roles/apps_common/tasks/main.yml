@@ -20,9 +20,13 @@
     - not ansible_check_mode
     - homelab_git_repo.changed
 
-  - name: "Ensure {{ deploy_user_home }}/secrets exists"
+  - name: "Set docker secrets directory fact"
+    ansible.builtin.set_fact:
+      deploy_user_secrets_dir: "{{ deploy_user_home }}/homelab/compose/secrets/"
+
+  - name: "Ensure {{ deploy_user_secrets_dir }} exists with proper permissions"
     ansible.builtin.file:
-      path: "{{ deploy_user_home }}/secrets"
+      path: "{{ deploy_user_secrets_dir }}"
       owner: "{{ deploy_user }}"
       group: "{{ deploy_user }}"
       mode: 0700
@@ -30,17 +34,17 @@
 
   - name: "Ensure app config templates are installed"
     ansible.builtin.template:
-      src: '{{ item }}.env.j2'
-      dest: '{{ deploy_user_home }}/secrets/{{ item }}.env'
-      owner: '{{ deploy_user }}'
-      group: '{{ deploy_user }}'
+      src: "{{ item }}.env.j2"
+      dest: "{{ deploy_user_secrets_dir }}/{{ item }}.env"
+      owner: "{{ deploy_user }}"
+      group: "{{ deploy_user }}"
       mode: 0600
     diff: false
     loop: "{{ app_config_templates }}"
 
   - name: "Ensure Docker secrets are installed"
     ansible.builtin.copy:
-      dest: "{{ deploy_user_home }}/secrets/{{ item }}"
+      dest: "{{ deploy_user_secrets_dir }}/{{ item }}"
       content: "{{ compose_secrets[item] }}"
       owner: "{{ deploy_user }}"
       group: "{{ deploy_user }}"
@@ -50,7 +54,7 @@
 
   - name: "Locate existing installed Docker secrets"
     ansible.builtin.find:
-      paths: "{{ deploy_user_home }}/secrets"
+      paths: "{{ deploy_user_secrets_dir }}"
       file_type: file
       excludes: >-
         {{
@@ -61,7 +65,7 @@
 
   - name: "Ensure unused Docker secrets are removed"
     ansible.builtin.file:
-      path: "{{ deploy_user_home }}/secrets/{{ item }}"
+      path: "{{ deploy_user_secrets_dir }}/{{ item }}"
       state: absent
     diff: false
     loop: >-
@@ -72,5 +76,12 @@
         | list
         | sort
       }}
+
+  - name: "Ensure legacy secrets directory is absent"
+    ansible.builtin.file:
+      path: "{{ deploy_user_home }}/secrets"
+      state: absent
+      recurse: true
+
   become: "{{ ansible_ssh_user != deploy_user }}"
   become_user: "{{ deploy_user }}"

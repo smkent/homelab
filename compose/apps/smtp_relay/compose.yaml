@@ -4,7 +4,7 @@ networks:
 
 secrets:
   smtp-submit-password:
-    file: $HOME/secrets/smtp-submit-password
+    file: ../../secrets/smtp-submit-password
 
 services:
   smtp:

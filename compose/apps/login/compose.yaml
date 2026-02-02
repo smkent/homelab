@@ -13,23 +13,23 @@ networks:
 
 secrets:
   authelia-jwt-secret:
-    file: $HOME/secrets/authelia-jwt-secret
+    file: ../../secrets/authelia-jwt-secret
   authelia-ldap-password:
-    file: $HOME/secrets/authelia-ldap-password
+    file: ../../secrets/authelia-ldap-password
   authelia-oidc-jwks-key:
-    file: $HOME/secrets/authelia-oidc-jwks-key
+    file: ../../secrets/authelia-oidc-jwks-key
   authelia-oidc-hmac-secret:
-    file: $HOME/secrets/authelia-oidc-hmac-secret
+    file: ../../secrets/authelia-oidc-hmac-secret
   authelia-session-secret:
-    file: $HOME/secrets/authelia-session-secret
+    file: ../../secrets/authelia-session-secret
   authelia-storage-encryption-key:
-    file: $HOME/secrets/authelia-storage-encryption-key
+    file: ../../secrets/authelia-storage-encryption-key
   lldap-jwt-secret:
-    file: $HOME/secrets/lldap-jwt-secret
+    file: ../../secrets/lldap-jwt-secret
   lldap-key-seed:
-    file: $HOME/secrets/lldap-key-seed
+    file: ../../secrets/lldap-key-seed
   lldap-ldap-user-pass:
-    file: $HOME/secrets/lldap-ldap-user-pass
+    file: ../../secrets/lldap-ldap-user-pass
 
 services:
   authelia:
@@ -44,7 +44,7 @@ services:
         condition: service_healthy
     env_file:
     - host.env
-    - $HOME/secrets/authelia.env
+    - ../../secrets/authelia.env
     environment:
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: "/run/secrets/authelia-jwt-secret"
       AUTHELIA_SESSION_SECRET_FILE: "/run/secrets/authelia-session-secret"
