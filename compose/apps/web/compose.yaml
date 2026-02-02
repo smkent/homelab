@@ -6,9 +6,9 @@ networks:
 
 secrets:
   flask-secret-key:
-    file: $HOME/secrets/flask-secret-key
+    file: ../../secrets/flask-secret-key
   flask-wtf-secret-key:
-    file: $HOME/secrets/flask-wtf-secret-key
+    file: ../../secrets/flask-wtf-secret-key
 
 services:
   web:
@@ -16,7 +16,7 @@ services:
     env_file:
     - host.env
     - web.env
-    - $HOME/secrets/web.env
+    - ../../secrets/web.env
     networks:
     - web
     - local

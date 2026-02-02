@@ -6,7 +6,7 @@ networks:
 
 secrets:
   nextcloud-admin-password:
-    file: $HOME/secrets/nextcloud-admin-password
+    file: ../../secrets/nextcloud-admin-password
 
 services:
   nextcloud:

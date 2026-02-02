@@ -1,6 +1,6 @@
 secrets:
   nut-upsd-password:
-    file: $HOME/secrets/nut-upsd-password
+    file: ../../secrets/nut-upsd-password
 
 services:
   nut:

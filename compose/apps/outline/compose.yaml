@@ -17,7 +17,7 @@ services:
     env_file:
     - host.env
     - outline.env
-    - $HOME/secrets/outline.env
+    - ../../secrets/outline.env
     networks:
     - local_db
     - local_valkey

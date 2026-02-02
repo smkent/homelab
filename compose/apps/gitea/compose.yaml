@@ -21,10 +21,10 @@ services:
     restart: unless-stopped
     volumes:
     - ./files/sshd_config-template:/etc/templates/sshd_config:ro
-    - $HOME/secrets/gitea-ssh-ed25519-host-key:/data/ssh/ssh_host_ed25519_key:ro
-    - $HOME/secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
-    - $HOME/secrets/gitea-ssh-rsa-host-key:/data/ssh/ssh_host_rsa_key:ro
-    - $HOME/secrets/gitea-ssh-rsa-host-key-pub:/data/ssh/ssh_host_rsa_key.pub:ro
+    - ../../secrets/gitea-ssh-ed25519-host-key:/data/ssh/ssh_host_ed25519_key:ro
+    - ../../secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
+    - ../../secrets/gitea-ssh-rsa-host-key:/data/ssh/ssh_host_rsa_key:ro
+    - ../../secrets/gitea-ssh-rsa-host-key-pub:/data/ssh/ssh_host_rsa_key.pub:ro
     - ./data/gitea:/data
 
   db:

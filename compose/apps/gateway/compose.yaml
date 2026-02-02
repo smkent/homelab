@@ -19,7 +19,7 @@ services:
     build: caddy
     env_file:
     - host.env
-    - $HOME/secrets/caddy.env
+    - ../../secrets/caddy.env
     environment:
       CADDY_ADMIN: "unix//opt/caddy/caddy_admin.socket"
     networks:
