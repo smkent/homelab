@@ -10,22 +10,6 @@
     register: homelab_git_repo
     ignore_errors: '{{ ansible_check_mode }}'
 
-  - ansible.builtin.include_role:
-      name: common
-      tasks_from: resolve_executable
-    vars:
-      resolve_executable_search_name: poetry
-      resolve_executable_try_path: "{{ deploy_user_home }}/.local/bin"
-      resolve_executable_set_fact: poetry_exe_path
-
-  - name: "Ensure poetry project is initialized"
-    ansible.builtin.command:
-      cmd: "{{ poetry_exe_path }} install"
-      chdir: "{{ deploy_user_home }}/homelab"
-    when:
-    - not ansible_check_mode
-    - homelab_git_repo.changed
-
   - name: "Install homelab package via pipx"
     community.general.pipx:
       name: homelab
