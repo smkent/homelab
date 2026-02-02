@@ -28,7 +28,7 @@
 
   - name: "Install homelab package via pipx"
     community.general.pipx:
-      name: poetry
+      name: homelab
       source: "{{ deploy_user_home }}/homelab"
       state: present
       force: true
