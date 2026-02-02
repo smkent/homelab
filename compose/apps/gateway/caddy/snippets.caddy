@@ -15,6 +15,18 @@
     }
 }
 
+(lan_proxy) {
+    @proxy_{args[0]} header_regexp host Host ^(.*\.){args[0]}\.{$DOMAIN}$
+    handle @proxy_{args[0]} {
+        reverse_proxy https://{args[0]}:443 {
+            header_up Host {re.host.1}{args[0]}.lan.{$DOMAIN}
+            transport http {
+                tls_server_name {re.host.1}{args[0]}.lan.{$DOMAIN}
+            }
+        }
+    }
+}
+
 (servers) {
     servers {
         listener_wrappers {

@@ -1,4 +1,4 @@
-{env.NODE_FQDN} *.{env.NODE_FQDN} {
+{env.NODE_LAN_FQDN} *.{env.NODE_LAN_FQDN} {
     import tls_linode
 
     import ../apps/hello.caddy

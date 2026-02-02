@@ -18,7 +18,14 @@ paperless.{env.DOMAIN} {
     import ../apps/paperless.caddy
 }
 
-{env.NODE_FQDN} *.{env.NODE_FQDN} {
+ganymede.{env.DOMAIN} *.ganymede.{env.DOMAIN} {
+    import tls_linode
+    import lan_proxy ganymede
+}
+
+{env.NODE_FQDN} *.{env.NODE_FQDN} \
+{env.NODE_LAN_FQDN} *.{env.NODE_LAN_FQDN} \
+{
     import tls_linode
 
     import ../apps/hello.caddy
