@@ -6,9 +6,8 @@
 .pytest_results.xml
 .venv/
 dist/
-homelab/ansible/.requirements.yml.sha256sum
-homelab/ansible/collections/
-homelab/ansible/vault/
+ansible/.requirements.yml.sha256sum
+ansible/vault/
 apps/.env
 apps/*/data
 compose/hosts/active

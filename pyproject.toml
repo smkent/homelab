@@ -33,7 +33,7 @@ homestar = "homelab.homestar:Homestar.app"
 [tool.poetry]
 requires-poetry = ">=2.0"
 exclude = [
-  "homelab/ansible/vault/**",
+  "ansible/vault/**",
 ]
 version = "0.0.0"
 

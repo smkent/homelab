@@ -12,12 +12,12 @@ class HomelabProject:
             return path.is_dir() and all(
                 (path / d).is_dir()
                 for d in (
+                    "ansible/inventories",
+                    "ansible/playbooks",
+                    "ansible/roles",
                     "compose/apps",
                     "compose/hosts",
                     "homelab",
-                    "homelab/ansible/inventories",
-                    "homelab/ansible/playbooks",
-                    "homelab/ansible/roles",
                 )
             )
 
@@ -34,7 +34,7 @@ class HomelabProject:
 
     @cached_property
     def ansible_dir(self) -> Path:
-        return self.dir / "homelab" / "ansible"
+        return self.dir / "ansible"
 
     @cached_property
     def stack_dir(self) -> Path:
