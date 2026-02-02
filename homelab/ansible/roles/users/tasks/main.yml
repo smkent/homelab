@@ -5,7 +5,7 @@
     state: present
 
 - name: "User creation tasks"
-  include_tasks: user.yml
+  ansible.builtin.include_tasks: user.yml
   vars:
     user_name: "{{ loop_user.user }}"
     user_def: "{{ loop_user.data }}"
@@ -32,7 +32,7 @@
   when: item | length > 0
 
 - name: "User package tasks"
-  include_tasks: packages.yml
+  ansible.builtin.include_tasks: packages.yml
   vars:
     user_name: "{{ loop_user.user }}"
     user_def: "{{ loop_user.data }}"
@@ -43,7 +43,7 @@
   when: loop_user.data.user_packages|d(False)
 
 - name: "User dotfiles tasks"
-  include_tasks: dotfiles.yml
+  ansible.builtin.include_tasks: dotfiles.yml
   vars:
     user_name: "{{ loop_user.user }}"
     user_def: "{{ loop_user.data }}"
