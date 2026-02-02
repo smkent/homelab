@@ -1,3 +1,7 @@
 - name: "Ensure hostname is set"
   ansible.builtin.hostname:
     name: "{{ node_fqdn }}"
+
+- name: "Ensure time zone is set to Etc/UTC"
+  community.general.timezone:
+    name: Etc/UTC
