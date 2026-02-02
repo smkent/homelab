@@ -29,7 +29,6 @@ ganymede.{env.DOMAIN} *.ganymede.{env.DOMAIN} {
     import tls_linode
 
     import ../apps/hello.caddy
-    import ../apps/plex_proxy_internal.caddy
     import ../apps/web.caddy
     import ../apps/web_catchall.caddy
 }
