@@ -81,7 +81,6 @@
     ansible.builtin.file:
       path: "{{ deploy_user_home }}/secrets"
       state: absent
-      recurse: true
 
   become: "{{ ansible_ssh_user != deploy_user }}"
   become_user: "{{ deploy_user }}"
