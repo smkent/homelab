@@ -292,9 +292,12 @@ class Homerun(HomelabCLIApp):
 
         if dump_file.exists():
             raise CLIError(f"{dump_file.resolve()} already exists")
-        if (new_data_dir := Path("data") / f"postgres{version}").exists():
-            raise CLIError(f"{new_data_dir.resolve()} already exists")
         pg = ctx.obj.pg
+        if (
+            new_data_dir := pg.source_volume.resolve().parent
+            / f"postgres{version}"
+        ).exists():
+            raise CLIError(f"{new_data_dir.resolve()} already exists")
         if pg.version >= version:
             raise CLIError(
                 f"No upgrade needed for current version {pg.version}"
@@ -311,7 +314,7 @@ class Homerun(HomelabCLIApp):
         _stop_container()
         print("Updating container configuration")
         pg.set_version(version)
-        pg.set_volume_source(new_data_dir.resolve())
+        pg.set_volume_source(new_data_dir.name)
         run(
             ["git", "--no-pager", "diff", "--", str(pg.compose_file)],
             dry_run=ctx.obj.dry_run,

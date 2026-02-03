@@ -202,9 +202,9 @@ class Homestar(HomelabCLIApp):
     ) -> None:
         for app in apps:
             remote_path = (
-                f"root@{host}:/opt/deploy/homelab/compose/apps/{app}/data/"
+                f"root@{host}:/opt/deploy/homelab/compose/volumes/{app}/"
             )
-            local_path = (Path(local_dir) / app / "data").as_posix()
+            local_path = (Path(local_dir) / app).as_posix()
             if not local_path.endswith("/"):
                 local_path += "/"
             cmd = ["sudo", "-E", "rsync", "-avHSP"]

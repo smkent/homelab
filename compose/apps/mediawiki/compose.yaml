@@ -17,9 +17,9 @@ services:
     restart: unless-stopped
     volumes:
     - ./build/static:/var/www/html/app-static/
-    - ./data/mediawiki/db:/var/www/data
-    - ./data/mediawiki/images:/var/www/html/images
-    - ./data/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/mediawiki/db:/var/www/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/mediawiki/images:/var/www/html/images
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
 
   mysql-db:
     image: mysql:8
@@ -33,4 +33,4 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/mysql-db:/var/lib/mysql
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/mysql-db:/var/lib/mysql

@@ -30,10 +30,10 @@ services:
     - local_valkey
     - web
     volumes:
-    - ./data/paperless_data:/usr/src/paperless/data
-    - ./data/paperless_media:/usr/src/paperless/media
-    - ./data/paperless_export:/usr/src/paperless/export
-    - ./data/paperless_consume:/usr/src/paperless/consume
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_data:/usr/src/paperless/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_media:/usr/src/paperless/media
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_export:/usr/src/paperless/export
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_consume:/usr/src/paperless/consume
 
   db:
     image: postgres:18
@@ -52,7 +52,7 @@ services:
     - local_db
     restart: unless-stopped
     volumes:
-    - ./data/postgres18:/var/lib/postgresql
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
 
   valkey:
     image: docker.io/valkey/valkey:9
@@ -62,7 +62,7 @@ services:
     - local_valkey
     restart: unless-stopped
     volumes:
-    - ./data/valkey:/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data
 
   gotenberg:
     image: docker.io/gotenberg/gotenberg:8.25

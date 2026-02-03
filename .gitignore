@@ -9,5 +9,5 @@ dist/
 /ansible/.requirements.yml.sha256sum
 /ansible/vault
 /compose/hosts/active
-/compose/apps/*/data
+/compose/volumes
 /compose/secrets

@@ -6,4 +6,4 @@ services:
     - 631:631
     restart: unless-stopped
     volumes:
-    - ./data/cups:/data/cups:rw
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/cups:/data/cups:rw
