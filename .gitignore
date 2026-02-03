@@ -7,7 +7,7 @@
 .venv/
 dist/
 /ansible/.requirements.yml.sha256sum
-/ansible/vault/
+/ansible/vault
 /compose/hosts/active
 /compose/apps/*/data
 /compose/secrets
