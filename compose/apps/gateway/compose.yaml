@@ -31,8 +31,8 @@ services:
     - caddy_socket:/opt/caddy
     - ./caddy:/etc/caddy:ro
     - ./host:/etc/caddy/host:ro
-    - ./data/caddy_data:/data
-    - ./data/caddy_config:/config
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_data:/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_config:/config
 
   cert-sync:
     <<: *common-service
@@ -42,4 +42,4 @@ services:
     networks: []
     volumes:
     - tls_certs:/data/certs
-    - ./data/caddy_data:/data/caddy:ro
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_data:/data/caddy:ro

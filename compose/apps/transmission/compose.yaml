@@ -17,7 +17,7 @@ services:
     - manual
     restart: unless-stopped
     volumes:
-    - ./data/config:/config
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/config
     - ${FS_MEDIA_PATH-/data/media}/bt/downloads:/downloads:rw
     - ${FS_MEDIA_PATH-/data/media}/bt/watch:/watch:rw
 

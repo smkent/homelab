@@ -34,7 +34,7 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/mealie:/app/data/
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/mealie:/app/data/
 
   db:
     image: postgres:18
@@ -53,4 +53,4 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/postgres18:/var/lib/postgresql
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql

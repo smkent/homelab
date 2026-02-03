@@ -26,12 +26,12 @@ services:
     - web
     restart: unless-stopped
     volumes:
-    - ./data/immich_uploads:/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/immich_uploads:/data
 
   immich-machine-learning:
     image: ghcr.io/immich-app/immich-machine-learning:v2
     volumes:
-    - ./data/immich_model_cache:/cache
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/immich_model_cache:/cache
     networks:
     - local_ml
     restart: unless-stopped
@@ -55,7 +55,7 @@ services:
     restart: unless-stopped
     shm_size: 128mb
     volumes:
-    - ./data/postgres18:/var/lib/postgresql
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
 
   valkey:
     image: docker.io/valkey/valkey:9
@@ -65,4 +65,4 @@ services:
     - local_valkey
     restart: unless-stopped
     volumes:
-    - ./data/valkey:/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data

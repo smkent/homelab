@@ -25,7 +25,7 @@ services:
     - ../../secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
     - ../../secrets/gitea-ssh-rsa-host-key:/data/ssh/ssh_host_rsa_key:ro
     - ../../secrets/gitea-ssh-rsa-host-key-pub:/data/ssh/ssh_host_rsa_key.pub:ro
-    - ./data/gitea:/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/gitea:/data
 
   db:
     image: postgres:18
@@ -44,4 +44,4 @@ services:
     - local
     restart: unless-stopped
     volumes:
-    - ./data/postgres18:/var/lib/postgresql
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql

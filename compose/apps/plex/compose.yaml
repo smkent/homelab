@@ -19,5 +19,5 @@ services:
     - web
     restart: unless-stopped
     volumes:
-    - ./data/config:/config:rw
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/config:rw
     - ${FS_MEDIA_PATH-/data/media}:/media:ro

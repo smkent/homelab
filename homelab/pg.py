@@ -77,11 +77,14 @@ class PostgresConfig:
         self.yaml_svc["image"] = f"postgres:{version}"
         self.write_yaml()
 
-    def set_volume_source(self, source: Path) -> None:
+    def set_volume_source(self, source_name: str) -> None:
         for i, volume in enumerate(self.yaml_svc["volumes"]):
-            if volume.split(":", 2)[1].startswith("/var/lib/postgresql"):
-                rel = f"./{source.resolve().relative_to(Path('./').resolve())}"
-                self.yaml_svc["volumes"][i] = f"{rel}:/var/lib/postgresql"
+            vol_source, vol_dest, *_ = volume.split(":", 2)
+            if vol_dest.startswith("/var/lib/postgresql"):
+                new_source = Path(vol_source).parent / source_name
+                self.yaml_svc["volumes"][i] = (
+                    f"{new_source}:/var/lib/postgresql"
+                )
                 break
         else:
             raise CLIError("Unable to locate data directory volume")

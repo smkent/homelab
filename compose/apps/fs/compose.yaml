@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     volumes:
     - ${FS_HOME_PATH-/data}:/export/data
-    - ./data/nfs_v4recovery:/var/lib/nfs/v4recovery
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/nfs_v4recovery:/var/lib/nfs/v4recovery
 
   samba:
     image: servercontainers/samba:a3.15.4-s4.15.5-r0

@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
     user: root
     volumes:
-    - ./data/outline:/var/lib/outline/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/outline:/var/lib/outline/data
 
   db:
     image: postgres:18
@@ -44,7 +44,7 @@ services:
     - local_db
     restart: unless-stopped
     volumes:
-    - ./data/postgres18:/var/lib/postgresql
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
 
   valkey:
     image: valkey/valkey:9
