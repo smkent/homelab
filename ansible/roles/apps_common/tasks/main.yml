@@ -23,14 +23,18 @@
   - name: "Set docker secrets directory fact"
     ansible.builtin.set_fact:
       deploy_user_secrets_dir: "{{ deploy_user_home }}/homelab/compose/secrets/"
+      deploy_user_volumes_dir: "{{ deploy_user_home }}/homelab/compose/volumes/"
 
-  - name: "Ensure {{ deploy_user_secrets_dir }} exists with proper permissions"
+  - name: "Ensure {{ deploy_user }} compose directories have proper permissions"
     ansible.builtin.file:
-      path: "{{ deploy_user_secrets_dir }}"
+      path: "{{ item }}"
       owner: "{{ deploy_user }}"
       group: "{{ deploy_user }}"
       mode: 0700
       state: directory
+    loop:
+    - "{{ deploy_user_secrets_dir }}"
+    - "{{ deploy_user_volumes_dir}}"
 
   - name: "Ensure app config templates are installed"
     ansible.builtin.template:
