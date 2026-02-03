@@ -6,8 +6,8 @@
 .pytest_results.xml
 .venv/
 dist/
-ansible/.requirements.yml.sha256sum
-ansible/vault/
-compose/hosts/active
-compose/apps/*/data
-compose/secrets
+/ansible/.requirements.yml.sha256sum
+/ansible/vault/
+/compose/hosts/active
+/compose/apps/*/data
+/compose/secrets
