@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -eu
+
+docker ps --format='{{.Names}} {{.Image}}' --filter="status=running" \
+    | grep 'postgres:' \
+    | awk '{print $1}' \
+    | while read -r container_name; do
+        (
+            set -x
+            docker exec "${container_name}" \
+                sh -c 'pg_dumpall -U "${POSTGRES_USER}" > /var/lib/postgresql/dump.sql'
+        )
+    done

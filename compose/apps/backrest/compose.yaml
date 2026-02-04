@@ -35,7 +35,11 @@ services:
     - deploy-backup-ssh-key
     - restic-repo-password
     user: 1000:1000
+    group_add:
+    - 200
     volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./scripts:/scripts:ro
     - backrest_cache:/cache
     - backrest_tmp:/tmp
     - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_config:/config
