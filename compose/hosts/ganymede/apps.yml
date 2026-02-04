@@ -1,5 +1,4 @@
 apps:
-- backup
 - fs
 - gateway
 - hello
