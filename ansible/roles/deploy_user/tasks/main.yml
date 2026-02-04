@@ -28,13 +28,16 @@
   diff: false
 
 - block:
-  - name: "Ensure backup source directory exists"
+  - name: "Ensure backup directories exist"
     ansible.builtin.file:
-      path: "{{ deploy_user_home }}/external"
+      path: "{{ deploy_user_home }}/{{ item }}"
       state: directory
       owner: '{{ deploy_user }}'
       group: '{{ deploy_user }}'
       mode: '0700'
+    loop:
+    - backup
+    - external
 
   - name: "Get backup source mount point directories state"
     ansible.builtin.stat:
