@@ -1,5 +1,5 @@
 apps:
-- backup
+- backrest
 - fs
 - gateway
 - hello

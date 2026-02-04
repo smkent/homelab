@@ -1,0 +1,49 @@
+networks:
+  web:
+    external: true
+
+secrets:
+  deploy-backup-ssh-key:
+    file: ../../secrets/deploy-backup-ssh-key
+  restic-repo-password:
+    file: ../../secrets/restic-repo-password
+
+volumes:
+  backrest_cache:
+    driver: local
+    name: backrest_cache
+  backrest_tmp:
+    driver: local
+    name: backrest_tmp
+
+services:
+  backrest:
+    build: build
+    cap_add:
+    - DAC_READ_SEARCH
+    environment:
+      BACKREST_CONFIG: /config/config.json
+      BACKREST_DATA: /data
+      TMPDIR: /tmp
+      XDG_CACHE_HOME: /cache
+      SSH_PRIVATE_KEY_FILE: /run/secrets/deploy-backup-ssh-key
+      TZ: Etc/UTC
+    networks:
+    - web
+    restart: unless-stopped
+    secrets:
+    - deploy-backup-ssh-key
+    - restic-repo-password
+    user: 1000:1000
+    group_add:
+    - 200
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ./scripts:/scripts:ro
+    - backrest_cache:/cache
+    - backrest_tmp:/tmp
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_config:/config
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_data:/data
+    - $HOME/backup:/backup:rw
+    - $HOME/homelab/compose/volumes:/source/compose_volumes:ro
+    - $HOME/external:/source/external:ro,rshared

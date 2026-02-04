@@ -1,6 +1,7 @@
 {env.NODE_LAN_FQDN} *.{env.NODE_LAN_FQDN} {
     import tls_linode
 
+    import ../apps/backrest.caddy
     import ../apps/hello.caddy
     import ../apps/plex.caddy
 }

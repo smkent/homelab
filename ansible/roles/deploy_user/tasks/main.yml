@@ -26,3 +26,27 @@
     group: '{{ deploy_user }}'
     mode: 0600
   diff: false
+
+- block:
+  - name: "Ensure backup source directory exists"
+    ansible.builtin.file:
+      path: "{{ deploy_user_home }}/external"
+      state: directory
+      mode: '0700'
+
+  - name: "Ensure backup source mount point directories exist"
+    ansible.builtin.file:
+      path: "{{ deploy_user_home }}/external/{{ item | basename }}"
+      state: directory
+      mode: '0700'
+    loop: "{{ deploy_external_bind_mounts | d([]) }}"
+
+  - name: "Ensure backup sources are configured and mounted"
+    ansible.posix.mount:
+      path: "{{ deploy_user_home }}/external/{{ item | basename }}"
+      src: "{{ item }}"
+      fstype: none
+      opts: bind,rshared,ro
+      state: mounted
+    loop: "{{ deploy_external_bind_mounts | d([]) }}"
+  when: deploy_external_bind_mounts | d([]) | length > 0
