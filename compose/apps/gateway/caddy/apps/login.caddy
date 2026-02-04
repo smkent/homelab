@@ -5,6 +5,6 @@ handle @authelia {
 
 @lldap expression `{host}.startsWith("lldap.")`
 handle @lldap {
-    import auth
+    import auth_local
     reverse_proxy lldap:17170
 }

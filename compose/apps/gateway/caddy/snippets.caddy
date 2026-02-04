@@ -1,11 +1,21 @@
-(auth) {
+(auth_common) {
+    uri /api/verify?rd=https://login.{env.DOMAIN}
+    copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+}
+
+(auth_local) {
+    forward_auth authelia:9091 {
+        import auth_common
+    }
+}
+
+(auth_remote) {
     forward_auth login.{env.DOMAIN}:443 {
         transport http {
             tls
             tls_server_name login.{$DOMAIN}
         }
-        uri /api/verify?rd=https://login.{env.DOMAIN}
-        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+        import auth_common
     }
 }
 
