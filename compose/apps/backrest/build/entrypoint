@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -eux
+
+if [ -f "${SSH_PRIVATE_KEY_FILE}" ]; then
+    SSH_DIR="${BACKREST_DATA?}/ssh"
+    mkdir -vp "${SSH_DIR}/config.d"
+    (
+        echo "Include config.d/*"
+        echo
+        echo "Host *"
+        echo "IdentityFile ${SSH_PRIVATE_KEY_FILE?}"
+        echo "StrictHostKeyChecking accept-new"
+    ) >"${SSH_DIR}/config"
+    ln -snvf "${SSH_DIR}" "${HOME}/.ssh"
+    chmod -Rc og-rwx "${BACKREST_DATA?}/ssh/"
+fi
+
+exec "${@}"
