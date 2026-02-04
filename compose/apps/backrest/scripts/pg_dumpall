@@ -2,6 +2,9 @@
 
 set -eu
 
+exec 8<>"${TMPDIR-/tmp}/$(basename "${0}")_lock"
+flock -w 10 || { echo "Unable to acquire lock"; exit 1; }
+
 docker ps --format='{{.Names}} {{.Image}}' --filter="status=running" \
     | grep 'postgres:' \
     | awk '{print $1}' \
