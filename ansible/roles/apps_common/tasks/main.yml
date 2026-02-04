@@ -10,8 +10,17 @@
     register: homelab_git_repo
     ignore_errors: '{{ ansible_check_mode }}'
 
+  - ansible.builtin.include_role:
+      name: common
+      tasks_from: resolve_executable
+    vars:
+      resolve_executable_search_name: pipx
+      resolve_executable_try_path: "{{ deploy_user_home }}/.local/bin"
+      resolve_executable_set_fact: pipx_exe_path
+
   - name: "Install homelab package via pipx"
     community.general.pipx:
+      executable: "{{ pipx_exe_path }}"
       name: homelab
       source: "{{ deploy_user_home }}/homelab"
       state: present
