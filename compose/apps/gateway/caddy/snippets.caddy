@@ -1,6 +1,10 @@
 (auth) {
-    forward_auth authelia:9091 {
-        uri /api/verify?rd=https://login.{env.NODE_FQDN}
+    forward_auth login.{env.DOMAIN}:443 {
+        transport http {
+            tls
+            tls_server_name login.{$DOMAIN}
+        }
+        uri /api/verify?rd=https://login.{env.DOMAIN}
         copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
     }
 }
