@@ -5,8 +5,8 @@ networks:
 secrets:
   deploy-backup-ssh-key:
     file: ../../secrets/deploy-backup-ssh-key
-  restic-repo-password:
-    file: ../../secrets/restic-repo-password
+  restic-password:
+    file: ../../secrets/restic-password
 
 volumes:
   backrest_cache:
@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
     secrets:
     - deploy-backup-ssh-key
-    - restic-repo-password
+    - restic-password
     user: 1000:1000
     group_add:
     - 200
