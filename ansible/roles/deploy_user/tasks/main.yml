@@ -32,14 +32,28 @@
     ansible.builtin.file:
       path: "{{ deploy_user_home }}/external"
       state: directory
+      owner: '{{ deploy_user }}'
+      group: '{{ deploy_user }}'
       mode: '0700'
+
+  - name: "Get backup source mount point directories state"
+    ansible.builtin.stat:
+      path: "{{ deploy_user_home }}/external/{{ item | basename }}"
+    loop: "{{ deploy_external_bind_mounts | d([]) }}"
+    register: deploy_external_bind_mounts_stat
 
   - name: "Ensure backup source mount point directories exist"
     ansible.builtin.file:
-      path: "{{ deploy_user_home }}/external/{{ item | basename }}"
+      path: "{{ deploy_user_home }}/external/{{ stat_item.item | basename }}"
       state: directory
+      owner: '{{ deploy_user }}'
+      group: '{{ deploy_user }}'
       mode: '0700'
-    loop: "{{ deploy_external_bind_mounts | d([]) }}"
+    when: not stat_item.stat.exists
+    loop: "{{ deploy_external_bind_mounts_stat.results }}"
+    loop_control:
+      loop_var: stat_item
+      label: "{{ stat_item.item }}"
 
   - name: "Ensure backup sources are configured and mounted"
     ansible.posix.mount:
