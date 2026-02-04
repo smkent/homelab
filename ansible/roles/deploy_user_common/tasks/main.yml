@@ -24,7 +24,7 @@
     user: "{{ deploy_user }}"
     key: '{{ key }}'
     state: present
-  loop: '{{ ssh_authorized_keys }}'
+  loop: '{{ create_users[deploy_user].authorized_keys }}'
   loop_control:
     loop_var: key
     label: "{{ key.split(' ')[-1]|d('(no comment)') }}"

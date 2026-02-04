@@ -14,7 +14,7 @@
 
   - name: Ensure authorized_keys is configured for dropbear
     ansible.builtin.copy:
-      content: "{{ ssh_authorized_keys | join('\n') }}"
+      content: "{{ ssh_crypt_boot_authorized_keys | join('\n') }}"
       dest: /etc/dropbear-initramfs/authorized_keys
       mode: 0600
     notify:
