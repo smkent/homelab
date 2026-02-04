@@ -1,5 +1,5 @@
 @backrest expression `{host}.startsWith("backrest.")`
 handle @backrest {
-    import auth
+    import auth_remote
     reverse_proxy backrest:9898
 }

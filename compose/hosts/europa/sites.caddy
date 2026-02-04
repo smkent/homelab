@@ -28,7 +28,7 @@ ganymede.{env.DOMAIN} *.ganymede.{env.DOMAIN} {
 {
     import tls_linode
 
-    import ../apps/backrest.caddy
+    import ../apps/backrest_remote.caddy
     import ../apps/hello.caddy
     import ../apps/web.caddy
     import ../apps/web_catchall.caddy
