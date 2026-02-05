@@ -1,3 +1,4 @@
+import socket
 import subprocess
 from collections.abc import Callable
 from contextlib import nullcontext
@@ -350,3 +351,78 @@ class Homerun(HomelabCLIApp):
             ["caddy", "reload", "--config", "/etc/caddy/Caddyfile"],
             exec=True,
         )
+
+    @cli.command(
+        context_settings={
+            "allow_extra_args": True,
+            "ignore_unknown_options": True,
+        },
+        help="Run restic commands with preconfigured settings",
+    )
+    @StackAppDir("backrest", "backrest")
+    @staticmethod
+    def restic(
+        ctx: Context,
+        repository: Annotated[
+            str,
+            Option(
+                "-r",
+                "--repo",
+                metavar="name",
+                help="Repository name",
+            ),
+        ] = socket.gethostname().split(".", 1)[0],
+        restore_target: Annotated[
+            Path | None,
+            Option(
+                "-t",
+                "--target",
+                metavar="directory",
+                show_default="none",
+                exists=True,
+                file_okay=False,
+                dir_okay=True,
+                resolve_path=True,
+                help="Restore target",
+            ),
+        ] = None,
+        rw: Annotated[
+            bool,
+            Option(
+                "--rw",
+                help="Mount repository read-write and enable locking",
+            ),
+        ] = False,
+    ) -> None:
+        if not Path(repository).is_absolute():
+            repository = f"/backup/{repository}"
+        mountflags = "rw" if rw else "ro"
+        cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "-v",
+            f"{Path.home() / 'backup'}:/backup:{mountflags}",
+            "-v",
+            (
+                f"{Path('../../secrets/restic-password').resolve()}"
+                ":/run/secrets/restic-password"
+            ),
+        ]
+        if restore_target:
+            cmd += ["-v", f"{restore_target}:/restore_target:rw"]
+        if rw:
+            cmd += ["--user", "1000:1000"]
+        cmd += [
+            "restic/restic",
+            "-p",
+            "/run/secrets/restic-password",
+            "-r",
+            repository,
+        ]
+        if not rw:
+            cmd += ["--no-lock"]
+        cmd += ctx.args
+        if restore_target:
+            cmd += ["--target", "/restore_target"]
+        run(cmd)
