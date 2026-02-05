@@ -46,6 +46,6 @@ services:
     - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_config:/opt/backrest/config
     - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_data:/opt/backrest/data
     - $HOME/backup:/backup:rw
-    - $HOME/homelab/compose/volumes:/source/compose_volumes:ro
-    - $HOME/external:/source/external:ro,rshared
+    - $HOME/homelab/compose/volumes:/deploy/compose_volumes:ro
+    - $HOME/external:/deploy/external:ro,rshared
     - ${DATA_MOUNT:-/dev/null}:${DATA_MOUNT:-/root/.nodatamount}:ro
