@@ -22,8 +22,8 @@ services:
     cap_add:
     - DAC_READ_SEARCH
     environment:
-      BACKREST_CONFIG: /config/config.json
-      BACKREST_DATA: /data
+      BACKREST_CONFIG: /opt/backrest/config/config.json
+      BACKREST_DATA: /opt/backrest/data
       TMPDIR: /tmp
       XDG_CACHE_HOME: /cache
       SSH_PRIVATE_KEY_FILE: /run/secrets/deploy-backup-ssh-key
@@ -43,8 +43,9 @@ services:
     - ./scripts:/scripts:ro
     - backrest_cache:/cache
     - backrest_tmp:/tmp
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_config:/config
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_data:/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_config:/opt/backrest/config
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_data:/opt/backrest/data
     - $HOME/backup:/backup:rw
-    - $HOME/homelab/compose/volumes:/source/compose_volumes:ro
-    - $HOME/external:/source/external:ro,rshared
+    - $HOME/homelab/compose/volumes:/deploy/compose_volumes:ro
+    - $HOME/external:/deploy/external:ro,rshared
+    - ${DATA_MOUNT:-/dev/null}:${DATA_MOUNT:-/root/.nodatamount}:ro

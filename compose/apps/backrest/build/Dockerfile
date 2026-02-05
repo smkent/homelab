@@ -5,8 +5,8 @@ ARG USER=backrest
 RUN apk --no-cache add libcap shadow
 RUN setcap cap_dac_read_search+ep /bin/restic
 RUN addgroup --gid 200 docker \
-    && useradd -b /opt -m -U -u "${UID}" -G docker -s /bin/sh "${USER}" \
-    && mkdir /cache \
+    && useradd -b /home -m -U -u "${UID}" -G docker -s /bin/sh "${USER}" \
+    && mkdir -vp /cache \
     && chown "${USER}:" /cache
 COPY --chown="${USER}:${USER}" --chmod=0755 entrypoint /entrypoint-wrapper
 
