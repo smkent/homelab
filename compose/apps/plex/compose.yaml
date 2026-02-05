@@ -2,6 +2,11 @@ networks:
   web:
     external: true
 
+volumes:
+  plex_media_cache:
+    driver: local
+    name: plex_media_cache
+
 services:
   plex:
     image: linuxserver/plex:1.41.5
@@ -20,4 +25,5 @@ services:
     restart: unless-stopped
     volumes:
     - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/config:rw
+    - plex_media_cache:/config/Library/Application Support/Plex Media Server/Media:rw
     - ${FS_MEDIA_PATH-/data/media}:/media:ro
