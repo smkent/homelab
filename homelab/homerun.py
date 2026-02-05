@@ -1,5 +1,6 @@
 import socket
 import subprocess
+import sys
 from collections.abc import Callable
 from contextlib import nullcontext
 from dataclasses import dataclass, field
@@ -71,6 +72,13 @@ class Homerun(HomelabCLIApp):
         pretty_exceptions_enable=False,
         rich_markup_mode=None,
     )
+
+    @classmethod
+    def app(cls) -> None:
+        try:
+            super().app()
+        except subprocess.CalledProcessError as e:
+            print(f"{e.__class__.__name__}: {e}", file=sys.stderr)
 
     @cli.callback()
     @staticmethod
