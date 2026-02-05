@@ -28,6 +28,7 @@ services:
       XDG_CACHE_HOME: /cache
       SSH_PRIVATE_KEY_FILE: /run/secrets/deploy-backup-ssh-key
       TZ: Etc/UTC
+    hostname: "${MACHINE?}"
     networks:
     - web
     restart: unless-stopped
