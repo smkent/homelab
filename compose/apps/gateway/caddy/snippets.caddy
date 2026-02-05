@@ -1,5 +1,5 @@
 (auth_common) {
-    uri /api/verify?rd=https://login.{env.DOMAIN}
+    uri /api/authz/forward-auth
     copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
 }
 
@@ -10,7 +10,8 @@
 }
 
 (auth_remote) {
-    forward_auth login.{env.DOMAIN}:443 {
+    forward_auth login.{$DOMAIN}:443 {
+        header_up Host {upstream_hostport}
         transport http {
             tls
             tls_server_name login.{$DOMAIN}
