@@ -48,4 +48,5 @@ services:
     - $HOME/backup:/backup:rw
     - $HOME/homelab/compose/volumes:/deploy/compose_volumes:ro
     - $HOME/external:/deploy/external:ro,rshared
+    - /mnt:/mnt:rw,rshared
     - ${DATA_MOUNT:-/dev/null}:${DATA_MOUNT:-/root/.nodatamount}:ro
