@@ -1,6 +1,7 @@
 - name: Ensure apt packages are installed
   ansible.builtin.apt:
     pkg:
+    - cryptsetup
     - curl
     - gnupg
     - htop
