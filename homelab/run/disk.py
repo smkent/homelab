@@ -148,7 +148,7 @@ class BackupDisk:
             # Wait for new partition to appear
             sudo_run(["partprobe", str(dev)])
             start = time.time()
-            dev = Path("f{dev}1")
+            dev = Path(f"{dev}1")
             while not dev.is_block_device():
                 if time.time() - start > PARTPROBE_TIMEOUT:
                     raise CLIError(f"Timeout waiting for {dev} to appear")
