@@ -12,6 +12,7 @@ from typer import Argument, Context, Option, Typer
 
 from .app import CLIError, HomelabCLIApp
 from .pg import PostgresConfig
+from .run import BackupDisk
 from .stack import ComposeStack
 from .util import run
 
@@ -72,6 +73,7 @@ class Homerun(HomelabCLIApp):
         pretty_exceptions_enable=False,
         rich_markup_mode=None,
     )
+    cli.add_typer(BackupDisk.cli, name="backupdisk")
 
     @classmethod
     def app(cls) -> None:
