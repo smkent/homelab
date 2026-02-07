@@ -10,6 +10,7 @@
     - mdadm
     - mtools
     - net-tools
+    - parted
     - python3-pip
     - python3-venv
     - rsync
