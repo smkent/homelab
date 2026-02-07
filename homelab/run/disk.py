@@ -228,7 +228,7 @@ class BackupDisk:
         sudo_run(["cryptsetup", "luksOpen", str(dev), MAPPER_NAME])
         mount_mapper_volume(ctx, mount_point=mount_point)
 
-    @cli.command(help="Mount disk")
+    @cli.command(help="Unmount disk")
     @staticmethod
     def unmount(
         ctx: Context,
