@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -eu
+
+REPO="${1:?.Repo.Uri value missing}"
+
+case "${REPO}" in
+    /*) ;;  # Local filesystem path
+    *) exit 0 ;;
+esac
+
+set -x
+
+if ! mountpoint -q "$(dirname "${REPO%/}")"; then
+    echo "Repository path ${REPO} is not mounted"
+    exit 1
+fi
+
+if [ ! -d "${REPO}" ] || [ ! -f "${REPO}/config" ]; then
+    echo "No restic repository found at ${REPO}"
+    exit 1
+fi
