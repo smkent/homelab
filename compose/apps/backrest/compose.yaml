@@ -26,8 +26,9 @@ services:
       BACKREST_DATA: /opt/backrest/data
       TMPDIR: /tmp
       XDG_CACHE_HOME: /cache
+      RESTIC_PASSWORD_FILE: /run/secrets/restic-password
       SSH_PRIVATE_KEY_FILE: /run/secrets/deploy-backup-ssh-key
-      TZ: Etc/UTC
+      TZ: America/Los_Angeles
     hostname: "${MACHINE?}"
     networks:
     - web
