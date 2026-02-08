@@ -2,7 +2,7 @@ FROM ghcr.io/garethgeorge/backrest:latest
 
 ARG UID=1000
 ARG USER=backrest
-RUN apk --no-cache add libcap shadow
+RUN apk --no-cache add libcap shadow jq
 RUN setcap cap_dac_read_search+ep /bin/restic
 RUN addgroup --gid 200 docker \
     && useradd -b /home -m -U -u "${UID}" -G docker -s /bin/sh "${USER}" \
