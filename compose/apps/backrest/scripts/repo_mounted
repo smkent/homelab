@@ -2,21 +2,25 @@
 
 set -eu
 
-REPO="${1:?.Repo.Uri value missing}"
+export RESTIC_REPOSITORY="${1:?First argument must be \"{{ .Repo.Uri \}\}\"}"
 
-case "${REPO}" in
+ensure_repo() {
+    [ -d "${1?}" ] && [ -f "${1?}/config" ]
+}
+
+case "${RESTIC_REPOSITORY}" in
     /*) ;;  # Local filesystem path
     *) exit 0 ;;
 esac
 
 set -x
 
-if ! mountpoint -q "$(dirname "${REPO%/}")"; then
-    echo "Repository path ${REPO} is not mounted"
+if ! mountpoint -q "$(dirname "${RESTIC_REPOSITORY%/}")"; then
+    echo "Repository path ${RESTIC_REPOSITORY} is not mounted"
     exit 1
 fi
 
-if [ ! -d "${REPO}" ] || [ ! -f "${REPO}/config" ]; then
-    echo "No restic repository found at ${REPO}"
+if ! ensure_repo "${RESTIC_REPOSITORY}"; then
+    echo "No restic repository found at ${RESTIC_REPOSITORY}"
     exit 1
 fi
