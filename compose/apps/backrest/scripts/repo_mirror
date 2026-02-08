@@ -39,7 +39,6 @@ mirror_event() {
                 restic forget \
                     --group-by "" \
                     --tag "${tag_set}" \
-                    --prune \
                     --keep-within-monthly 365d \
                     --keep-last 3
             )
