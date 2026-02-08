@@ -28,14 +28,12 @@ mirror_event() {
     tag_set="${2:?}"
     case "${BACKREST_EVENT}" in
         CONDITION_SNAPSHOT_START)
-            echo "snapshot start event";
             (
                 set -x
                 restic copy --from-repo "${src_repo}" --tag "${tag_set}" latest
             )
             ;;
         CONDITION_FORGET_START)
-            echo "forget start";
             (
                 set -x
                 restic forget \
