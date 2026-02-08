@@ -9,10 +9,7 @@ export RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-/run/secrets/restic-passwor
 export RESTIC_FROM_PASSWORD_FILE="${RESTIC_PASSWORD_FILE}"
 
 ensure_repo() {
-    if [ ! -d "${1?}" ] || [ ! -f "${1?}/config" ]; then
-        echo "No restic repository found at ${1?}"
-        exit 1
-    fi
+    [ -d "${1?}" ] && [ -f "${1?}/config" ]
 }
 
 case "${RESTIC_REPOSITORY}" in
@@ -20,15 +17,20 @@ case "${RESTIC_REPOSITORY}" in
     *) exit 0 ;;
 esac
 
-ensure_repo "${RESTIC_REPOSITORY}"
+if ! ensure_repo "${RESTIC_REPOSITORY}"; then
+    echo "No restic repository found at ${1?}"
+    exit 1
+fi
 
-find "${SOURCES}" -mindepth 1 -maxdepth 1 -type d | while read -r src_repo; do
-    ensure_repo "${src_repo}"
+find "${SOURCES}" -maxdepth 1 -type d | while read -r src_repo; do
+    ensure_repo "${src_repo}" || continue
+    echo ">>> Copy from ${src_repo}"
     restic -r "${src_repo}" snapshots --json \
             | jq -r '.[].tags | select(length > 0) | sort | join(",")' \
             | sort -u \
             | while read -r tag_set; do
         (
+            echo "--- Tag set ${tag_set}"
             set -x
             restic copy --from-repo "${src_repo}" --tag "${tag_set}" latest
             restic forget \
