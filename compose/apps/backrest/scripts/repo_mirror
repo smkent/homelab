@@ -1,0 +1,42 @@
+#!/bin/sh
+
+set -eu
+
+SOURCES="${2:-/backup}"
+
+export RESTIC_REPOSITORY="${1:?.Repo.Uri value missing}"
+export RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-/run/secrets/restic-password}"
+export RESTIC_FROM_PASSWORD_FILE="${RESTIC_PASSWORD_FILE}"
+
+ensure_repo() {
+    if [ ! -d "${1?}" ] || [ ! -f "${1?}/config" ]; then
+        echo "No restic repository found at ${1?}"
+        exit 1
+    fi
+}
+
+case "${RESTIC_REPOSITORY}" in
+    /*) ;;  # Local filesystem path
+    *) exit 0 ;;
+esac
+
+ensure_repo "${RESTIC_REPOSITORY}"
+
+find "${SOURCES}" -mindepth 1 -maxdepth 1 -type d | while read -r src_repo; do
+    ensure_repo "${src_repo}"
+    restic -r "${src_repo}" snapshots --json \
+            | jq -r '.[].tags | select(length > 0) | sort | join(",")' \
+            | sort -u \
+            | while read -r tag_set; do
+        (
+            set -x
+            restic copy --from-repo "${src_repo}" --tag "${tag_set}" latest
+            restic forget \
+                --group-by "" \
+                --tag "${tag_set}" \
+                --prune \
+                --keep-within-monthly 365d \
+                --keep-last 3
+        )
+    done
+done
