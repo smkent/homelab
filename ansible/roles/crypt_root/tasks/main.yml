@@ -1,7 +1,19 @@
+- name: Check if /etc/crypttab contains root encryption
+  ansible.builtin.slurp:
+    src: /etc/crypttab
+  register: crypttab_content
+  failed_when: false
+  changed_when: false
+
 - name: Check if root filesystem is encrypted
-  ansible.builtin.stat:
-    path: /etc/crypttab
-  register: crypttab_stat
+  set_fact:
+    crypttab_mounts: >-
+      {{
+        (crypttab_content.content | b64decode).splitlines()
+        | select('match', '^\s*[^#\s]')
+        | length > 0
+      }}
+  when: crypttab_content.content is defined
 
 - block:
   - name: Ensure dropbear-initramfs is installed
@@ -40,4 +52,4 @@
     notify:
     - update-initramfs
     ignore_errors: '{{ ansible_check_mode }}'
-  when: crypttab_stat.stat.exists
+  when: crypttab_mounts|d(False)
