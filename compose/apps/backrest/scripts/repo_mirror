@@ -2,9 +2,10 @@
 
 set -eu
 
-SOURCES="${2:-/backup}"
-
 export RESTIC_REPOSITORY="${1:?First argument must be \"{{ .Repo.Uri \}\}\"}"
+export BACKREST_EVENT="${2:?Second argument must be \"{{ .Event \}\}\"}"
+export SOURCES="${3:-/backup}"
+
 export RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-/run/secrets/restic-password}"
 export RESTIC_FROM_PASSWORD_FILE="${RESTIC_PASSWORD_FILE}"
 
@@ -22,23 +23,43 @@ if ! ensure_repo "${RESTIC_REPOSITORY}"; then
     exit 1
 fi
 
+mirror_event() {
+    src_repo="${1:?}"
+    tag_set="${2:?}"
+    case "${BACKREST_EVENT}" in
+        CONDITION_SNAPSHOT_START)
+            echo "snapshot start event";
+            (
+                set -x
+                restic copy --from-repo "${src_repo}" --tag "${tag_set}" latest
+            )
+            ;;
+        CONDITION_FORGET_START)
+            echo "forget start";
+            (
+                set -x
+                restic forget \
+                    --group-by "" \
+                    --tag "${tag_set}" \
+                    --prune \
+                    --keep-within-monthly 365d \
+                    --keep-last 3
+            )
+            ;;
+        *)
+            echo "Unsupported event type ${BACKREST_EVENT}" >&2
+            return 1
+            ;;
+    esac
+}
+
 find "${SOURCES}" -maxdepth 1 -type d | while read -r src_repo; do
     ensure_repo "${src_repo}" || continue
-    echo ">>> Copy from ${src_repo}"
     restic -r "${src_repo}" snapshots --json \
             | jq -r '.[].tags | select(length > 0) | sort | join(",")' \
             | sort -u \
             | while read -r tag_set; do
-        (
-            echo "--- Tag set ${tag_set}"
-            set -x
-            restic copy --from-repo "${src_repo}" --tag "${tag_set}" latest
-            restic forget \
-                --group-by "" \
-                --tag "${tag_set}" \
-                --prune \
-                --keep-within-monthly 365d \
-                --keep-last 3
-        )
+        echo ">>> Repository ${src_repo} :: ${tag_set}"
+        mirror_event "${src_repo}" "${tag_set}"
     done
 done
