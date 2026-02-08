@@ -4,7 +4,7 @@ set -eu
 
 SOURCES="${2:-/backup}"
 
-export RESTIC_REPOSITORY="${1:?.Repo.Uri value missing}"
+export RESTIC_REPOSITORY="${1:?First argument must be \"{{ .Repo.Uri \}\}\"}"
 export RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-/run/secrets/restic-password}"
 export RESTIC_FROM_PASSWORD_FILE="${RESTIC_PASSWORD_FILE}"
 
