@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from contextlib import chdir
 from dataclasses import dataclass, field
 from functools import cached_property
+from importlib.util import find_spec
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
@@ -142,12 +143,23 @@ class Homestar(HomelabCLIApp):
         with chdir(project.ansible_dir):
             return super().app()
 
+    @cached_property
+    def mitogen_path(self) -> str:
+        spec = find_spec("ansible_mitogen")
+        assert spec and spec.origin, "ansible_mitogen module not found"
+        return str(Path(spec.origin).parent / "plugins" / "strategy")
+
     def _ansible_run(
         self,
         cmd: Sequence[str],
         *args: Any,
         **kwargs: Any,
     ) -> Any:
+        kwargs.setdefault("env", {})
+        kwargs["env"] |= {
+            "ANSIBLE_NOCOWS": "true",
+            "ANSIBLE_STRATEGY_PLUGINS": self.mitogen_path,
+        }
         self.ansible_collections.ensure()
         return run(cmd, *args, dry_run=self.dry_run, **kwargs)
 
