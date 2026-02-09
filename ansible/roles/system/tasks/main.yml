@@ -6,7 +6,7 @@
   community.general.timezone:
     name: Etc/UTC
 
-- name: Configure journald disk usage limits
+- name: "Ensure journald disk usage limits are configured"
   ansible.builtin.ini_file:
     path: /etc/systemd/journald.conf
     section: Journal
@@ -22,6 +22,6 @@
     label: "{{ item.key }}"
   notify: restart-journald
 
-- name: Vacuum journald logs
+- name: "Ensure journald logs are vacuumed"
   ansible.builtin.command: journalctl --vacuum-size=1G
   changed_when: false
