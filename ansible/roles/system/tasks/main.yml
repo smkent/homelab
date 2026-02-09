@@ -5,3 +5,23 @@
 - name: "Ensure time zone is set to Etc/UTC"
   community.general.timezone:
     name: Etc/UTC
+
+- name: Configure journald disk usage limits
+  ansible.builtin.ini_file:
+    path: /etc/systemd/journald.conf
+    section: Journal
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
+  loop:
+  - key: SystemMaxUse
+    value: 1G
+  - key: RuntimeMaxUse
+    value: 1G
+  loop_control:
+    label: "{{ item.key }}"
+  notify: restart-journald
+
+- name: Vacuum journald logs
+  ansible.builtin.command: journalctl --vacuum-size=1G
+  changed_when: false
