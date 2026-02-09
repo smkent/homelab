@@ -80,3 +80,23 @@
     update_cache: yes
     cache_valid_time: 600
   when: ansible_facts["architecture"] == "aarch64"
+
+- name: Ensure /etc/docker exists
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: "0755"
+
+- name: Ensure Docker log rotation is configured
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    mode: "0644"
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "10",
+          "max-file": "3",
+          "compress": "true"
+        }
+      }
