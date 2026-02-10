@@ -1,4 +1,5 @@
 import subprocess
+from contextlib import suppress
 from functools import cached_property
 from pathlib import Path
 
@@ -21,13 +22,14 @@ class HomelabProject:
                 )
             )
 
-        git_root = Path(
-            subprocess.check_output(
-                ["git", "rev-parse", "--show-toplevel"], text=True
-            ).strip()
-        )
-        if _is_project_dir(git_root):
-            return git_root
+        with suppress(subprocess.CalledProcessError):
+            git_root = Path(
+                subprocess.check_output(
+                    ["git", "rev-parse", "--show-toplevel"], text=True
+                ).strip()
+            )
+            if _is_project_dir(git_root):
+                return git_root
         if _is_project_dir(path := (Path.home() / "homelab")):
             return path
         raise CLIError("Unable to locate homelab project directory")
