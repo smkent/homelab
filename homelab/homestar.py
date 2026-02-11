@@ -157,7 +157,6 @@ class Homestar(HomelabCLIApp):
     ) -> Any:
         kwargs.setdefault("env", {})
         kwargs["env"] |= {
-            "ANSIBLE_NOCOWS": "true",
             "ANSIBLE_STRATEGY_PLUGINS": self.mitogen_path,
         }
         self.ansible_collections.ensure()
