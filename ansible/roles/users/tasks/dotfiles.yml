@@ -14,7 +14,7 @@
   block:
   - name: Clone dotfiles repository
     ansible.builtin.git:
-      repo: "{{ repository }}"
+      repo: "{{ dotfiles_repository }}"
       dest: "{{ temp_dir }}"
     ignore_errors: '{{ ansible_check_mode }}'
 
@@ -24,14 +24,6 @@
       chdir: '{{ user_home }}'
       removes: "{{ temp_dir }}/.git"
       creates: '{{ user_home }}/.git'
-
-  - name: Check out dotfiles repository contents
-    ansible.builtin.git:
-      repo: "{{ repository }}"
-      dest: '{{ user_home }}'
-      clone: false
-      force: true
-    ignore_errors: '{{ ansible_check_mode }}'
 
   - name: Clean up temporary dotfiles repository directory
     ansible.builtin.file:
@@ -46,3 +38,12 @@
   when:
   - ansible_facts.getent_passwd.get(user_name) is not none
   - not dotfiles_git_stat.stat.exists
+
+- name: "Ensure dotfiles repository is updated"
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repository }}"
+    dest: "{{ user_home }}"
+    clone: false
+    force: true
+  ignore_errors: '{{ ansible_check_mode }}'
+  become_user: '{{ user_name }}'
