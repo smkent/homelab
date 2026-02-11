@@ -27,10 +27,13 @@
   ansible.builtin.blockinfile:
     path: /etc/ssh/sshd_config
     block: |
-      KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+      KexAlgorithms {%
+          if ansible_facts["distribution"] == "Debian" and ansible_facts["distribution_major_version"] == "13"
+        %}sntrup761x25519-sha512@openssh.com,{%
+          endif
+        %}curve25519-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256
       Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr
-      MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
-      HostKey /etc/ssh/ssh_host_rsa_key
+      MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
       HostKey /etc/ssh/ssh_host_ed25519_key
       RekeyLimit 128M 15m
     marker: '# {mark} ANSIBLE MANAGED BLOCK ssh-crypto'
