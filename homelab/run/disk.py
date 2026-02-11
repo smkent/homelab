@@ -15,11 +15,7 @@ MAPPER_NAME = "homerun_backup_disk"
 PARTPROBE_TIMEOUT = 5
 
 
-def sudo_run(
-    cmd: Sequence[str],
-    *args: Any,
-    **kwargs: Any,
-) -> Any:
+def sudo_run(cmd: Sequence[str], *args: Any, **kwargs: Any) -> Any:
     return run(["sudo"] + list(cmd), *args, **kwargs)
 
 
