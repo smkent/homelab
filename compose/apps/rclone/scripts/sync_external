@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -eu
+
+SYNC_DEST="${SYNC_DEST:?Sync destination directory is required}"
+PREFIX="backup_"
+
+list_remotes() {
+    rclone listremotes --json \
+        | jq -r ".[] | select(.name | startswith(\"${PREFIX}\")) | .name"
+}
+
+rclone_sync() {
+    (
+        set -x
+        rclone sync --create-empty-src-dirs --delete-excluded --metadata "${@}"
+    )
+}
+
+list_remotes | while read -r name; do
+    rclone_sync "${name}:" "${SYNC_DEST}/${name#"${PREFIX}"}"
+done
