@@ -4,4 +4,5 @@ apps:
 - gateway
 - hello
 - plex
+- rclone
 - smtp_relay
