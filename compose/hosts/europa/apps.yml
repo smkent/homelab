@@ -6,5 +6,6 @@ apps:
 - immich
 - mealie
 - paperless
+- rclone
 - smtp_relay
 - web

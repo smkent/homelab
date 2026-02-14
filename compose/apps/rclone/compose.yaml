@@ -1,0 +1,32 @@
+secrets:
+  deploy-backup-ssh-key:
+    file: ../../secrets/deploy-backup-ssh-key
+
+services:
+  ofelia:
+    image: mcuadros/ofelia:0.3
+    command: daemon --docker
+    depends_on:
+    - rclone
+    labels:
+      ofelia.job-local.ofelia-keepalive.schedule: "@yearly"
+      ofelia.job-local.ofelia-keepalive.command: "/bin/true"
+    restart: unless-stopped
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  rclone:
+    build: rclone
+    environment:
+      SYNC_DEST: /deploy/external
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.sync-external.schedule: "@every 6h"
+      ofelia.job-exec.sync-external.command: /scripts/sync_external
+    restart: unless-stopped
+    secrets:
+    - deploy-backup-ssh-key
+    volumes:
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/rclone_config:/config/rclone:rw
+    - ./scripts:/scripts:ro
+    - $HOME/external:/deploy/external:rw
