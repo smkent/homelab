@@ -11,6 +11,11 @@ list_remotes() {
 }
 
 rclone_sync() {
+    case "${1#"${PREFIX}"}" in
+        s3[_:]*)
+            export RCLONE_SIZE_ONLY=true
+            ;;
+    esac
     (
         set -x
         rclone sync --create-empty-src-dirs --delete-excluded --metadata "${@}"
