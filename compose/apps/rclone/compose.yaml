@@ -1,6 +1,8 @@
 secrets:
   deploy-backup-ssh-key:
     file: ../../secrets/deploy-backup-ssh-key
+  rclone-s3:
+    file: ../../secrets/rclone-s3
 
 services:
   ofelia:
@@ -26,6 +28,7 @@ services:
     restart: unless-stopped
     secrets:
     - deploy-backup-ssh-key
+    - rclone-s3
     volumes:
     - ../../volumes/${COMPOSE_PROJECT_NAME}/rclone_config:/config/rclone:rw
     - ./scripts:/scripts:ro
