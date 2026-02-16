@@ -71,6 +71,7 @@ notifier:
     address: smtp:25
     sender: 'Authelia <authelia@{{ env "NODE_FQDN" }}>'
     disable_require_tls: true
+    disable_starttls: true
 
 webauthn:
   disable: false
