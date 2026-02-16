@@ -1,7 +1,7 @@
 - name: "Configure root ssh on bootstrap host"
   hosts: all
   ignore_unreachable: true
-  gather_facts: false
+  gather_facts: true
   become: true
   become_method: "{{ bootstrap_become_method|d('su') }}"
   vars:

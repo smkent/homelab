@@ -6,7 +6,7 @@
 
 - name: Ensure installation user is removed
   ansible.builtin.user:
-    name: user
+    name: "{{ installation_user }}"
     state: absent
     remove: true
     force: true
@@ -15,7 +15,7 @@
 
 - name: Ensure installation group is removed
   ansible.builtin.group:
-    name: user
+    name: "{{ installation_user }}"
     state: absent
   when: installation_user != deploy_user
   ignore_errors: true
