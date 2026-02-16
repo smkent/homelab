@@ -2,6 +2,7 @@ apps:
 - backrest
 - gateway
 - gitea
+- healthchecks
 - hello
 - jobdb
 - login
