@@ -3,6 +3,7 @@
 
     import ../apps/backrest_local.caddy
     import ../apps/login.caddy
+    import ../apps/healthchecks.caddy
     import ../apps/hello.caddy
     import ../apps/jobdb.caddy
     import ../apps/gitea.caddy

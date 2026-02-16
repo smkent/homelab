@@ -1,0 +1,39 @@
+networks:
+  web:
+    external: true
+  local_db:
+    external: false
+
+services:
+  healthchecks:
+    image: healthchecks/healthchecks:v4.0
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+    - host.env
+    - healthchecks.env
+    - ../../secrets/healthchecks.env
+    networks:
+    - local_db
+    - web
+    restart: unless-stopped
+
+  db:
+    image: postgres:18
+    environment:
+    - POSTGRES_USER=healthchecks
+    - POSTGRES_PASSWORD=healthchecks
+    - POSTGRES_DB=healthchecks
+    healthcheck:
+      test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
+      interval: 1m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    networks:
+    - local_db
+    restart: unless-stopped
+    volumes:
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql

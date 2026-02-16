@@ -35,6 +35,16 @@ access_control:
     - '{{ env "NODE_FQDN" }}'
     - '*.{{ env "NODE_FQDN" }}'
     policy: two_factor
+  - domain: 'healthchecks.{{ env "NODE_FQDN" }}'
+    policy: two_factor
+    subject:
+    - "group:web_admin"
+  - domain: 'healthchecks.{{ env "NODE_FQDN" }}'
+    policy: deny
+  - domain:
+    - '{{ env "NODE_FQDN" }}'
+    - '*.{{ env "NODE_FQDN" }}'
+    policy: two_factor
 
 session:
   name: sso_session
