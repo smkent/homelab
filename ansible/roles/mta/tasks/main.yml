@@ -9,6 +9,7 @@
 - name: Ensure apt packages are installed
   ansible.builtin.apt:
     pkg:
+    - bsd-mailx
     - msmtp
     - msmtp-mta
     state: present
@@ -20,15 +21,19 @@
     dest: /etc/msmtprc
     content: |
       account default
-      host localhost
+      host {{ node_domain }}
       port 587
-      from sys@{{ node_fqdn }}
+      from sys.{{ inventory_hostname }}@{{ node_domain }}
       aliases /etc/aliases
       tls on
       tls_certcheck off
+      auth on
+      user gomail
+      password {{ smtp_submit_password }}
     mode: 0640
     owner: root
     group: msmtp
+  diff: false
 
 - name: Ensure mail aliases are configured
   ansible.builtin.lineinfile:
