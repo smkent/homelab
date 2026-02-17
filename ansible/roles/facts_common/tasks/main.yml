@@ -11,4 +11,5 @@
 
 - name: Set the detected FQDN as a fact
   ansible.builtin.set_fact:
+    node_domain: "{{ host_env_domain_result.stdout }}"
     node_fqdn: "{{ inventory_hostname }}.{{ host_env_domain_result.stdout }}"
