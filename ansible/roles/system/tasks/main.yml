@@ -25,3 +25,29 @@
 - name: "Ensure journald logs are vacuumed"
   ansible.builtin.command: journalctl --vacuum-size=1G
   changed_when: false
+
+- block:
+  - name: "Ensure smartmontools are installed"
+    ansible.builtin.apt:
+      pkg:
+      - smartmontools
+      state: present
+      update_cache: true
+      cache_valid_time: 600
+
+  - name: "Ensure smartd is configured"
+    ansible.builtin.copy:
+      content: |
+        DEVICESCAN \
+          -a \
+          -o on \
+          -S on \
+          -W 4,45,50 \
+          -m {{ email }} \
+          -M exec /usr/share/smartmontools/smartd-runner
+      dest: /etc/smartd.conf
+      owner: root
+      group: root
+      mode: '0644'
+    notify: restart-smartd
+  when: ansible_facts["virtualization_role"] != "guest"
