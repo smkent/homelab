@@ -2,6 +2,8 @@
 
 set -eux
 
+env | sort > "${HOME}/entrypoint.env"
+
 if [ -f "${SSH_PRIVATE_KEY_FILE}" ]; then
     SSH_DIR="${BACKREST_DATA?}/ssh"
     mkdir -vp "${SSH_DIR}/config.d"

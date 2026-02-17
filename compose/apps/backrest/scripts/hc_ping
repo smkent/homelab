@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -eu
+
+BACKREST_PLAN_ID="${1:?First argument must be \"{{ .Plan.Id \}\}\"}"
+BACKREST_EVENT="${2:?First argument must be \"{{ .Event \}\}\"}"
+
+# shellcheck disable=SC1091
+. "${HOME}/entrypoint.env"
+: "${HEALTHCHECKS_URL:?HEALTHCHECKS_URL is missing}"
+: "${HEALTHCHECKS_PING_KEY_FILE:?HEALTHCHECKS_PING_KEY_FILE is missing}"
+PING_KEY=$(cat "${HEALTHCHECKS_PING_KEY_FILE}")
+: "${PING_KEY:?Healthchecks ping key is missing}"
+
+CHECK_SLUG="backrest-job-$(
+    printf "%s" "${BACKREST_PLAN_ID}" \
+        | tr '[:upper:]' '[:lower:]' | tr -c "a-z0-9-" "-" | tr -s "-" \
+        | sed -e 's/^-//; s/-$//'
+)"
+
+case "${BACKREST_EVENT}" in
+    CONDITION_SNAPSHOT_ERROR) EVENT_URI="/fail";;
+    CONDITION_SNAPSHOT_START) EVENT_URI="/start";;
+    CONDITION_SNAPSHOT_SUCCESS) EVENT_URI="";;
+    *) echo "Unknown event ${BACKREST_EVENT}" >&2 ; exit 1;;
+esac;
+
+URL="${HEALTHCHECKS_URL}/ping/${PING_KEY}/${CHECK_SLUG}${EVENT_URI}?create=1"
+(
+    set -x
+    curl -fsS --max-time 10 --retry 3 --retry-delay 2 "${URL}"
+)
