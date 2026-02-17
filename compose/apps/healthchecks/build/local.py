@@ -9,7 +9,7 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
 class OIDCAuthSubClaimBackend(OIDCAuthenticationBackend):
     def create_user(self, claims: dict[str, str]) -> Any:
-        user = _make_user(claims["email"])
+        user = _make_user(claims["email"], with_project=False)
         profile = Profile.objects.for_user(user)
         profile.theme = "system"
         profile.save()
