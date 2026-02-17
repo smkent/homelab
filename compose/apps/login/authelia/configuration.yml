@@ -35,16 +35,6 @@ access_control:
     - '{{ env "NODE_FQDN" }}'
     - '*.{{ env "NODE_FQDN" }}'
     policy: two_factor
-  - domain: 'healthchecks.{{ env "NODE_FQDN" }}'
-    policy: two_factor
-    subject:
-    - "group:web_admin"
-  - domain: 'healthchecks.{{ env "NODE_FQDN" }}'
-    policy: deny
-  - domain:
-    - '{{ env "NODE_FQDN" }}'
-    - '*.{{ env "NODE_FQDN" }}'
-    policy: two_factor
 
 session:
   name: sso_session
@@ -86,6 +76,8 @@ definitions:
   user_attributes:
     immich_role:
       expression: '"web_admin" in groups ? "admin" : "user"'
+    healthchecks_role:
+      expression: '"web_admin" in groups ? "admin" : "user"'
 
 identity_providers:
   oidc:
@@ -96,10 +88,16 @@ identity_providers:
       immich:
         custom_claims:
           immich_role: {}
+      healthchecks_policy:
+        custom_claims:
+          healthchecks_role: {}
     scopes:
       immich:
         claims:
         - immich_role
+      healthchecks:
+        claims:
+        - healthchecks_role
     clients:
     - client_id: {{ env "OIDC_GITEA_CLIENT_ID" }}
       client_secret: {{ env "OIDC_GITEA_CLIENT_SECRET" }}
@@ -110,6 +108,18 @@ identity_providers:
       - openid
       - profile
       - email
+    - client_id: {{ env "OIDC_HEALTHCHECKS_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_HEALTHCHECKS_CLIENT_SECRET" }}
+      consent_mode: implicit
+      claims_policy: healthchecks_policy
+      redirect_uris:
+      - https://healthchecks.{{ env "NODE_FQDN" }}/oidc/callback/
+      scopes:
+      - openid
+      - profile
+      - email
+      - healthchecks
+      token_endpoint_auth_method: client_secret_post
     - client_id: {{ env "OIDC_IMMICH_CLIENT_ID" }}
       client_secret: {{ env "OIDC_IMMICH_CLIENT_SECRET" }}
       consent_mode: implicit

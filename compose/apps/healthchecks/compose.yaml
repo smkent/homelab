@@ -6,7 +6,7 @@ networks:
 
 services:
   healthchecks:
-    image: healthchecks/healthchecks:v4.0
+    build: build
     depends_on:
       db:
         condition: service_healthy
