@@ -42,7 +42,6 @@
           -a \
           -o on \
           -S on \
-          -W 4,45,50 \
           -m {{ email }} \
           -M exec /usr/share/smartmontools/smartd-runner
       dest: /etc/smartd.conf
