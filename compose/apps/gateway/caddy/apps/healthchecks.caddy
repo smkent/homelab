@@ -1,14 +1,4 @@
 @healthchecks expression `{host}.startsWith("healthchecks.")`
 handle @healthchecks {
-    @public {
-        path /api/*
-        path /ping/*
-    }
-    handle @public {
-        reverse_proxy healthchecks:8000
-    }
-    handle {
-        import auth_local
-        reverse_proxy healthchecks:8000
-    }
+    reverse_proxy healthchecks:8000
 }
