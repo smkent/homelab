@@ -43,9 +43,7 @@ def _insert(src: Sequence[Any], val: Any, after: Any = None) -> tuple[Any]:
     return tuple(src_list)
 
 
-AUTHENTICATION_BACKENDS = _auth_backends + [
-    "mozilla_django_oidc.auth.OIDCAuthenticationBackend"
-]
+AUTHENTICATION_BACKENDS = _auth_backends + ["hc.local.OIDCAuthSubClaimBackend"]
 INSTALLED_APPS = _insert(
     _installed_apps, "mozilla_django_oidc", "django.contrib.auth"
 )
