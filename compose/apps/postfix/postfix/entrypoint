@@ -12,6 +12,18 @@ if [ -n "${SUBMIT_USER}" ] \
     cp -vf /etc/sasldb2 /var/spool/postfix/etc
 fi
 
+if [ -n "${RELAY_MAP}" ]; then
+    while [ -n "${RELAY_MAP}" ]; do
+        pair="${RELAY_MAP%%;*}"
+        echo "${pair}" | sed -e 's/,/ /'
+        RELAY_MAP="${RELAY_MAP#*;}"
+        [ "${pair}" = "${RELAY_MAP}" ] && break
+    done > /etc/postfix/transport
+    postmap /etc/postfix/transport
+    export POSTFIX_transport_maps=hash:/etc/postfix/transport
+    export POSTFIX_relay_domains="$(awk '{print $1}' /etc/postfix/transport | paste -sd, -)"
+fi
+
 if [ -n "${RELAYHOST}" ]; then
     saslpass_file="/etc/saslpass"
     export POSTFIX_relayhost="${RELAYHOST}"
