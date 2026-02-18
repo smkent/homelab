@@ -2,13 +2,13 @@
     import tls_linode
 
     import ../apps/backrest_local.caddy
-    import ../apps/login.caddy
+    import ../apps/gitea.caddy
     import ../apps/healthchecks.caddy
     import ../apps/hello.caddy
     import ../apps/jobdb.caddy
-    import ../apps/gitea.caddy
-    import ../apps/outline.caddy
+    import ../apps/login.caddy
     import ../apps/nextcloud.caddy
+    import ../apps/outline.caddy
     import ../apps/web.caddy
     import ../apps/web_catchall.caddy
 }
