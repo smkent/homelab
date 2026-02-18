@@ -21,7 +21,8 @@ if [ -n "${RELAY_MAP}" ]; then
     done > /etc/postfix/transport
     postmap /etc/postfix/transport
     export POSTFIX_transport_maps=hash:/etc/postfix/transport
-    export POSTFIX_relay_domains="$(awk '{print $1}' /etc/postfix/transport | paste -sd, -)"
+    POSTFIX_relay_domains="$(awk '{print $1}' /etc/postfix/transport | paste -sd, -)"
+    export POSTFIX_relay_domains
 fi
 
 if [ -n "${RELAYHOST}" ]; then
