@@ -1,0 +1,34 @@
+(storage) {
+    storage file_system {
+        root /data
+    }
+}
+
+(tls_linode) {
+    tls certs@{env.DOMAIN} {
+        dns linode "{$LINODE_TOKEN}"
+        propagation_delay 1m
+        propagation_timeout 5m
+        resolvers 1.1.1.1 8.8.8.8
+    }
+}
+
+(mqtt) {
+    layer4 {
+        :8883 {
+            route {
+                tls
+                proxy mosquitto:1883
+            }
+        }
+    }
+}
+
+{
+    import storage
+    import mqtt
+}
+
+{env.NODE_FQDN} *.{env.NODE_FQDN} {
+    import tls_linode
+}

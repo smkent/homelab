@@ -6,6 +6,7 @@ apps:
 - hello
 - jobdb
 - login
+- mosquitto
 - nextcloud
 - outline
 - postfix
