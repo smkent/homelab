@@ -5,8 +5,8 @@ networks:
 secrets:
   deploy-backup-ssh-key:
     file: ../../secrets/deploy-backup-ssh-key
-  hc-ping-key-backrest:
-    file: ../../secrets/hc-ping-key-backrest
+  healthchecks-ping-key:
+    file: ../../secrets/healthchecks-ping-key
   restic-password:
     file: ../../secrets/restic-password
 
@@ -32,14 +32,14 @@ services:
       SSH_PRIVATE_KEY_FILE: /run/secrets/deploy-backup-ssh-key
       TZ: America/Los_Angeles
       HEALTHCHECKS_URL: "https://healthchecks.${DOMAIN?}"
-      HEALTHCHECKS_PING_KEY_FILE: "/run/secrets/hc-ping-key-backrest"
+      HEALTHCHECKS_PING_KEY_FILE: "/run/secrets/healthchecks-ping-key"
     hostname: "${MACHINE?}"
     networks:
     - web
     restart: unless-stopped
     secrets:
     - deploy-backup-ssh-key
-    - hc-ping-key-backrest
+    - healthchecks-ping-key
     - restic-password
     user: 1000:1000
     group_add:
