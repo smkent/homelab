@@ -1,0 +1,35 @@
+networks:
+  local_mqtt:
+    external: false
+
+volumes:
+  mosquitto_log:
+    driver: local
+
+services:
+  caddy:
+    build: caddy
+    env_file:
+    - host.env
+    - ../../secrets/caddy.env
+    networks:
+    - local_mqtt
+    ports:
+    - 8883:8883
+    volumes:
+    - ./caddy:/etc/caddy:ro
+    - ../../volumes/gateway/caddy_data:/data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_config:/config
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    environment:
+      PUID: 0
+      PGID: 0
+    restart: unless-stopped
+    volumes:
+    - ./config:/mosquitto/config:ro
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/data:/mosquitto/data
+    - mosquitto_log:/mosquitto/log
+    networks:
+    - local_mqtt
