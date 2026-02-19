@@ -50,3 +50,14 @@
       mode: '0644'
     notify: restart-smartd
   when: ansible_facts["virtualization_role"] != "guest"
+
+- name: "Ensure mdadm email is configured"
+  ansible.builtin.lineinfile:
+    path: /etc/mdadm/mdadm.conf
+    regexp: "^{{ item.name }} "
+    line: "{{ item.name }} {{ item.value }}"
+  loop:
+  - {name: "MAILADDR", value: "{{ email }}"}
+  - {name: "MAILFROM", value: "mdadm.{{ inventory_hostname}}@{{ node_domain }}"}
+  loop_control:
+    label: "{{ item.name }}"
