@@ -46,6 +46,7 @@ jobs:
   build:
     name: "Build and push / ${{ matrix.image }}"
     needs: discover
+    if: ${{ fromJson(needs.discover.outputs.matrix).image | length > 0 }}
     runs-on: ubuntu-latest
 
     permissions:
