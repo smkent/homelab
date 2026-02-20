@@ -32,12 +32,12 @@ jobs:
           head_ref="${{ github.event.pull_request.head.sha }}"
         fi
         if git diff --name-only "${base_ref}" "${head_ref}" | grep -q "^\.github/workflows"; then
-          changed_dirs="$(find compose/images -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename | sort)"
+          changed_dirs="$(git ls-files | grep "^compose/images/.*/Dockerfile$" | sort -u)"
         else
-          changed_dirs="$(git diff --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/.*/Dockerfile$" | sort -u | xargs -n1 dirname | xargs -n1 basename)"
+          changed_dirs="$(git diff --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/.*/Dockerfile$" | sort -u)"
         fi
         if [ -n "${changed_dirs}" ]; then
-          json="$(printf '%s\n' "${changed_dirs}" | jq -R . | jq -s -c .)"
+          json="$(printf '%s\n' "$(echo "${changed_dirs}" | xargs -n1 dirname | xargs -n1 basename)" | jq -R . | jq -s -c .)"
         else
           json="[]";
         fi
