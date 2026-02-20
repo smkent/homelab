@@ -8,6 +8,7 @@ ganymede.{env.DOMAIN} *.ganymede.{env.DOMAIN} {
 {env.NODE_LAN_FQDN} *.{env.NODE_LAN_FQDN} \
 {
     import tls_linode
+    import lan_proxy_app plex ganymede
 
     import ../apps/backrest_remote.caddy
     import ../apps/casa_proxy.caddy
