@@ -1,6 +1,8 @@
 secrets:
   deploy-backup-ssh-key:
     file: ../../secrets/deploy-backup-ssh-key
+  healthchecks-ping-key:
+    file: ../../secrets/healthchecks-ping-key
   rclone-s3:
     file: ../../secrets/rclone-s3
 
@@ -19,15 +21,19 @@ services:
 
   rclone:
     build: rclone
+    env_file:
+    - host.env
+    - rclone.env
     environment:
       SYNC_DEST: /deploy/external
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.sync-external.schedule: "@every 6h"
-      ofelia.job-exec.sync-external.command: /scripts/sync_external
+      ofelia.job-exec.sync-external.command: runitor -create -- /scripts/sync_external
     restart: unless-stopped
     secrets:
     - deploy-backup-ssh-key
+    - healthchecks-ping-key
     - rclone-s3
     volumes:
     - ../../volumes/${COMPOSE_PROJECT_NAME}/rclone_config:/config/rclone:rw
