@@ -15,6 +15,7 @@ ganymede.{env.DOMAIN} *.ganymede.{env.DOMAIN} {
     import ../apps/hello.caddy
     import ../apps/immich.caddy
     import ../apps/mealie.caddy
+    import ../apps/outline.caddy
     import ../apps/paperless.caddy
     import ../apps/web.caddy
     import ../apps/web_catchall.caddy

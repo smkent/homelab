@@ -8,7 +8,6 @@
     import ../apps/jobdb.caddy
     import ../apps/login.caddy
     import ../apps/nextcloud.caddy
-    import ../apps/outline.caddy
     import ../apps/web.caddy
     import ../apps/web_catchall.caddy
 }
