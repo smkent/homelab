@@ -15,6 +15,7 @@ jobs:
 
     - id: set-matrix
       run: |
+        set -x
         dirs=$(find compose/images -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename)
         json=$(printf '%s\n' "${dirs}" | jq -R . | jq -s .)
         echo "matrix={\"image\":${json}}" >> "${GITHUB_OUTPUT}"
