@@ -52,9 +52,7 @@
 }
 
 (storage) {
-    storage file_system {
-        root /data
-    }
+    storage s3
 }
 
 (tls_linode) {

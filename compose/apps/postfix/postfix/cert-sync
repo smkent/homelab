@@ -2,15 +2,47 @@
 
 set -eu
 
-CADDY_DATA="${CADDY_DATA-/data/caddy}"
 DEST="${DEST-/data/certs}"
+S3_SYNC_DIR="${DEST}/s3"
+
+LOGNAME="$(basename "${0}")"
+S3CMD_CFG="/tmp/s3cfg"
+
+log() {
+    echo "[${LOGNAME}] $(date -Iseconds) ${*}"
+}
+
+cat > "${S3CMD_CFG}" <<EOF
+[default]
+access_key = ${S3_ACCESS_ID}
+secret_key = ${S3_SECRET_KEY}
+host_base = ${S3_HOST}
+host_bucket = %(bucket)s.${S3_HOST}
+use_https = True
+signature_v2 = False
+EOF
+
+mkdir -vp "${S3_SYNC_DIR}"
+
+SYNC_SOURCE="s3://${S3_BUCKET}/${S3_PREFIX%/}"
+sync_certs() {
+    log "Syncing certificates from ${SYNC_SOURCE}"
+    s3cmd \
+        --config="${S3CMD_CFG}" sync \
+        --delete-removed \
+        "${SYNC_SOURCE}" \
+        "${S3_SYNC_DIR}"
+}
 
 find_cert_dirs() {
-    find "${CADDY_DATA}" -type d -path "*/certificates/*/*"
+    find "${S3_SYNC_DIR}" -type d -path "*/certificates/*/*"
 }
 
 copy_certs() {
-    echo "[$(date "+%Y-%m-%dT%H:%M:%S")] Checking certs"
+    if ! sync_certs; then
+        log "S3 sync failure"
+        return "${?}"
+    fi
     find_cert_dirs | while read -r cert_dir; do
         bn=$(basename "${cert_dir}")
         mtime=$(stat -c %Y "$(dirname "${cert_dir}")")
@@ -38,10 +70,9 @@ copy_cert() {
                 diff -q "${crt}" "${crt_dest}" \
                 && diff -q "${key}" "${key_dest}"
         ) 2>/dev/null; then
-            echo "Unchanged: $(basename "${dir}")"
             return
         fi
-        echo "Updated: $(basename "${dir}")"
+        log "Updated: $(basename "${dir}")"
         mkdir -vp "$(dirname "${crt_dest}")"
         cp -v "${crt}" "${crt_dest}.temp"
         cp -v "${key}" "${key_dest}.temp"
@@ -52,9 +83,10 @@ copy_cert() {
     fi
 }
 
-copy_certs
-while true; do
-    inotifywait -t 86400 -e create -e modify -r "${CADDY_DATA}"
-    sleep 5
-    copy_certs
+while :; do
+    copy_certs || true
+    postfix reload || true
+    SLEEP_TIME="$((86400 + $(shuf -i 0-7200 -n 1) - 3600))"
+    log "Next sync in ${SLEEP_TIME} seconds"
+    sleep "${SLEEP_TIME}"
 done
