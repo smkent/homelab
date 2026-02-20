@@ -38,7 +38,11 @@ jobs:
         else
           changed_dirs="$(git diff --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/.*/Dockerfile$" | sort -u | xargs -n1 dirname | xargs -n1 basename)"
         fi
-        json="$(printf '%s\n' "${changed_dirs}" | jq -R . | jq -s -c .)"
+        if [ -n "${changed_dirs}" ]; then
+          json="$(printf '%s\n' "${changed_dirs}" | jq -R . | jq -s -c .)"
+        else
+          json="[]";
+        fi
         echo "matrix={\"image\":${json}}" >> "${GITHUB_OUTPUT}"
 
   build:
