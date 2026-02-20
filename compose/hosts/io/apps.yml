@@ -8,6 +8,5 @@ apps:
 - login
 - mosquitto
 - nextcloud
-- outline
 - postfix
 - web
