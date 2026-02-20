@@ -218,7 +218,7 @@ class Homestar(HomelabCLIApp):
             local_path = (Path(local_dir) / app).as_posix()
             if not local_path.endswith("/"):
                 local_path += "/"
-            cmd = ["sudo", "-E", "rsync", "-avHSP"]
+            cmd = ["sudo", "-E", "rsync", "-avHSP", "--delete"]
             if ctx.obj.dry_run:
                 cmd += ["-n"]
             if action == "get":
