@@ -30,8 +30,8 @@ jobs:
         base_ref="@~1"
         head_ref="@"
         if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-          base_ref="${GITHUB_BASE_REF}"
-          head_ref="${GITHUB_SHA}"
+          base_ref="${{ github.event.pull_request.base.sha }}"
+          head_ref="${{ github.event.pull_request.head.sha }}"
         fi
         changed_dirs="$(
           cd compose/images || exit 1
