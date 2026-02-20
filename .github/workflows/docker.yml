@@ -33,12 +33,10 @@ jobs:
           base_ref="${{ github.event.pull_request.base.sha }}"
           head_ref="${{ github.event.pull_request.head.sha }}"
         fi
-        changed_dirs="$(
-          cd compose/images || exit 1
-          git diff --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/" | sort -u | xargs -n1 basename
-        )"
         if git diff --name-only "${base_ref}" "${head_ref}" | grep -q "^\.github/workflows"; then
           changed_dirs="$(find compose/images -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename | sort)"
+        else
+          changed_dirs="$(git diff --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/.*/Dockerfile$" | sort -u | xargs -n1 dirname | xargs -n1 basename)"
         fi
         json="$(printf '%s\n' "${changed_dirs}" | jq -R . | jq -s -c .)"
         echo "matrix={\"image\":${json}}" >> "${GITHUB_OUTPUT}"
