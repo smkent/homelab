@@ -42,6 +42,18 @@
     }
 }
 
+(lan_proxy_app) {
+    @proxy_{args[0]}_{args[1]} expression `{host}.startsWith("{args[0]}.")`
+    handle @proxy_{args[0]}_{args[1]} {
+        reverse_proxy https://{args[1]}:443 {
+            header_up Host {args[0]}.{args[1]}.lan.{$DOMAIN}
+            transport http {
+                tls_server_name {args[0]}.{args[1]}.lan.{$DOMAIN}
+            }
+        }
+    }
+}
+
 (servers) {
     servers {
         listener_wrappers {
