@@ -26,6 +26,7 @@ jobs:
     - name: 🔭 Discover container images to build
       id: set-matrix
       run: |
+        set -x
         base_ref="@~1"
         head_ref="@"
         if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
