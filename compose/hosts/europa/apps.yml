@@ -5,6 +5,7 @@ apps:
 - hello
 - immich
 - mealie
+- outline
 - paperless
 - rclone
 - smtp_relay
