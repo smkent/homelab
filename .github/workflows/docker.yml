@@ -62,7 +62,7 @@ jobs:
         tags: |
           type=ref,event=branch
           type=sha,prefix=ref-
-          type=sha,prefix=ref-,format=full
+          type=sha,prefix=ref-,format=long
         labels: |
           org.opencontainers.image.source=${{ github.repository_url }}
           org.opencontainers.image.revision=${{ github.sha }}
