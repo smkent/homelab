@@ -3,7 +3,8 @@ FROM caddy:2-builder AS builder
 RUN xcaddy build \
     --with github.com/caddy-dns/linode \
     --with github.com/mholt/caddy-dynamicdns \
-    --with github.com/mholt/caddy-l4
+    --with github.com/mholt/caddy-l4 \
+    --with github.com/ss098/certmagic-s3
 
 FROM caddy:2
 
