@@ -1,0 +1,92 @@
+#!/bin/sh
+
+set -eu
+
+DEST="${DEST-/data/certs}"
+S3_SYNC_DIR="${DEST}/s3"
+
+LOGNAME="$(basename "${0}")"
+S3CMD_CFG="/tmp/s3cfg"
+
+log() {
+    echo "[${LOGNAME}] $(date -Iseconds) ${*}"
+}
+
+cat > "${S3CMD_CFG}" <<EOF
+[default]
+access_key = ${S3_ACCESS_ID}
+secret_key = ${S3_SECRET_KEY}
+host_base = ${S3_HOST}
+host_bucket = %(bucket)s.${S3_HOST}
+use_https = True
+signature_v2 = False
+EOF
+
+mkdir -vp "${S3_SYNC_DIR}"
+
+SYNC_SOURCE="s3://${S3_BUCKET}/${S3_PREFIX%/}"
+sync_certs() {
+    log "Syncing certificates from ${SYNC_SOURCE}"
+    s3cmd \
+        --config="${S3CMD_CFG}" sync \
+        --delete-removed \
+        "${SYNC_SOURCE}" \
+        "${S3_SYNC_DIR}"
+}
+
+find_cert_dirs() {
+    find "${S3_SYNC_DIR}" -type d -path "*/certificates/*/*"
+}
+
+copy_certs() {
+    if ! sync_certs; then
+        log "S3 sync failure"
+        return "${?}"
+    fi
+    find_cert_dirs | while read -r cert_dir; do
+        bn=$(basename "${cert_dir}")
+        mtime=$(stat -c %Y "$(dirname "${cert_dir}")")
+        echo "${bn} ${mtime} ${cert_dir}";
+    done | sort -k1,1 -k2,2nr | awk '!seen[$1]++ {print $3}' | (
+        while read -r nd; do
+            copy_cert "${nd}"
+        done
+    )
+}
+
+copy_cert() {
+    dir="${1?Certificate directory is required}"
+    shift
+    crt=$(find "${dir}" -name '*.crt' | head -n 1)
+    key=$(find "${dir}" -name '*.key' | head -n 1)
+    crt_cn=$(
+        openssl x509 -in "${crt}" -noout -subject \
+            | sed -ne 's/\*/_/g' -e 's/.*CN=\(.*\)/\1/p'
+    )
+    crt_dest="${DEST}/${crt_cn}/x509.crt"
+    key_dest="${DEST}/${crt_cn}/x509.key"
+    if [ -n "${crt_cn}" ] && [ -f "${crt}" ] && [ -f "${key}" ]; then
+        if (
+                diff -q "${crt}" "${crt_dest}" \
+                && diff -q "${key}" "${key_dest}"
+        ) 2>/dev/null; then
+            return
+        fi
+        log "Updated: $(basename "${dir}")"
+        mkdir -vp "$(dirname "${crt_dest}")"
+        cp -v "${crt}" "${crt_dest}.temp"
+        cp -v "${key}" "${key_dest}.temp"
+        mv -v "${crt_dest}.temp" "${crt_dest}"
+        mv -v "${key_dest}.temp" "${key_dest}"
+        chown -c 0:0 "${crt_dest}" "${key_dest}"
+        chmod -c 0600 "${key_dest}"
+    fi
+}
+
+while :; do
+    copy_certs || true
+    postfix reload || true
+    SLEEP_TIME="$((86400 + $(shuf -i 0-7200 -n 1) - 3600))"
+    log "Next sync in ${SLEEP_TIME} seconds"
+    sleep "${SLEEP_TIME}"
+done

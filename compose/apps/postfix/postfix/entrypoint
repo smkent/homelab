@@ -25,4 +25,6 @@ if [ -n "${RELAY_MAP}" ]; then
     export POSTFIX_relay_domains
 fi
 
+/smkent-extras/cert-sync &
+
 exec /root/run
