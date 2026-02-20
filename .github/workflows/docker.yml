@@ -67,6 +67,9 @@ jobs:
         labels: |
           org.opencontainers.image.source=${{ github.repository_url }}
           org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.title=homelab image for ${{ matrix.image }}
+          org.opencontainers.image.description=customized homelab image for ${{ matrix.image }}
+          org.opencontainers.image.licenses=
 
     - name: 📦 Build and publish container image
       uses: docker/build-push-action@v5
