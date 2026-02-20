@@ -21,8 +21,20 @@ jobs:
     - name: 🔭 Discover container images to build
       id: set-matrix
       run: |
-        dirs="$(find compose/images -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename | sort)"
-        json="$(printf '%s\n' "${dirs}" | jq -R . | jq -s -c .)"
+        base_ref="@~1"
+        head_ref="@"
+        if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+          base_ref="${GITHUB_BASE_REF}"
+          head_ref="${GITHUB_SHA}"
+        fi
+        changed_dirs="$(
+          cd compose/images || exit 1
+          git diff --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/" | sort -u | xargs -n1 basename
+        )"
+        if git diff --name-only "${base_ref}" "${head_ref}" | grep -q "^\.github/workflows"; then
+          changed_dirs="$(find compose/images -mindepth 1 -maxdepth 1 -type d -exec test -f "{}/Dockerfile" \; -print | xargs -n1 basename | sort)"
+        fi
+        json="$(printf '%s\n' "${changed_dirs}" | jq -R . | jq -s -c .)"
         echo "matrix={\"image\":${json}}" >> "${GITHUB_OUTPUT}"
 
   build:
