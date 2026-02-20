@@ -1,4 +1,4 @@
-name: Docker
+name: Containers
 
 env:
   IMAGE_PREFIX: homelab
