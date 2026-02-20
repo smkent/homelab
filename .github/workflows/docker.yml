@@ -79,7 +79,8 @@ jobs:
         images: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}/${{ matrix.image }}
         tags: |
           type=raw,value=latest,enable={{ is_default_branch }}
-          type=ref,event=branch,ref=${{ github.head_ref }}
+          type=ref,event=branch
+          type=ref,event=pr
           type=sha,prefix=ref-
           type=sha,prefix=ref-,format=long
         labels: |
