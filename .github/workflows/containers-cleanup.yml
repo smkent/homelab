@@ -28,6 +28,7 @@ jobs:
 
     - name: 🧹 Remove obsolete image tags
       run: |
+        set -x
         if [ "${GITHUB_EVENT_NAME}" = "delete" ] && [ "${GITHUB_REF_TYPE}" = "branch" ]; then
           delete_tag="$(basename "${{ github.event.ref }}")"
         elif [ "${GITHUB_EVENT_NAME}" = "pull_request" ] && [ "${GITHUB_EVENT_ACTION}" = "closed" ]; then
