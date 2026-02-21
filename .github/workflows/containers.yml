@@ -25,8 +25,8 @@ jobs:
       id: set-matrix
       run: |
         set -x
-        base_ref="@~1"
-        head_ref="@"
+        base_ref="${{ github.event.before }}"
+        head_ref="${{ github.event.after }}"
         if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
           base_ref="${{ github.event.pull_request.base.sha }}"
           head_ref="${{ github.event.pull_request.head.sha }}"
