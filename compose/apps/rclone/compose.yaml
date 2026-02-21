@@ -20,7 +20,7 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock:ro
 
   rclone:
-    build: rclone
+    build: ../../images/rclone
     env_file:
     - host.env
     - rclone.env
