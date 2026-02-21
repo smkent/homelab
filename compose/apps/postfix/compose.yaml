@@ -12,7 +12,8 @@ volumes:
 
 services:
   smtp:
-    build: ../../images/postfix
+    image: ghcr.io/smkent/homelab/postfix:latest
+    # build: ../../images/postfix
     env_file:
     - host.env
     - postfix.env

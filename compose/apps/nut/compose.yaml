@@ -4,7 +4,8 @@ secrets:
 
 services:
   nut:
-    build: ../../images/nut
+    image: ghcr.io/smkent/homelab/nut:latest
+    # build: ../../images/nut
     env_file:
     - host.env
     - nut.env

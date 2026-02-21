@@ -8,7 +8,8 @@ volumes:
 
 services:
   caddy:
-    build: ../../images/caddy
+    image: ghcr.io/smkent/homelab/caddy:latest
+    # build: ../../images/caddy
     env_file:
     - host.env
     - ../../secrets/caddy.env
