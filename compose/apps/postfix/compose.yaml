@@ -12,7 +12,7 @@ volumes:
 
 services:
   smtp:
-    build: postfix
+    build: ../../images/postfix
     env_file:
     - host.env
     - postfix.env

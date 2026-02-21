@@ -1,6 +1,6 @@
 services:
   nfs:
-    build: nfs
+    build: ../../images/nfs
     ports:
     - 2049:2049
     privileged: true

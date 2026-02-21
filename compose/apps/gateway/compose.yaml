@@ -9,7 +9,7 @@ volumes:
 
 services:
   caddy:
-    build: caddy
+    build: ../../images/caddy
     env_file:
     - host.env
     - ../../secrets/caddy.env

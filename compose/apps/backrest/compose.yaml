@@ -20,7 +20,7 @@ volumes:
 
 services:
   backrest:
-    build: build
+    build: ../../images/backrest
     cap_add:
     - DAC_READ_SEARCH
     environment:

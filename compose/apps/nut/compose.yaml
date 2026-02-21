@@ -4,7 +4,7 @@ secrets:
 
 services:
   nut:
-    build: build
+    build: ../../images/nut
     env_file:
     - host.env
     - nut.env

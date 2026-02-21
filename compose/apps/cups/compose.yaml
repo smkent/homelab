@@ -1,6 +1,6 @@
 services:
   cups:
-    build: build
+    build: ../../images/cups
     platform: linux/amd64
     ports:
     - 631:631
