@@ -84,8 +84,8 @@ jobs:
           type=raw,value=latest,enable={{ is_default_branch }}
           type=ref,event=branch
           type=ref,event=pr
-          type=sha,prefix=ref-
-          type=sha,prefix=ref-,format=long
+          type=sha,prefix=ref-,enable={{ github.event_name == 'push' }}
+          type=sha,prefix=ref-,format=long,enable={{ github.event_name == 'push' }}
         labels: |
           org.opencontainers.image.source=${{ github.repository_url }}
           org.opencontainers.image.revision=${{ github.sha }}
