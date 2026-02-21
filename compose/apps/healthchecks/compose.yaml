@@ -6,7 +6,8 @@ networks:
 
 services:
   healthchecks:
-    build: ../../images/healthchecks
+    image: ghcr.io/smkent/homelab/healthchecks:latest
+    # build: ../../images/healthchecks
     depends_on:
       db:
         condition: service_healthy

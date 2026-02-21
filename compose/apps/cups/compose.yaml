@@ -1,6 +1,7 @@
 services:
   cups:
-    build: ../../images/cups
+    image: ghcr.io/smkent/homelab/cups:latest
+    # build: ../../images/cups
     platform: linux/amd64
     ports:
     - 631:631

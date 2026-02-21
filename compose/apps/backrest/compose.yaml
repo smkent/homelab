@@ -20,7 +20,8 @@ volumes:
 
 services:
   backrest:
-    build: ../../images/backrest
+    image: ghcr.io/smkent/homelab/backrest:latest
+    # build: ../../images/backrest
     cap_add:
     - DAC_READ_SEARCH
     environment:

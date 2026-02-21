@@ -1,6 +1,7 @@
 services:
   nfs:
-    build: ../../images/nfs
+    image: ghcr.io/smkent/homelab/nfs:latest
+    # build: ../../images/nfs
     ports:
     - 2049:2049
     privileged: true

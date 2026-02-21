@@ -20,7 +20,8 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock:ro
 
   rclone:
-    build: ../../images/rclone
+    image: ghcr.io/smkent/homelab/rclone:latest
+    # build: ../../images/rclone
     env_file:
     - host.env
     - rclone.env
