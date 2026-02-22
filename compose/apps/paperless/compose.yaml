@@ -12,7 +12,8 @@ networks:
 
 services:
   paperless:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20
+    image: ghcr.io/smkent/homelab/paperless:latest
+    # build: ../../images/paperless
     restart: unless-stopped
     depends_on:
       db:
@@ -30,6 +31,7 @@ services:
     - local_valkey
     - web
     volumes:
+    - ./rulesets:/opt/postprocessor/rulesets:ro
     - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_data:/usr/src/paperless/data
     - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_media:/usr/src/paperless/media
     - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_export:/usr/src/paperless/export

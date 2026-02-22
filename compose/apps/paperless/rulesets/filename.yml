@@ -1,0 +1,9 @@
+Parse creation date from filename:
+  match: '{{ title | regex_match(".*\d{8}$") }}'
+  metadata_postprocessing:
+    title_old: '{{ title }}'     # saved as temporary value
+    # title:         '{{ title_old | regex_sub("^(?P<title>[^-\s]*)[-\s]*(?P<created_year>\d{4})(?P<created_month>\d{2})(?P<created_day>\d{2})$", "\g<title>") | capitalize }}'
+    created_year: '{{ title_old | regex_sub(".*(?P<created_year>\d{4})(?P<created_month>\d{2})(?P<created_day>\d{2})$", "\g<created_year>") }}'
+    created_month: '{{ title_old | regex_sub(".*(?P<created_year>\d{4})(?P<created_month>\d{2})(?P<created_day>\d{2})$", "\g<created_month>") }}'
+    created_day: '{{ title_old | regex_sub(".*(?P<created_year>\d{4})(?P<created_month>\d{2})(?P<created_day>\d{2})$", "\g<created_day>") }}'
+  validation_rule: '{{ num_documents(correspondent=correspondent, document_type=document_type, created_date_object=created_date_object) == 1 }}'
