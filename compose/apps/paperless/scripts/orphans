@@ -1,0 +1,90 @@
+#!/command/with-contenv python3
+import argparse
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+import django  # type: ignore
+
+sys.path.insert(0, "/usr/src/paperless/src")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "paperless.settings")
+django.setup()
+
+from documents.models import Document  # type: ignore  # noqa: E402
+from documents.sanity_checker import check_sanity  # type: ignore  # noqa: E402
+
+ap = argparse.ArgumentParser()
+ap.add_argument(
+    "-n", "--dry-run", "--pretend", dest="dry_run", action="store_true"
+)
+ap.add_argument(
+    "-1",
+    "--one",
+    dest="only_one",
+    action="store_true",
+    help="Stop after fixing one document",
+)
+args = ap.parse_args()
+
+print("Run document sanity checker")
+insane_docs = check_sanity(scheduled=False)._messages
+
+# Get orphans
+orphans = {}
+print("Locating orphan files and calculating checksums")
+for entry in insane_docs.pop(None, []):
+    if (message := entry["message"]).startswith(
+        "Orphaned file in media dir: "
+    ):
+        file_path = Path(message.split(": ", 1)[1])
+        md5sum = (
+            subprocess.check_output(["md5sum", str(file_path)], text=True)
+            .strip()
+            .split()[0]
+            .strip()
+        )
+        if md5sum in orphans:
+            raise Exception(f"Duplicate md5sum found! {md5sum} -- {file_path}")
+        orphans[md5sum] = file_path
+print(
+    f"Found {len(insane_docs)} insane documents"
+    f" and {len(orphans)} orphaned files"
+)
+
+
+def match_orphan(doc_pk: int, source_path: Path, checksum: str) -> None:
+    if not (found_orphan := orphans.pop(checksum, None)):
+        print(
+            "!!! [{doc_pk}] NO ORPHAN MATCH FOUND FOR"
+            f" {checksum} / {source_path}"
+        )
+        return
+    print(
+        ">>> [{doc_pk}] REPLACE MISSING"
+        f" {source_path} WITH FOUND {found_orphan}"
+    )
+    if not (parent_dir := source_path.parent).is_dir():
+        print(f"--- [{doc_pk}] NEED TO MAKE DIRECTORY {parent_dir}")
+        if not args.dry_run:
+            parent_dir.mkdir(exist_ok=True, parents=True)
+    if not args.dry_run:
+        found_orphan.rename(source_path)
+
+
+for doc_pk in insane_docs:
+    # print(f"Checking insane document {doc_pk}")
+    document = Document.objects.get(pk=doc_pk)
+    if not document.source_path.exists():
+        match_orphan(document.pk, document.source_path, document.checksum)
+    if not document.archive_path.exists():
+        match_orphan(
+            document.pk, document.archive_path, document.archive_checksum
+        )
+    if args.only_one:
+        break
+
+if orphans and not args.only_one:
+    print(f"{len(orphans)} orphans remaining")
+
+# vim: ft=python
