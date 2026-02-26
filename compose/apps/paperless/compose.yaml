@@ -32,6 +32,7 @@ services:
     - web
     volumes:
     - ./rulesets:/opt/postprocessor/rulesets:ro
+    - ./scripts:/opt/scripts:ro
     - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_data:/usr/src/paperless/data
     - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_media:/usr/src/paperless/media
     - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_export:/usr/src/paperless/export
