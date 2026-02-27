@@ -10,13 +10,22 @@ from typer import Argument, Context, Option, Typer
 from ..app import CLIError
 from ..util import run
 
-LABEL = "homerun_backup"
-MAPPER_NAME = "homerun_backup_disk"
+LABEL = "home_backup"
+MAPPER_NAME = "home_backup_disk"
 PARTPROBE_TIMEOUT = 5
+PASSPHRASE_SECRET = "backupdisk-luks-passphrase"  # nosec
 
 
 def sudo_run(cmd: Sequence[str], *args: Any, **kwargs: Any) -> Any:
     return run(["sudo"] + list(cmd), *args, **kwargs)
+
+
+def unlock(ctx: Context, dev: Path) -> None:
+    cmd = ["cryptsetup", "luksOpen", str(dev), MAPPER_NAME]
+    if (kf := ctx.obj.stack.host_secrets_dir / PASSPHRASE_SECRET).exists():
+        cmd += ["--key-file", str(kf)]
+    # Open encrypted volume
+    sudo_run(cmd)
 
 
 def mount_mapper_volume(ctx: Context, mount_point: Path | None = None) -> None:
@@ -173,15 +182,16 @@ class BackupDisk:
                 str(dev),
             ]
         )
-        # Open encrypted volume
-        sudo_run(["cryptsetup", "luksOpen", str(dev), MAPPER_NAME])
+        unlock(ctx, dev)
         # Ensure mapper device exists
         if not (
             mapper_dev := Path(f"/dev/mapper/{MAPPER_NAME}")
         ).is_block_device():
             raise CLIError(f"{mapper_dev} not created")
         # Create filesystem
-        sudo_run(["mkfs.ext4", "-m", "0", "-L", LABEL, str(mapper_dev)])
+        sudo_run(
+            ["mkfs.ext4", "-m", "0", "-L", filesystem_label, str(mapper_dev)]
+        )
         if mount_filesystem:
             mount_mapper_volume(ctx)
         else:
@@ -220,8 +230,7 @@ class BackupDisk:
         # Check if mapper device exists
         if (mapper_dev := Path(f"/dev/mapper/{MAPPER_NAME}")).exists():
             raise CLIError(f"{mapper_dev} already exists")
-        # Open encrypted volume
-        sudo_run(["cryptsetup", "luksOpen", str(dev), MAPPER_NAME])
+        unlock(ctx, dev)
         mount_mapper_volume(ctx, mount_point=mount_point)
 
     @cli.command(help="Unmount disk")
@@ -236,33 +245,37 @@ class BackupDisk:
         if not (mapper_dev := Path(f"/dev/mapper/{MAPPER_NAME}")).exists():
             return
         # Locate mount point
-        mount_point = Path(
-            sudo_run(
-                [
-                    "findmnt",
-                    "-n",
-                    "--output",
-                    "TARGET",
-                    "--source",
-                    str(mapper_dev),
-                ],
-                stdout=subprocess.PIPE,
-                text=True,
-            ).stdout.strip()
-        )
-        if not mount_point.is_mount():
-            raise CLIError(f"Detected {mount_point} is not a mount point")
-        if not mount_point.is_dir():
-            raise CLIError(f"Detected {mount_point} is not a directory")
-        # Unmount filesystem
-        sudo_run(["umount", str(mapper_dev)])
+        try:
+            mount_point = Path(
+                sudo_run(
+                    [
+                        "findmnt",
+                        "-n",
+                        "--output",
+                        "TARGET",
+                        "--source",
+                        str(mapper_dev),
+                    ],
+                    stdout=subprocess.PIPE,
+                    text=True,
+                ).stdout.strip()
+            )
+        except subprocess.CalledProcessError:
+            mount_point = None
+        if mount_point:
+            if not mount_point.is_mount():
+                raise CLIError(f"Detected {mount_point} is not a mount point")
+            if not mount_point.is_dir():
+                raise CLIError(f"Detected {mount_point} is not a directory")
+            # Unmount filesystem
+            sudo_run(["umount", str(mapper_dev)])
+            # Check mount point directory is empty
+            if any(mount_point.iterdir()):
+                raise CLIError(f"Mount point {mount_point} is not empty")
+            # Remove mount point directory
+            sudo_run(["rmdir", "-v", str(mount_point)])
         # Close encrypted volume
         sudo_run(["cryptsetup", "luksClose", MAPPER_NAME])
-        # Check mount point directory is empty
-        if any(mount_point.iterdir()):
-            raise CLIError(f"Mount point {mount_point} is not empty")
-        # Remove mount point directory
-        sudo_run(["rmdir", "-v", str(mount_point)])
 
     # Alias for unmount
     cli.command(name="umount", hidden=True)(unmount)
