@@ -76,6 +76,10 @@ class ComposeStack:
             with chdir(app_dir):
                 yield app_dir
 
+    @cached_property
+    def host_secrets_dir(self) -> Path:
+        return self.project.stack_dir / "secrets"
+
     @contextmanager
     def app_stack(self, app_name: str) -> Iterator[Path]:
         if app_name not in self.host_apps:
