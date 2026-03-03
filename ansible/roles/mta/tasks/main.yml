@@ -21,7 +21,7 @@
     dest: /etc/msmtprc
     content: |
       account default
-      host {{ node_domain }}
+      host localhost
       port 25
       from sys.{{ inventory_hostname }}@{{ node_domain }}
       aliases /etc/aliases
