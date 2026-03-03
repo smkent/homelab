@@ -28,6 +28,7 @@ services:
     - smtp-submit-password
     volumes:
     - tls_certs:/data/certs
+    - ./config:/opt/postfix:ro
     - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/lib:/var/lib/postfix:rw
     - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/spool:/var/spool/postfix:rw
     - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/mail:/var/mail:rw
