@@ -16,6 +16,9 @@ services:
       SMTP_PASSWORD_FILE: /run/secrets/smtp-submit-password
     networks:
     - web
+    ports:
+    - "127.0.0.1:25:25"
+    - "[::1]:25:25"
     restart: unless-stopped
     secrets:
     - smtp-submit-password
