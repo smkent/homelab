@@ -1,0 +1,19 @@
+#!/bin/sh
+
+CHECK_SLUG="email-external-${MACHINE:?}"
+HC_EMAIL_TO="${PING_KEY}+${CHECK_SLUG:?}@${HC_EMAIL_HOST:?}"
+
+set -eux
+
+jq -n \
+    --arg from "${MAILJET_EMAIL_FROM:?}" \
+    --arg to "${HC_EMAIL_TO:?}" \
+    --arg sub "Email Deliverability Health Check" \
+    --arg body "Sent $(date)" \
+    '{Messages: [{From: {Email: $from}, To: [{Email: $to}], Subject: $sub, TextPart: $body}]}' \
+| curl \
+    -s \
+    -X POST "https://api.mailjet.com/v3.1/send" \
+    -u "${MAILJET_API_KEY:?}:${MAILJET_SECRET_KEY:?}" \
+    -H "Content-Type: application/json" \
+    -d @-

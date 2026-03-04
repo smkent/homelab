@@ -4,6 +4,7 @@ apps:
 - gateway
 - hello
 - immich
+- mail-hc
 - mealie
 - ofelia
 - outline

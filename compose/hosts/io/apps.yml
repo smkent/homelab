@@ -6,6 +6,7 @@ apps:
 - hello
 - jobdb
 - login
+- mail-hc
 - mosquitto
 - nextcloud
 - ofelia
