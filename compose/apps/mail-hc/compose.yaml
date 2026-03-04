@@ -1,0 +1,30 @@
+networks:
+  web:
+    external: true
+
+secrets:
+  healthchecks-ping-key:
+    file: ../../secrets/healthchecks-ping-key
+
+services:
+  mail-hc:
+    image: ghcr.io/smkent/homelab/hc-task-runner:latest
+    # build: ../../images/hc-task-runner
+    env_file:
+    - host.env
+    - ../../secrets/mailjet.env
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.ping-internal.schedule: "@every 1h"
+      ofelia.job-exec.ping-internal.command: /entrypoint /scripts/email-internal
+      ofelia.job-exec.ping-internal.user: "1000:1000"
+      ofelia.job-exec.ping-external.schedule: "@every 6h"
+      ofelia.job-exec.ping-external.command: /entrypoint /scripts/email-external
+      ofelia.job-exec.ping-external.user: "1000:1000"
+    networks:
+    - web
+    restart: unless-stopped
+    secrets:
+    - healthchecks-ping-key
+    volumes:
+    - ./scripts:/scripts:ro

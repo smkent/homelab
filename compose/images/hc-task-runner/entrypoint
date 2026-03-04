@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+[ "${*}" = "sleep" ] && ( set -x; exec sleep infinity )
+
+export HC_API_URL="${HC_API_URL:-https://healthchecks.${DOMAIN?-}/ping/}"
+export HC_EMAIL_HOST="${HC_EMAIL_HOST:-$(trurl "${HC_API_URL}" -g '{host}')}"
+export PING_KEY="${PING_KEY:-$(cat /run/secrets/"${PING_KEY_SECRET:-healthchecks-ping-key}")}"
+
+exec "${@}"

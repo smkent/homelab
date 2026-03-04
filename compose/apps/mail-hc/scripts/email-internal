@@ -1,0 +1,12 @@
+#!/bin/sh
+
+CHECK_SLUG="email-internal-${MACHINE:?}"
+HC_EMAIL_TO="${PING_KEY}+${CHECK_SLUG:?}@${HC_EMAIL_HOST:?}"
+
+set -eux
+
+echo "Sent $(date)" \
+| mail \
+    -s "Email Deliverability Health Check" \
+    -r "sys.${MACHINE:?}@${DOMAIN:?}" \
+    "${HC_EMAIL_TO:?}"

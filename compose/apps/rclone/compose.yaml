@@ -7,21 +7,9 @@ secrets:
     file: ../../secrets/rclone-s3
 
 services:
-  ofelia:
-    image: mcuadros/ofelia:0.3
-    command: daemon --docker
-    depends_on:
-    - rclone
-    labels:
-      ofelia.job-local.ofelia-keepalive.schedule: "@yearly"
-      ofelia.job-local.ofelia-keepalive.command: "/bin/true"
-    restart: unless-stopped
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-
   rclone:
-    image: ghcr.io/smkent/homelab/rclone:latest
-    # build: ../../images/rclone
+    image: ghcr.io/smkent/homelab/hc-task-runner:latest
+    # build: ../../images/hc-task-runner
     env_file:
     - host.env
     - rclone.env
@@ -31,6 +19,7 @@ services:
       ofelia.enabled: "true"
       ofelia.job-exec.sync-external.schedule: "@every 6h"
       ofelia.job-exec.sync-external.command: runitor -create -- /scripts/sync_external
+      ofelia.job-exec.sync-external.user: "1000:1000"
     restart: unless-stopped
     secrets:
     - deploy-backup-ssh-key
