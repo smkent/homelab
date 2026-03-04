@@ -18,7 +18,7 @@ services:
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.sync-external.schedule: "@every 6h"
-      ofelia.job-exec.sync-external.command: runitor -create -- /scripts/sync_external
+      ofelia.job-exec.sync-external.command: /entrypoint runitor -create -- /scripts/sync_external
       ofelia.job-exec.sync-external.user: "1000:1000"
     restart: unless-stopped
     secrets:
