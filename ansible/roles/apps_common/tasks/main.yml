@@ -9,6 +9,8 @@
       GIT_TERMINAL_PROMPT: 0
     register: homelab_git_repo
     ignore_errors: '{{ ansible_check_mode }}'
+    when:
+    - ensure_homelab_repo | d(True)
 
   - ansible.builtin.include_role:
       name: common
@@ -28,6 +30,7 @@
     when:
     - not ansible_check_mode
     - homelab_git_repo.changed
+    - ensure_homelab_repo | d(True)
 
   - name: "Set docker secrets directory fact"
     ansible.builtin.set_fact:
