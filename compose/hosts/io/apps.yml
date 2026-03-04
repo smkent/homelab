@@ -8,5 +8,6 @@ apps:
 - login
 - mosquitto
 - nextcloud
+- ofelia
 - postfix
 - web

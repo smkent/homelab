@@ -1,0 +1,7 @@
+services:
+  ofelia:
+    image: ghcr.io/netresearch/ofelia:0.20.0
+    command: daemon --docker-events
+    restart: unless-stopped
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro

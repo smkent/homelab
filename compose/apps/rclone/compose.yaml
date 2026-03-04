@@ -7,13 +7,6 @@ secrets:
     file: ../../secrets/rclone-s3
 
 services:
-  ofelia:
-    image: ghcr.io/netresearch/ofelia:0.20.0
-    command: daemon --docker-events
-    restart: unless-stopped
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-
   rclone:
     image: ghcr.io/smkent/homelab/rclone:latest
     # build: ../../images/rclone

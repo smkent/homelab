@@ -5,6 +5,7 @@ apps:
 - hello
 - immich
 - mealie
+- ofelia
 - outline
 - paperless
 - rclone

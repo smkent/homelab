@@ -3,6 +3,7 @@ apps:
 - fs
 - gateway
 - hello
+- ofelia
 - plex
 - rclone
 - smtp_relay
