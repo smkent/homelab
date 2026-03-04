@@ -8,13 +8,8 @@ secrets:
 
 services:
   ofelia:
-    image: mcuadros/ofelia:0.3
-    command: daemon --docker
-    depends_on:
-    - rclone
-    labels:
-      ofelia.job-local.ofelia-keepalive.schedule: "@yearly"
-      ofelia.job-local.ofelia-keepalive.command: "/bin/true"
+    image: ghcr.io/netresearch/ofelia:0.20.0
+    command: daemon --docker-events
     restart: unless-stopped
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -31,6 +26,7 @@ services:
       ofelia.enabled: "true"
       ofelia.job-exec.sync-external.schedule: "@every 6h"
       ofelia.job-exec.sync-external.command: runitor -create -- /scripts/sync_external
+      ofelia.job-exec.sync-external.user: "1000:1000"
     restart: unless-stopped
     secrets:
     - deploy-backup-ssh-key
