@@ -8,8 +8,8 @@ secrets:
 
 services:
   rclone:
-    image: ghcr.io/smkent/homelab/rclone:latest
-    # build: ../../images/rclone
+    image: ghcr.io/smkent/homelab/hc-task-runner:latest
+    # build: ../../images/hc-task-runner
     env_file:
     - host.env
     - rclone.env
