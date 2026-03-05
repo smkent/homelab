@@ -17,7 +17,7 @@ services:
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.sync.schedule: "@every 12h"
-      ofelia.job-exec.sync.command: /scripts/sync
+      ofelia.job-exec.sync.command: /entrypoint /scripts/sync
       ofelia.job-exec.sync.user: "1000:1000"
     restart: unless-stopped
     secrets:
