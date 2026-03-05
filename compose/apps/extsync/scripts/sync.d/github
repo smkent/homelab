@@ -1,0 +1,17 @@
+#!/bin/sh
+
+cd "${SYNC_DEST:?}" || { echo "\$SYNC_DEST must be a directory"; exit 1; }
+
+set -eu
+
+export GHORG_ABSOLUTE_PATH_TO_CLONE_TO="${SYNC_DEST:?}"
+GHORG_GITHUB_TOKEN="$(cat /run/secrets/github-backup-token)"
+export GHORG_GITHUB_TOKEN
+
+ghorg clone \
+    --backup \
+    --clone-wiki \
+    --include-submodules \
+    --prune \
+    --prune-no-confirm \
+    --clone-type=user smkent
