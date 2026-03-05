@@ -1,6 +1,7 @@
 apps:
 - backrest
 - cups
+- extsync
 - gateway
 - hello
 - immich

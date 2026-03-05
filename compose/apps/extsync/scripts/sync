@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -eu
+
+cd "$(dirname "${0}")" || exit
+
+export SYNC_ROOT="${SYNC_ROOT:-/deploy/external}"
+
+find ./sync.d -mindepth 1 -maxdepth 1 -type f -executable \! -path '*/.*' \
+        | while read -r sync_script; do
+    (
+        sync_script_path="$(readlink -f "${sync_script:?}")"
+        script_name="$(basename "${sync_script_path:?}")"
+        export CHECK_SLUG="sync-${script_name:?}"
+        export SYNC_DEST="${SYNC_ROOT:?}/${script_name:?}"
+        mkdir -vp "${SYNC_DEST:?}"
+        cd "${SYNC_DEST:?}"
+        set -x
+        runitor -create -- "${sync_script_path:?}"
+    )
+done

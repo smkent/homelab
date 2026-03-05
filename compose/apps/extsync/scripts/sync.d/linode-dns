@@ -1,0 +1,36 @@
+#!/bin/sh
+
+cd "${SYNC_DEST:?}" || { echo "\$SYNC_DEST must be a directory"; exit 1; }
+
+set -eu
+
+td="$(mktemp -d)"
+trap '[ -d "${td:?}" ] && rm -rf "${td:?}"' EXIT
+
+export LINODE_CLI_CONFIG=/dev/null
+LINODE_CLI_TOKEN="$(cat /run/secrets/linode-backup-dns-token)"
+export LINODE_CLI_TOKEN
+
+linode() {
+    (
+        set -x
+        linode-cli --json "${@}"
+    )
+}
+
+domains_json="$(linode domains list)"
+echo "${domains_json:?}" | jq -r '.[] | "\(.domain) \(.id)"' | while read -r domain domain_id; do
+    domain_records="$(linode domains records-list "${domain_id:?}")"
+    domain_meta="$(linode domains view "${domain_id:?}")"
+    jq -n \
+        --arg domain "${domain:?}" \
+        --argjson meta "${domain_meta:?}" \
+        --argjson records "${domain_records:?}" \
+        '{domain: $domain, meta: $meta, records: $records}' \
+        > "${td:?}/${domain:?}.json"
+    linode domains zone-file "${domain_id:?}" \
+        | jq -r '.[].zone_file | .[]' \
+        > "${td:?}/${domain:?}.zone"
+done
+
+cp -rvf "${td:?}/." "${SYNC_DEST:?}"
