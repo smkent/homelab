@@ -3,10 +3,12 @@ networks:
     external: true
 
 secrets:
-  linode-backup-dns-token:
-    file: ../../secrets/linode-backup-dns-token
+  github-backup-token:
+    file: ../../secrets/github-backup-token
   healthchecks-ping-key:
     file: ../../secrets/healthchecks-ping-key
+  linode-backup-dns-token:
+    file: ../../secrets/linode-backup-dns-token
 
 services:
   extsync:
@@ -21,6 +23,7 @@ services:
       ofelia.job-exec.sync.user: "1000:1000"
     restart: unless-stopped
     secrets:
+    - github-backup-token
     - healthchecks-ping-key
     - linode-backup-dns-token
     volumes:
