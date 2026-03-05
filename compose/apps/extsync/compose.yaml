@@ -1,0 +1,28 @@
+networks:
+  web:
+    external: true
+
+secrets:
+  linode-backup-dns-token:
+    file: ../../secrets/linode-backup-dns-token
+  healthchecks-ping-key:
+    file: ../../secrets/healthchecks-ping-key
+
+services:
+  extsync:
+    image: ghcr.io/smkent/homelab/hc-task-runner:latest
+    # build: ../../images/hc-task-runner
+    env_file:
+    - host.env
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.sync.schedule: "@every 12h"
+      ofelia.job-exec.sync.command: /scripts/sync
+      ofelia.job-exec.sync.user: "1000:1000"
+    restart: unless-stopped
+    secrets:
+    - healthchecks-ping-key
+    - linode-backup-dns-token
+    volumes:
+    - ./scripts:/scripts:ro
+    - $HOME/external:/deploy/external:rw
