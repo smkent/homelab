@@ -17,7 +17,7 @@ fastmail_user="$(cat /run/secrets/fastmail-backup-user)"
 cat > "${HOME}/.mbsyncrc" <<EOF
 IMAPAccount fastmail
 Host imap.fastmail.com
-UserCmd "${fastmail_user:?}"
+User "${fastmail_user:?}"
 PassCmd "cat /run/secrets/fastmail-backup-key"
 TLSType IMAPS
 Timeout 120
