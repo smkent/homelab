@@ -3,6 +3,10 @@ networks:
     external: true
 
 secrets:
+  fastmail-backup-key:
+    file: ../../secrets/fastmail-backup-key
+  fastmail-backup-user:
+    file: ../../secrets/fastmail-backup-user
   github-backup-token:
     file: ../../secrets/github-backup-token
   healthchecks-ping-key:
@@ -23,6 +27,8 @@ services:
       ofelia.job-exec.sync.user: "1000:1000"
     restart: unless-stopped
     secrets:
+    - fastmail-backup-key
+    - fastmail-backup-user
     - github-backup-token
     - healthchecks-ping-key
     - linode-backup-dns-token

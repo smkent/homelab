@@ -3,8 +3,9 @@ ARG UID=1000
 ARG USER=deploy
 
 RUN apk --no-cache add \
-    bash ca-certificates curl git jq mailx python3 py3-pip tini trurl yq
-RUN pip install --no-cache-dir --break-system-packages linode-cli
+    bash ca-certificates curl git isync jq mailx python3 py3-pip tini trurl yq
+RUN pip install --no-cache-dir --break-system-packages pipx && \
+    pipx install --global linode-cli vdirsyncer
 COPY --from=runitor/runitor:v1 /usr/local/bin/runitor /usr/local/bin/
 COPY --from=ghcr.io/gabrie30/ghorg:latest /usr/local/bin/ghorg /usr/local/bin/
 
