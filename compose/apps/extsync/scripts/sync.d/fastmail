@@ -1,0 +1,92 @@
+#!/bin/sh
+
+cd "${SYNC_DEST:?}" || { echo "\$SYNC_DEST must be a directory"; exit 1; }
+
+set -eu
+
+retry () {
+    n="$((${n:-"${SYNC_ATTEMPTS:-5}"}-1))"
+    ( set -x ; "${@}" ) || { e=${?}; [ "${n}" -le 0 ] && return "${e}"; sleep 0.5; retry "${@}"; }
+}
+
+mail_dest="${SYNC_DEST%%/}/mail"
+mkdir -vp "${mail_dest:?}"
+
+fastmail_user="$(cat /run/secrets/fastmail-backup-user)"
+
+cat > "${HOME}/.mbsyncrc" <<EOF
+IMAPAccount fastmail
+Host imap.fastmail.com
+UserCmd "${fastmail_user:?}"
+PassCmd "cat /run/secrets/fastmail-backup-key"
+TLSType IMAPS
+Timeout 120
+
+IMAPStore fastmail-remote
+Account fastmail
+
+MaildirStore fastmail-local
+Path ${mail_dest:?}/
+Inbox ${mail_dest:?}/INBOX
+
+Channel fastmail
+Far :fastmail-remote:
+Near :fastmail-local:
+Sync Pull
+SyncState *
+Patterns * !Spam !Trash
+Create Near
+Expunge Near
+EOF
+
+retry mbsync -a
+
+calendars_dest="${SYNC_DEST%%/}/calendars"
+contacts_dest="${SYNC_DEST%%/}/contacts"
+mkdir -vp "${calendars_dest:?}"
+mkdir -vp "${contacts_dest:?}"
+
+mkdir -vp "${HOME}/.vdirsyncer"
+cat > "${HOME}/.vdirsyncer/config" <<EOF
+[general]
+status_path = "${HOME}/.vdirsyncer/status/"
+
+[pair calendars]
+a = "fastmail_calendars"
+b = "local_calendars"
+collections = ["from a"]
+
+[pair contacts]
+a = "fastmail_contacts"
+b = "local_contacts"
+collections = ["from a"]
+
+[storage fastmail_calendars]
+type = "caldav"
+url = "https://caldav.fastmail.com/dav/${fastmail_user:?}/Calendar/"
+username = "${fastmail_user:?}"
+password.fetch = ["command", "cat", "/run/secrets/fastmail-backup-key"]
+read_only = "true"
+
+[storage fastmail_contacts]
+type = "carddav"
+url = "https://carddav.fastmail.com/dav/${fastmail_user:?}/Contacts/"
+username = "${fastmail_user:?}"
+password.fetch = ["command", "cat", "/run/secrets/fastmail-backup-key"]
+read_only = "true"
+
+[storage local_calendars]
+type = "filesystem"
+path = "${calendars_dest}"
+fileext = ".ics"
+
+[storage local_contacts]
+type = "filesystem"
+path = "${contacts_dest}"
+fileext = ".vcf"
+EOF
+
+yes | vdirsyncer discover
+{ vdirsyncer sync 2>&1 || exit "${?}"; } \
+    | grep -ve '^Doing conflict resolution' -e 'same content on both sides'
+vdirsyncer metasync

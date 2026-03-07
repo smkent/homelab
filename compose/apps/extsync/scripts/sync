@@ -16,6 +16,10 @@ find ./sync.d -mindepth 1 -maxdepth 1 -type f -executable \! -path '*/.*' \
         mkdir -vp "${SYNC_DEST:?}"
         cd "${SYNC_DEST:?}"
         set -x
-        runitor -create -- "${sync_script_path:?}"
+        runitor -create -- \
+            timeout \
+                -k "${SYNC_TIMEOUT_GRACE_SECONDS:-60}" \
+                "${SYNC_TIMEOUT_SECONDS:-$((2*60*60))}" \
+                "${sync_script_path:?}"
     )
 done
