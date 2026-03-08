@@ -6,7 +6,7 @@ set -eu
 
 setx() { ( set -x; "${@}" ); }
 
-export GNUPGHOME="${SYNC_DEST:?}/gnupg"
+export GNUPGHOME="${XDG_CONFIG_HOME:?}/bitwarden/gnupg"
 export PGP_FINGERPRINT="0x0342C80999FB1A06FD0F95338392C992D92500A9"
 
 encrypt() {
