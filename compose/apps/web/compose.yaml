@@ -1,26 +1,10 @@
 networks:
   web:
     external: true
-  local:
-    external: false
-
-secrets:
-  flask-secret-key:
-    file: ../../secrets/flask-secret-key
-  flask-wtf-secret-key:
-    file: ../../secrets/flask-wtf-secret-key
 
 services:
   web:
-    build: build
-    env_file:
-    - host.env
-    - web.env
-    - ../../secrets/web.env
+    image: ghcr.io/smkent/net:latest
     networks:
     - web
-    - local
     restart: unless-stopped
-    secrets:
-    - flask-secret-key
-    - flask-wtf-secret-key

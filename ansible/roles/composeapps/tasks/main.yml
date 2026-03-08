@@ -1,13 +1,3 @@
-- name: "Ensure web repository is present"
-  ansible.builtin.git:
-    repo: '{{ web_repo }}'
-    dest: '{{ deploy_user_home }}/homelab/compose/apps/web/build'
-    version: main
-    accept_hostkey: true
-  environment:
-    GIT_TERMINAL_PROMPT: 0
-  ignore_errors: '{{ ansible_check_mode }}'
-
 - name: "Locate host profile directory"
   ansible.builtin.stat:
     path: "{{ deploy_user_home }}/homelab/compose/hosts/{{ inventory_hostname }}"
