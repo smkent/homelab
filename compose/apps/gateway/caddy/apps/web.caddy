@@ -1,4 +1,4 @@
 @web expression `{host}.startsWith("www.")`
 handle @web {
-    reverse_proxy web:5000
+    reverse_proxy web:8080
 }
