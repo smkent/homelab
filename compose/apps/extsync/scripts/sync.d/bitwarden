@@ -1,0 +1,54 @@
+#!/bin/sh
+
+cd "${SYNC_DEST:?}" || { echo "\$SYNC_DEST must be a directory"; exit 1; }
+
+set -eu
+
+setx() { ( set -x; "${@}" ); }
+
+export GNUPGHOME="${SYNC_DEST:?}/gnupg"
+export PGP_FINGERPRINT="0x0342C80999FB1A06FD0F95338392C992D92500A9"
+
+encrypt() {
+    setx gpg --batch --yes --trust-model always -aer "${PGP_FINGERPRINT}"
+}
+
+mkdir -vp "${GNUPGHOME:?}"
+chmod -Rc og-rwx "${GNUPGHOME:?}"
+if ! setx gpg -k "${PGP_FINGERPRINT}" >/dev/null 2>&1; then
+    setx gpg --keyserver hkps://keys.openpgp.org --recv-keys "${PGP_FINGERPRINT}"
+fi
+
+td="$(mktemp -d "tmp.sync_d.$(basename "${0}").XXXXXXXX")"
+trap 'setx bw lock || true; [ -d "${td:?}" ] && rm -rvf "${td:?}"' EXIT
+
+bw_status="$(setx bw status | jq -r '.status')"
+[ "${bw_status}" = "unauthenticated" ] && setx bw login --apikey
+case "${bw_status}" in
+    unauthenticated|locked)
+        BW_SESSION=$(setx bw unlock --passwordenv BW_PASSWORD --raw)
+        export BW_SESSION
+        ;;
+esac
+
+if [ "$(setx bw status | jq -r '.status')" != "unlocked" ]; then
+    echo "Error: Vault not unlocked" >&2
+    exit 1
+fi
+
+bwexport() {
+    ff="${td:?}/bw_pipefail"
+    {
+        setx bw export --raw --format json "${@}" || echo "${?}" > "${ff}";
+    } | encrypt
+    [ ! -s "${ff:?}" ]
+}
+
+bwexport > "${td:?}/vault.json.asc"
+setx bw list organizations | jq -r '.[].id' | while read -r org_id; do
+    bwexport --organizationid "${org_id:?}" > "${td:?}/org-${org_id}.json.asc"
+done
+
+find "${td:?}" -mindepth 1 -maxdepth 1 -type f -name '*.asc' | while read -r fn; do
+    cp -vf "${fn:?}" "${SYNC_DEST:?}/"
+done

@@ -14,12 +14,17 @@ secrets:
   linode-backup-dns-token:
     file: ../../secrets/linode-backup-dns-token
 
+volumes:
+  config:
+    driver: local
+
 services:
   extsync:
     image: ghcr.io/smkent/homelab/hc-task-runner:latest
     # build: ../../images/hc-task-runner
     env_file:
     - host.env
+    - ../../secrets/bitwarden-backup.env
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.sync.schedule: "@every 6h"
@@ -34,4 +39,5 @@ services:
     - linode-backup-dns-token
     volumes:
     - ./scripts:/scripts:ro
+    - config:/config:rw
     - $HOME/external:/deploy/external:rw
