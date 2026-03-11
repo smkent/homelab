@@ -1,2 +1,3 @@
 dependencies:
 - role: facts_common
+- role: packages_common

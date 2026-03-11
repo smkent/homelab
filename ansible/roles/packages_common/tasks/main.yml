@@ -2,6 +2,8 @@
   ansible.builtin.apt:
     pkg:
     - git
+    - gnupg
+    - mdadm
     state: present
     update_cache: true
     cache_valid_time: 600
