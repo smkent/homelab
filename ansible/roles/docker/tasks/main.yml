@@ -12,7 +12,6 @@
     append: true
   when:
   - not ansible_check_mode
-  - not docker_group.changed
 
 - name: Ensure legacy Docker apt_repository file is removed
   ansible.builtin.file:
