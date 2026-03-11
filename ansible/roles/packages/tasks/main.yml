@@ -3,12 +3,10 @@
     pkg:
     - cryptsetup
     - curl
-    - gnupg
     - htop
     - jq
     - libpam-modules
     - make
-    - mdadm
     - mtools
     - net-tools
     - parted
