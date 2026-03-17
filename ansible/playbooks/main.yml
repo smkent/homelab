@@ -10,6 +10,7 @@
   - mta
   - packages
   - users
+  - tailscale
   - name: helmet
     when: helmet_role|d(false)
   become: true

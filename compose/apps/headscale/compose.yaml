@@ -1,0 +1,21 @@
+networks:
+  web:
+    external: true
+
+services:
+  headscale:
+    image: headscale/headscale:0.28
+    command: serve
+    env_file:
+    - host.env
+    - headscale.env
+    healthcheck:
+      test: ["CMD", "headscale", "health"]
+    networks:
+    - web
+    ports:
+    - "3478:3478/udp"
+    restart: unless-stopped
+    volumes:
+    - ./config:/etc/headscale:ro
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/headscale_data:/var/lib/headscale
