@@ -53,14 +53,22 @@
   changed_when: false
   failed_when: false
 
-- name: Ensure Tailscale is authenticated
-  ansible.builtin.command:
-    argv:
-    - tailscale
-    - up
-    - "--login-server=https://headscale.{{ node_domain }}"
-    - "--auth-key"
-    - "{{ headscale_preauth_key }}"
-  register: ts_debug
+- block:
+  - name: Ensure Tailscale is authenticated
+    ansible.builtin.command:
+      argv:
+      - tailscale
+      - up
+      - "--login-server=https://headscale.{{ node_domain }}"
+      - "--auth-key"
+      - "{{ headscale_preauth_key }}"
+
+  - name: "Ensure Tailscale operator is set to {{ deploy_user }}"
+    ansible.builtin.command:
+      argv:
+      - tailscale
+      - set
+      - --operator
+      - "{{ deploy_user }}"
   when:
   - tailscale_status.rc != 0
