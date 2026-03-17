@@ -1,2 +1,0 @@
-- name: update-initramfs
-  ansible.builtin.include_tasks: ../roles/crypt_root/handlers/update-initramfs.yml

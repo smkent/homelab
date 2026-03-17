@@ -5,7 +5,6 @@
   - ssh
   - auth
   - deploy_user
-  - crypt_root
   - docker
   - mta
   - packages
