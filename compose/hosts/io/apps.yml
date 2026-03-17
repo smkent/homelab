@@ -3,6 +3,7 @@ apps:
 - gateway
 - gitea
 - healthchecks
+- headscale
 - hello
 - jobdb
 - login

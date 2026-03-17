@@ -4,6 +4,7 @@
     import ../apps/backrest_local.caddy
     import ../apps/gitea.caddy
     import ../apps/healthchecks.caddy
+    import ../apps/headscale.caddy
     import ../apps/hello.caddy
     import ../apps/jobdb.caddy
     import ../apps/login.caddy

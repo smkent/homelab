@@ -1,0 +1,4 @@
+@headscale expression `{host}.startsWith("headscale.")`
+handle @headscale {
+    reverse_proxy headscale:8080
+}

@@ -33,7 +33,8 @@
     dest: /etc/apt/keyrings/docker.asc
     mode: 0644
   when:
-  - not (ansible_check_mode and apt_keyring_dir.changed)
+  - not ansible_check_mode
+  - not apt_keyring_dir.changed
   register: apt_docker_key_asc
 
 - name: Ensure Docker apt GPG key is dearmored
