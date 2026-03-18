@@ -55,6 +55,8 @@ services:
     - local_db
     - local_valkey
     - web
+    ports:
+    - 19091:9091
     secrets:
     - authelia-jwt-secret
     - authelia-ldap-password
