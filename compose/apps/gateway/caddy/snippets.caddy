@@ -10,12 +10,7 @@
 }
 
 (auth_remote) {
-    forward_auth login.{$DOMAIN}:443 {
-        header_up Host {upstream_hostport}
-        transport http {
-            tls
-            tls_server_name login.{$DOMAIN}
-        }
+    forward_auth io.vpn.{$DOMAIN}:19091 {
         import auth_common
     }
 }
