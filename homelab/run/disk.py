@@ -20,10 +20,14 @@ def sudo_run(cmd: Sequence[str], *args: Any, **kwargs: Any) -> Any:
     return run(["sudo"] + list(cmd), *args, **kwargs)
 
 
-def unlock(ctx: Context, dev: Path) -> None:
-    cmd = ["cryptsetup", "luksOpen", str(dev), MAPPER_NAME]
+def kf_args(ctx: Context) -> list[str]:
     if (kf := ctx.obj.stack.host_secrets_dir / PASSPHRASE_SECRET).exists():
-        cmd += ["--key-file", str(kf)]
+        return ["--key-file", str(kf)]
+    return []
+
+
+def unlock(ctx: Context, dev: Path) -> None:
+    cmd = ["cryptsetup", "luksOpen", str(dev), MAPPER_NAME] + kf_args(ctx)
     # Open encrypted volume
     sudo_run(cmd)
 
@@ -181,6 +185,7 @@ class BackupDisk:
                 "sha512",
                 str(dev),
             ]
+            + kf_args(ctx)
         )
         unlock(ctx, dev)
         # Ensure mapper device exists
