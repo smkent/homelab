@@ -235,6 +235,19 @@ class BackupDisk:
         # Check if mapper device exists
         if (mapper_dev := Path(f"/dev/mapper/{MAPPER_NAME}")).exists():
             raise CLIError(f"{mapper_dev} already exists")
+        if not dev:
+            devices = (
+                sudo_run(
+                    ["blkid", "-t", "TYPE=crypto_LUKS", "-s", "LABEL"],
+                    stdout=subprocess.PIPE,
+                    text=True,
+                )
+                .stdout.strip()
+                .splitlines()
+            )
+            if len(devices) != 1:
+                raise CLIError("Did not find exactly 1 matching block device")
+            dev = devices.split(":", 1)[0].strip()
         unlock(ctx, dev)
         mount_mapper_volume(ctx, mount_point=mount_point)
 
