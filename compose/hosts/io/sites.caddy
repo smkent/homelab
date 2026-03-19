@@ -2,6 +2,7 @@
     import tls_linode
 
     import ../apps/backrest_local.caddy
+    import ../apps/beszel.caddy
     import ../apps/gitea.caddy
     import ../apps/healthchecks.caddy
     import ../apps/headscale.caddy
