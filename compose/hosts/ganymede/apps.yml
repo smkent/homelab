@@ -1,5 +1,6 @@
 apps:
 - backrest
+- beszel-agent
 - fs
 - gateway
 - hello
