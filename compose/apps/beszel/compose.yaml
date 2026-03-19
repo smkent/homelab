@@ -1,0 +1,29 @@
+networks:
+  web:
+    external: true
+
+services:
+  beszel:
+    image: henrygd/beszel:latest
+    env_file:
+    - host.env
+    - beszel.env
+    networks:
+    - web
+    restart: unless-stopped
+    volumes:
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/beszel_data:/beszel_data
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/beszel_socket:/beszel_socket
+
+  beszel-agent:
+    image: henrygd/beszel-agent:latest
+    env_file:
+    - host.env
+    - beszel-agent.env
+    - ../../secrets/beszel-agent.env
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/beszel_agent_data:/var/lib/beszel-agent
+    - ../../volumes/${COMPOSE_PROJECT_NAME}/beszel_socket:/beszel_socket
+    - /var/run/docker.sock:/var/run/docker.sock:ro

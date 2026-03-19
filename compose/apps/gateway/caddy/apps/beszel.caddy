@@ -1,0 +1,4 @@
+@beszel expression `{host}.startsWith("beszel.")`
+handle @beszel {
+    reverse_proxy beszel:8090
+}

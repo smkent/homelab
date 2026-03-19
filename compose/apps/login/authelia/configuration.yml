@@ -99,6 +99,16 @@ identity_providers:
         claims:
         - healthchecks_role
     clients:
+    - client_id: {{ env "OIDC_BESZEL_CLIENT_ID" }}
+      client_secret: {{ env "OIDC_BESZEL_CLIENT_SECRET" }}
+      client_name: Beszel
+      consent_mode: implicit
+      redirect_uris:
+      - https://beszel.{{ env "NODE_FQDN" }}/api/oauth2-redirect
+      scopes:
+      - openid
+      - email
+      - profile
     - client_id: {{ env "OIDC_GITEA_CLIENT_ID" }}
       client_secret: {{ env "OIDC_GITEA_CLIENT_SECRET" }}
       consent_mode: implicit
