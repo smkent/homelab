@@ -11,7 +11,7 @@ volumes:
     driver: local
 
 services:
-  smtp:
+  postfix:
     image: ghcr.io/smkent/homelab/postfix:latest
     # build: ../../images/postfix
     env_file:

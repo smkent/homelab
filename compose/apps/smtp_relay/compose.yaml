@@ -17,8 +17,8 @@ services:
     networks:
     - web
     ports:
-    - "127.0.0.1:25:25"
-    - "[::1]:25:25"
+    - "127.0.0.1:2525:25"
+    - "[::1]:2525:25"
     restart: unless-stopped
     secrets:
     - smtp-submit-password

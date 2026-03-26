@@ -22,7 +22,7 @@
     content: |
       account default
       host localhost
-      port 25
+      port 2525
       from sys.{{ inventory_hostname }}@{{ node_domain }}
       aliases /etc/aliases
       auth off
