@@ -13,4 +13,5 @@ apps:
 - nextcloud
 - ofelia
 - postfix
+- smtp_relay
 - web
