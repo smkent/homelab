@@ -8,7 +8,7 @@ networks:
 
 services:
   outline:
-    image: outlinewiki/outline:0.84.0
+    image: outlinewiki/outline:1.8.1
     depends_on:
       db:
         condition: service_healthy
