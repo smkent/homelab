@@ -9,7 +9,7 @@ volumes:
 
 services:
   plex:
-    image: linuxserver/plex:1.41.5
+    image: linuxserver/plex:1.43.3
     ports:
     - 32400:32400
     environment:
