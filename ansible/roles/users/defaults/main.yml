@@ -2,8 +2,8 @@ create_users:
   deploy:
     uid: 1000
     groups:
-    - docker
-    - sudo
+      - docker
+      - sudo
     home: /opt/deploy
     dotfiles: true
     user_packages: true

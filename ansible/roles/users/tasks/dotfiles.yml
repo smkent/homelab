@@ -1,49 +1,49 @@
-- import_role:
-    name: common
-    tasks_from: resolve_user_home
-  vars:
-    resolve_home_user_name: "{{ user_name }}"
-    resolve_home_user_def: "{{ user_def }}"
+  - import_role:
+      name: common
+      tasks_from: resolve_user_home
+    vars:
+      resolve_home_user_name: "{{ user_name }}"
+      resolve_home_user_def: "{{ user_def }}"
 
-- name: Check if dotfiles repository is installed
-  ansible.builtin.stat:
-    path: "{{ user_home }}/.git"
-  register: dotfiles_git_stat
+  - name: Check if dotfiles repository is installed
+    ansible.builtin.stat:
+      path: "{{ user_home }}/.git"
+    register: dotfiles_git_stat
 
-- name: "Ensure dotfiles repository is installed for {{ user_name }}"
-  block:
-  - name: Clone dotfiles repository
+  - name: "Ensure dotfiles repository is installed for {{ user_name }}"
+    block:
+      - name: Clone dotfiles repository
+        ansible.builtin.git:
+          repo: "{{ dotfiles_repository }}"
+          dest: "{{ temp_dir }}"
+        ignore_errors: '{{ ansible_check_mode }}'
+
+      - name: Move repository metadata directory into place
+        ansible.builtin.command: mv "{{ temp_dir }}/.git" "{{ user_home }}"
+        args:
+          chdir: '{{ user_home }}'
+          removes: "{{ temp_dir }}/.git"
+          creates: '{{ user_home }}/.git'
+
+      - name: Clean up temporary dotfiles repository directory
+        ansible.builtin.file:
+          path: "{{ temp_dir }}"
+          state: absent
+        diff: false
+        no_log: true
+    become_user: '{{ user_name }}'
+    vars:
+      repository: "https://github.com/smkent/dotfiles"
+      temp_dir: /tmp/dotfiles_temp
+    when:
+      - ansible_facts.getent_passwd.get(user_name) is not none
+      - not dotfiles_git_stat.stat.exists
+
+  - name: "Ensure dotfiles repository is updated"
     ansible.builtin.git:
       repo: "{{ dotfiles_repository }}"
-      dest: "{{ temp_dir }}"
+      dest: "{{ user_home }}"
+      clone: false
+      force: true
     ignore_errors: '{{ ansible_check_mode }}'
-
-  - name: Move repository metadata directory into place
-    ansible.builtin.command: mv "{{ temp_dir }}/.git" "{{ user_home }}"
-    args:
-      chdir: '{{ user_home }}'
-      removes: "{{ temp_dir }}/.git"
-      creates: '{{ user_home }}/.git'
-
-  - name: Clean up temporary dotfiles repository directory
-    ansible.builtin.file:
-      path: "{{ temp_dir }}"
-      state: absent
-    diff: false
-    no_log: true
-  become_user: '{{ user_name }}'
-  vars:
-    repository: "https://github.com/smkent/dotfiles"
-    temp_dir: /tmp/dotfiles_temp
-  when:
-  - ansible_facts.getent_passwd.get(user_name) is not none
-  - not dotfiles_git_stat.stat.exists
-
-- name: "Ensure dotfiles repository is updated"
-  ansible.builtin.git:
-    repo: "{{ dotfiles_repository }}"
-    dest: "{{ user_home }}"
-    clone: false
-    force: true
-  ignore_errors: '{{ ansible_check_mode }}'
-  become_user: '{{ user_name }}'
+    become_user: '{{ user_name }}'

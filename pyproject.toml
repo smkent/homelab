@@ -1,29 +1,39 @@
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
 
 [project]
 name = "homelab"
+dynamic = ["version"]
 description = "Self-hosted apps I run on my homelab and personal infrastructure. Deployments are managed by Ansible."
-license = "GPL-3.0-or-later"
-authors = [ { name = "Stephen Kent", email = "smkent@smkent.net" } ]
 readme = "README.md"
-repository = "https://github.com/smkent/homelab"
+license = "GPL-3.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+authors = [
+    { name = "Stephen Kent", email = "smkent@smkent.net" },
+]
 classifiers = [
-    "Development Status :: 1 - Planning",
-    "Operating System :: OS Independent",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Documentation",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
     "Typing :: Typed",
 ]
-requires-python = ">=3.12,<4.0"
-dynamic = [ "version" ]
+keywords = []
 dependencies = [
     "ansible-core",
     "gnupg",
     "passlib",
-    "ruamel-yaml (>=0.19.1,<0.20.0)",
-    "typer (>=0.21.1,<0.22.0)",
-    "mitogen (>=0.3.39,<0.4.0)",
+    "ruamel-yaml>=0.19.1,<0.20.0",
+    "typer>=0.21.1,<0.22.0",
+    "mitogen>=0.3.39,<0.4.0",
 ]
 
 [project.scripts]
@@ -31,108 +41,103 @@ hm = "homelab.homerun:Homerun.app"
 homerun = "homelab.homerun:Homerun.app"
 homestar = "homelab.homestar:Homestar.app"
 
-[tool.poetry]
-requires-poetry = ">=2.0"
-exclude = [
-  "ansible/vault/**",
+[project.urls]
+Homepage = "https://github.com/smkent/homelab"
+Repository = "https://github.com/smkent/homelab"
+Issues = "https://github.com/smkent/homelab/issues"
+
+[dependency-groups]
+dev = [
+    "bump-my-version>=1.3.0",
+    "pysentry-rs>=0.4",
+    "pytest>=9",
+    "pytest-cov>=7",
+    "pytest-sugar>=1",
+    "pytest-xdist>=3",
+    "ruff>=0.15",
+    "syrupy>=5",
+    "ty>=0.0.49",
 ]
-version = "0.0.0"
 
-[tool.poetry.requires-plugins]
-poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
+[tool.bumpversion]
+commit = false
+tag = true
+tag_name = "v{new_version}"
+tag_message = ""
+push = true
 
-[tool.poetry.group.dev.dependencies]
-bandit = {extras = ["toml"], version = "*"}
-cruft = "*"
-mypy = "*"
-poethepoet = "*"
-pre-commit = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-github-actions-annotate-failures = "*"
-pytest-sugar = "*"
-ruff = "*"
+[tool.hatch.build.targets.sdist]
+include = ["/homelab", "/tests", "*.md", "LICENSE"]
 
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "semver"
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
 
-[tool.poe.tasks.lint]
-cmd = "pre-commit run --all-files --show-diff-on-failure"
-help = "Check all files"
-
-[tool.poe.tasks.pytest]
-cmd = "pytest"
-help = "Run unit tests with pytest"
-
-[tool.poe.tasks.test]
-sequence = ["lint", "pytest"]
-help = "Run all tests"
-
-[tool.bandit]
-skips = [
-    "B101",  # assert_used
-    "B404",  # blacklist
-    "B603",  # subprocess_without_shell_equals_true
-    "B607",  # start_process_with_partial_path
+[tool.pytest]
+addopts = [
+    "-ra",
+    "--cov=homelab",
+    "--strict-config",
+    "--strict-markers",
+    "--numprocesses",
+    "auto",
 ]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["homelab"]
+branch = true
 
 [tool.coverage.report]
-fail_under = 0
 show_missing = true
-
-[tool.cruft]
-skip = [".git"]
-
-[tool.mypy]
-files = [ "tests", "homelab" ]
-mypy_path = "types"
-disallow_untyped_defs = true
-no_implicit_optional = true
-check_untyped_defs = true
-warn_return_any = true
-show_error_codes = true
-warn_unused_ignores = true
-
-[tool.pytest]
-testpaths = ['tests']
-addopts = [
-    "--cov",
-    "--cov-append",
-    "--cov-report=term",
-    "--cov-report=xml:.pytest_coverage.xml",
-    "--junitxml=.pytest_results.xml",
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
 ]
 
 [tool.ruff]
-target-version = "py310"
 line-length = 79
-fix = true
-
-exclude = [
-  ".git",
-  ".venv",
-  "__pycache__",
-]
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-line-ending = "auto"
+output-format = "concise"
+target-version = "py312"
 
 [tool.ruff.lint]
-select = [
-  "E", "W",     # pycodestyle
-  "F",          # pyflakes
-  "I",          # isort
-  "B",          # bugbear
-  "SIM",        # flake8-simplify
-  "N",          # pep8-naming
-  "UP",         # pyupgrade
+select = ["ALL"]
+ignore = [
+    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
+    "COM812",  # Trailing comma missing
+    "CPY001",  # Missing copyright notice at top of file
+    "D1",  # Missing docstring presence rules
+    "EM",  # flake8-errmsg
+    "G004",  # Logging statement uses f-string
+    "PLR",  # pylint Refactor
+    "S607",  # Starting a process with a partial executable path
+    "TD",  # flake8-todos
+    "TRY003", # Avoid specifying long messages outside the exception class
 ]
 
-# vim: ft=cfg
+[tool.ruff.lint.isort]
+known-first-party = ["homelab"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "ARG",  # flake8-unused-arguments
+    "S101",  # Use of assert detected
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ty.src]
+include = ["homelab/", "tests/"]
+
+[tool.ty.terminal]
+error-on-warning = true
+output-format = "concise"
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.uv-dynamic-versioning]
+pattern = "default-unprefixed"
+fallback-version = "0.0.0"

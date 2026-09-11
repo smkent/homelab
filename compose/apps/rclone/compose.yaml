@@ -11,8 +11,8 @@ services:
     image: ghcr.io/smkent/homelab/hc-task-runner:latest
     # build: ../../images/hc-task-runner
     env_file:
-    - host.env
-    - rclone.env
+      - host.env
+      - rclone.env
     environment:
       SYNC_DEST: /deploy/external
     labels:
@@ -22,10 +22,10 @@ services:
       ofelia.job-exec.sync-external.user: "1000:1000"
     restart: unless-stopped
     secrets:
-    - deploy-backup-ssh-key
-    - healthchecks-ping-key
-    - rclone-s3
+      - deploy-backup-ssh-key
+      - healthchecks-ping-key
+      - rclone-s3
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/rclone_config:/config/rclone:rw
-    - ./scripts:/scripts:ro
-    - $HOME/external:/deploy/external:rw
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/rclone_config:/config/rclone:rw
+      - ./scripts:/scripts:ro
+      - $HOME/external:/deploy/external:rw

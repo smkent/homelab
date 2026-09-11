@@ -1,0 +1,29 @@
+title = "homelab betterleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+    id = "generic-password"
+    [[rules.allowlists]]
+        description = "Ansible role tasks (false positives, secrets in vault)"
+        paths = ['''(^|/)ansible/roles/.*\.ya?ml$''']
+    [[rules.allowlists]]
+        description = "Compose stack internal service credentials"
+        paths = [
+            '''(^|/)apps/[^/]+/(.*\.env|env)$''',
+            '''(^|/)apps/[^/]+/compose\.ya?ml$''',
+            '''(^|/)apps/login/authelia/configuration\.ya?ml$''',
+        ]
+
+[[rules]]
+    id = "generic-credential-uri"
+    [[rules.allowlists]]
+        description = "Compose stack internal database connection strings"
+        condition = "AND"
+        paths = [
+            '''(^|/)apps/[^/]+/(.*\.env|env)$''',
+            '''(^|/)apps/[^/]+/compose\.ya?ml$''',
+        ]
+        regexes = ['''@db(:\d+)?/''']
+        regexTarget = "line"

@@ -23,8 +23,8 @@ services:
     image: ghcr.io/smkent/homelab/hc-task-runner:latest
     # build: ../../images/hc-task-runner
     env_file:
-    - host.env
-    - ../../secrets/bitwarden-backup.env
+      - host.env
+      - ../../secrets/bitwarden-backup.env
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.sync.schedule: "@every 6h"
@@ -32,12 +32,12 @@ services:
       ofelia.job-exec.sync.user: "1000:1000"
     restart: unless-stopped
     secrets:
-    - fastmail-backup-key
-    - fastmail-backup-user
-    - github-backup-token
-    - healthchecks-ping-key
-    - linode-backup-dns-token
+      - fastmail-backup-key
+      - fastmail-backup-user
+      - github-backup-token
+      - healthchecks-ping-key
+      - linode-backup-dns-token
     volumes:
-    - ./scripts:/scripts:ro
-    - config:/config:rw
-    - $HOME/external:/deploy/external:rw
+      - ./scripts:/scripts:ro
+      - config:/config:rw
+      - $HOME/external:/deploy/external:rw

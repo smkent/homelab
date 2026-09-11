@@ -1,2 +1,2 @@
 dependencies:
-- role: packages_common
+  - role: packages_common

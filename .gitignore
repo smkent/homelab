@@ -1,13 +1,31 @@
+# Python
+__pycache__/
 *.egg-info/
-*.pyc
-.coverage
+*.py[cod]
+
+# uv and packaging
+.venv*/
+/build/
+/dist/
+
+# mise
+mise.local.toml
+.mise.local.toml
+.mise/
+
+# Development tools
+.cache/
+.coverage*
 .pytest_cache/
-.pytest_coverage.xml
-.pytest_results.xml
-.venv/
-dist/
-/ansible/.requirements.yml.sha256sum
+.ruff_cache/
+/htmlcov/
+/site/
+coverage.xml
+
+# Ansible
 /ansible/vault
+
+# Docker Compose stacks
 /compose/hosts/active
 /compose/volumes
 /compose/secrets

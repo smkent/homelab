@@ -1,5 +1,3 @@
-import hashlib
-import os
 import sys
 import textwrap
 from collections.abc import Sequence
@@ -17,67 +15,24 @@ from .project import HomelabProject
 from .util import gpg_fifo, run
 
 
-@dataclass
-class AnsibleCollections:
-    project: HomelabProject = field(default_factory=HomelabProject)
-
-    @cached_property
-    def requirements(self) -> Path:
-        return self.project.ansible_dir / "requirements.yml"
-
-    @cached_property
-    def checksum(self) -> Path:
-        return (
-            self.requirements.parent / f".{self.requirements.name}.sha256sum"
-        )
-
-    def ensure(self) -> None:
-        if not self._requirements_changed():
-            return
-        run(
-            [
-                "ansible-galaxy",
-                "collection",
-                "install",
-                "-r",
-                str(self.requirements),
-            ],
-        )
-        self._update_checksum()
-
-    def _requirements_changed(self) -> bool:
-        if not self.checksum.exists():
-            return True
-        new_checksum = hashlib.sha256(
-            self.requirements.read_bytes()
-        ).hexdigest()
-        old_checksum = self.checksum.read_text().strip()
-        return new_checksum != old_checksum
-
-    def _update_checksum(self) -> None:
-        self.checksum.write_text(
-            hashlib.sha256(self.requirements.read_bytes()).hexdigest()
-        )
-
-
 class HomestarOptions:
     class Validators:
         @classmethod
-        def _str(cls, value: str) -> str:
+        def string(cls, value: str) -> str:
             if not value:
                 raise BadParameter("Value cannot be empty")
             return value
 
         @classmethod
-        def _file(cls, value: str) -> Path:
-            path = Path(cls._str(value))
+        def file_path(cls, value: str) -> Path:
+            path = Path(cls.string(value))
             if not path.exists():
                 raise BadParameter(f"{path} does not exist")
             return path
 
         @classmethod
-        def _playbook_path(cls, value: str) -> Path:
-            fn = cls._str(str(value))
+        def playbook_path(cls, value: str) -> Path:
+            fn = cls.string(str(value))
             if not fn.endswith(".yml"):
                 fn += ".yml"
             path = Path(fn)
@@ -88,33 +43,33 @@ class HomestarOptions:
 
     playbook = Annotated[
         Path,
-        Option(
+        Option(  # ty: ignore[no-matching-overload]
             "-p",
             "--playbook",
             metavar="playbook",
-            callback=Validators._playbook_path,
+            callback=Validators.playbook_path,
             default_factory="main",
             help="Ansible playbook",
         ),
     ]
     env = Annotated[
         str,
-        Option(
+        Option(  # ty: ignore[no-matching-overload]
             "-e",
             "--env",
             metavar="env",
-            callback=Validators._str,
+            callback=Validators.string,
             default_factory="live",
             help="Ansible inventory",
         ),
     ]
     ansible_vault = Annotated[
         Path,
-        Option(
+        Option(  # ty: ignore[no-matching-overload]
             "-V",
             "--vault",
             metavar="path",
-            callback=Validators._file,
+            callback=Validators.file_path,
             default_factory=Path("vault/ansible.asc"),
             help="Path to Ansible vault",
         ),
@@ -124,10 +79,7 @@ class HomestarOptions:
 @dataclass
 class Homestar(HomelabCLIApp):
     dry_run: bool = False
-    invoke_cwd: Path = Path(".").resolve()
-    ansible_collections: AnsibleCollections = field(
-        default_factory=AnsibleCollections
-    )
+    invoke_cwd: Path = field(default_factory=Path.cwd)
 
     cli = Typer(
         help="Homelab setup",
@@ -146,10 +98,10 @@ class Homestar(HomelabCLIApp):
     @cached_property
     def mitogen_path(self) -> str:
         spec = find_spec("ansible_mitogen")
-        assert spec and spec.origin, "ansible_mitogen module not found"
+        assert spec and spec.origin, "ansible_mitogen module not found"  # noqa: S101, PT018
         return str(Path(spec.origin).parent / "plugins" / "strategy")
 
-    def _ansible_run(
+    def ansible_run(
         self,
         cmd: Sequence[str],
         *args: Any,
@@ -159,13 +111,13 @@ class Homestar(HomelabCLIApp):
         kwargs["env"] |= {
             "ANSIBLE_STRATEGY_PLUGINS": self.mitogen_path,
         }
-        self.ansible_collections.ensure()
         return run(cmd, *args, dry_run=self.dry_run, **kwargs)
 
     @cli.callback()
     @staticmethod
     def setup(
         ctx: Context,
+        *,
         ansible_help: Annotated[
             bool,
             Option(
@@ -193,7 +145,7 @@ class Homestar(HomelabCLIApp):
     @staticmethod
     def appdata(
         ctx: Context,
-        ansible_vault: HomestarOptions.ansible_vault,
+        *,
         action: Annotated[Literal["get", "put"], Argument(help="Action")],
         host: Annotated[str, Argument(metavar="host", help="Target host")],
         apps: Annotated[
@@ -223,7 +175,7 @@ class Homestar(HomelabCLIApp):
                 cmd += ["-n"]
             if action == "get":
                 if not ctx.obj.dry_run:
-                    os.makedirs(local_path, exist_ok=True)
+                    Path(local_path).mkdir(parents=True)
                 cmd += [remote_path, local_path]
             elif action == "put":
                 cmd += [local_path, remote_path]
@@ -239,6 +191,7 @@ class Homestar(HomelabCLIApp):
     @staticmethod
     def bootstrap(
         ctx: Context,
+        *,
         ansible_vault: HomestarOptions.ansible_vault,
         host: Annotated[str, Argument(metavar="host", help="Target host")],
         username: Annotated[
@@ -270,8 +223,8 @@ class Homestar(HomelabCLIApp):
             if sudo:
                 cmd += ["-e", "bootstrap_become_method=sudo"]
             cmd += ctx.args
-            print(cmd)
-            ctx.obj._ansible_run(cmd)
+            print(cmd)  # noqa: T201
+            ctx.obj.ansible_run(cmd)
 
     @cli.command(
         context_settings={
@@ -283,6 +236,7 @@ class Homestar(HomelabCLIApp):
     @staticmethod
     def hostvars(
         ctx: Context,
+        *,
         env: HomestarOptions.env,
         ansible_vault: HomestarOptions.ansible_vault,
         message: Annotated[
@@ -314,8 +268,8 @@ class Homestar(HomelabCLIApp):
                     msg: {message}
             """
             )
-            print(hostvars_playbook)
-            ctx.obj._ansible_run(cmd, input=hostvars_playbook, text=True)
+            print(hostvars_playbook)  # noqa: T201
+            ctx.obj.ansible_run(cmd, input=hostvars_playbook, text=True)
 
     @cli.command(
         context_settings={
@@ -327,18 +281,10 @@ class Homestar(HomelabCLIApp):
     @staticmethod
     def run(
         ctx: Context,
+        *,
         playbook: HomestarOptions.playbook,
         env: HomestarOptions.env,
         ansible_vault: HomestarOptions.ansible_vault,
-        message: Annotated[
-            str,
-            Option(
-                "-m",
-                "--message",
-                metavar="expression",
-                help="Expression for Ansible `debug` module",
-            ),
-        ] = '"{{hostvars[inventory_hostname]}}"',
     ) -> None:
         with gpg_fifo(ansible_vault) as fifo:
             cmd = [
@@ -350,4 +296,4 @@ class Homestar(HomelabCLIApp):
                 f"playbooks/{playbook}",
             ]
             cmd += ctx.args
-            ctx.obj._ansible_run(cmd)
+            ctx.obj.ansible_run(cmd)

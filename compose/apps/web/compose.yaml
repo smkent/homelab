@@ -6,5 +6,5 @@ services:
   web:
     image: ghcr.io/smkent/net:latest
     networks:
-    - web
+      - web
     restart: unless-stopped
