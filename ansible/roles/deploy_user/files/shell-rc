@@ -3,3 +3,7 @@
 __c_prompt="\\[$(tput setaf 177)\\]${__bold}"
 # shellcheck disable=SC2034
 prompt_hide_user=""
+
+if [ -d "${HOME}/homelab/.venv/bin" ]; then
+    export PATH="${HOME}/homelab/.venv/bin:${PATH}"
+fi
