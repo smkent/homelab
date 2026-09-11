@@ -1,0 +1,26 @@
+# Changes here will be overwritten by Copier
+_commit: v0.14.0
+_src_path: gh:smkent/copier-python
+copyright_holder: Stephen Kent
+copyright_holder_email: smkent@smkent.net
+copyright_license: GPL-3.0
+copyright_year: '2022'
+enable_container: false
+enable_coverage: true
+enable_docs: false
+enable_features:
+- syrupy
+- xdist
+enable_pypi: false
+github_user: smkent
+project_description: Self-hosted apps I run on my homelab and personal infrastructure.
+    Deployments are managed by Ansible.
+project_name: homelab
+project_slug: homelab
+project_type: application
+project_visibility: public
+python_version_maximum: No maximum
+python_version_minimum: '3.12'
+template_attribution: true
+user_email: smkent@smkent.net
+user_name: Stephen Kent

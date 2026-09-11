@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - '3.12'
+          - '3.13'
+          - '3.14'
+    steps:
+      - name: 💾 Check out repository
+        uses: actions/checkout@v7
+
+      - name: 📦 Restore uv cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ matrix.python-version }}-
+
+      - name: 🍳 Set up mise
+        uses: jdx/mise-action@v4
+        with:
+          cache: true
+          install: true
+
+      - name: 📐 Lint
+        run: mise run lint
+
+      - name: 🔥 Test
+        run: mise run test
+
+      - name: 🔍 Collect coverage results
+        run: uv run coverage xml
+        if: ${{ matrix.python-version == '3.14' }}
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v6
+        if: ${{ matrix.python-version == '3.14' }}
+        with:
+          fail_ci_if_error: true
+          use_pypi: true
+          version: 11.2.8
+
+
+  betterleaks:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: 💾 Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 🍳 Set up mise
+        uses: jdx/mise-action@v4
+        with:
+          cache: true
+          install: true
+
+      - name: 🔍 Check for secrets
+        run: mise run secretscan

@@ -1,11 +1,13 @@
-# Homelab
-
-[![Build](https://img.shields.io/github/checks-status/smkent/homelab/main?label=build)][gh-actions]
-[![codecov](https://codecov.io/gh/smkent/homelab/branch/main/graph/badge.svg)][codecov]
-[![GitHub stars](https://img.shields.io/github/stars/smkent/homelab?style=social)][repo]
+# homelab
 
 Self-hosted apps I run on my [homelab][homelab] and personal infrastructure.
 Deployments are managed by [Ansible][ansible].
+
+[![License](https://img.shields.io/github/license/smkent/homelab)](https://github.com/smkent/homelab/blob/main/LICENSE)
+[![CI](https://github.com/smkent/homelab/actions/workflows/ci.yaml/badge.svg)](https://github.com/smkent/homelab/actions/workflows/ci.yaml)
+[![Coverage](https://codecov.io/gh/smkent/homelab/branch/main/graph/badge.svg)](https://codecov.io/gh/smkent/homelab)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovatebot)](https://renovatebot.com)
+[![GitHub stars](https://img.shields.io/github/stars/smkent/homelab?style=social)](https://github.com/smkent/homelab)
 
 # New machine first steps
 
@@ -50,45 +52,39 @@ through to [ansible-playbook][ansible-playbook-docs].
 
 # Development
 
-## [Poetry][poetry] installation
+## Required software
 
-Via [`pipx`][pipx]:
+* [**git**][git] for version control
+* [**mise**][mise] tool manager: `curl https://mise.run | sh` or
+  [alternate installation method][mise-installation]
 
-```console
-pip install pipx
-pipx install poetry
-pipx inject poetry poetry-pre-commit-plugin
-```
-
-Via `pip`:
-
-```console
-pip install poetry
-poetry self add poetry-pre-commit-plugin
-```
+`mise` provides [**uv**][uv], a supported version of Python, and the other
+project development tools.
 
 ## Development tasks
 
-* Setup: `poetry install`
-* Run static checks: `poetry run poe lint` or
-  `poetry run pre-commit run --all-files`
-* Run static checks and tests: `poetry run poe test`
+Run `mise install` once per clone to install tools, dependencies, and git
+hooks.
 
----
+* Run formatters and static checks: `mise run lint`
+* Run tests: `mise run test`
+* Run both: `mise run lt`
 
-Created from [smkent/cookie-python][cookie-python] using
-[cookiecutter][cookiecutter]
+For more detail, see the [project documentation site][docs].
+
+# Project template
+
+This project is generated and maintained with [copier-python][copier-python].
 
 [ansible-playbook-docs]: https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html
 [ansible]: https://docs.ansible.com/ansible/latest/
-[codecov]: https://codecov.io/gh/smkent/homelab
-[cookie-python]: https://github.com/smkent/cookie-python
-[cookiecutter]: https://github.com/cookiecutter/cookiecutter
+[copier-python]: https://smkent.github.io/copier-python
 [debian-netinst]: https://www.debian.org/distrib/netinst
 [debian]: https://www.debian.org/releases/stable/
-[gh-actions]: https://github.com/smkent/homelab/actions?query=branch%3Amain
+[docs]: https://smkent.github.io/homelab
+[git]: https://git-scm.com
 [homelab]: https://web.archive.org/web/20221023001900/https://linuxhandbook.com/homelab/
 [linode]: https://linode.com
-[pipx]: https://pypa.github.io/pipx/
-[poetry]: https://python-poetry.org/docs/#installation
-[repo]: https://github.com/smkent/homelab
+[mise-installation]: https://mise.jdx.dev/installing-mise.html
+[mise]: https://mise.jdx.dev
+[uv]: https://docs.astral.sh/uv/
