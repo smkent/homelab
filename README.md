@@ -50,28 +50,6 @@ through to [ansible-playbook][ansible-playbook-docs].
 * Deploy to all configured hosts (dry run): `homestar run -C`
 * Deploy to all configured hosts: `homestar run`
 
-# Development
-
-## Required software
-
-* [**git**][git] for version control
-* [**mise**][mise] tool manager: `curl https://mise.run | sh` or
-  [alternate installation method][mise-installation]
-
-`mise` provides [**uv**][uv], a supported version of Python, and the other
-project development tools.
-
-## Development tasks
-
-Run `mise install` once per clone to install tools, dependencies, and git
-hooks.
-
-* Run formatters and static checks: `mise run lint`
-* Run tests: `mise run test`
-* Run both: `mise run lt`
-
-For more detail, see the [project documentation site][docs].
-
 # Project template
 
 This project is generated and maintained with [copier-python][copier-python].
@@ -81,10 +59,5 @@ This project is generated and maintained with [copier-python][copier-python].
 [copier-python]: https://smkent.github.io/copier-python
 [debian-netinst]: https://www.debian.org/distrib/netinst
 [debian]: https://www.debian.org/releases/stable/
-[docs]: https://smkent.github.io/homelab
-[git]: https://git-scm.com
 [homelab]: https://web.archive.org/web/20221023001900/https://linuxhandbook.com/homelab/
 [linode]: https://linode.com
-[mise-installation]: https://mise.jdx.dev/installing-mise.html
-[mise]: https://mise.jdx.dev
-[uv]: https://docs.astral.sh/uv/
