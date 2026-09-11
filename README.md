@@ -5,7 +5,6 @@ Deployments are managed by [Ansible][ansible].
 
 [![License](https://img.shields.io/github/license/smkent/homelab)](https://github.com/smkent/homelab/blob/main/LICENSE)
 [![CI](https://github.com/smkent/homelab/actions/workflows/ci.yaml/badge.svg)](https://github.com/smkent/homelab/actions/workflows/ci.yaml)
-[![Coverage](https://codecov.io/gh/smkent/homelab/branch/main/graph/badge.svg)](https://codecov.io/gh/smkent/homelab)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovatebot)](https://renovatebot.com)
 [![GitHub stars](https://img.shields.io/github/stars/smkent/homelab?style=social)](https://github.com/smkent/homelab)
 

@@ -6,7 +6,7 @@ copyright_holder_email: smkent@smkent.net
 copyright_license: GPL-3.0
 copyright_year: '2022'
 enable_container: false
-enable_coverage: true
+enable_coverage: false
 enable_docs: false
 enable_features:
 - syrupy
