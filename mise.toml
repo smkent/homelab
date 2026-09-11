@@ -1,5 +1,8 @@
 min_version = "2026.2.5"
 
+[env]
+UV_PYTHON = { default = "3.12" }
+
 [hooks]
 postinstall = [
     "uv sync",
