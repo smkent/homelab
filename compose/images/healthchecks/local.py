@@ -1,4 +1,4 @@
-# mypy: disable-error-code="import-not-found,import-untyped"
+# noqa: INP001
 
 from typing import Any
 

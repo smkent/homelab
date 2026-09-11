@@ -1,5 +1,5 @@
-# mypy: disable-error-code="import-not-found,import-untyped"
-# ruff: noqa N811
+# ruff: noqa: INP001
+# ruff: noqa: N811
 
 import os
 import sys
@@ -43,7 +43,7 @@ def _insert(src: Sequence[Any], val: Any, after: Any = None) -> tuple[Any]:
     return tuple(src_list)
 
 
-AUTHENTICATION_BACKENDS = _auth_backends + ["hc.local.OIDCAuthSubClaimBackend"]
+AUTHENTICATION_BACKENDS = [*_auth_backends, "hc.local.OIDCAuthSubClaimBackend"]
 INSTALLED_APPS = _insert(
     _installed_apps, "mozilla_django_oidc", "django.contrib.auth"
 )
