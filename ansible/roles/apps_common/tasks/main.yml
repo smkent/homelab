@@ -12,25 +12,13 @@
         when:
           - ensure_homelab_repo | d(True)
 
-      - ansible.builtin.include_role:
-          name: common
-          tasks_from: resolve_executable
-        vars:
-          resolve_executable_search_name: pipx
-          resolve_executable_try_path: "{{ deploy_user_home }}/.local/bin"
-          resolve_executable_set_fact: pipx_exe_path
-
-      - name: "Install homelab package via pipx"
-        community.general.pipx:
-          executable: "{{ pipx_exe_path }}"
-          name: homelab
-          source: "{{ deploy_user_home }}/homelab"
-          state: present
-          force: true
-        when:
-          - not ansible_check_mode
-          - homelab_git_repo.changed
-          - ensure_homelab_repo | d(True)
+      - name: "Ensure mise packages are installed"
+        ansible.builtin.command:
+          cmd: "mise install {% if ansible_check_mode %}--dry-run{% endif %}"
+          chdir: '{{ deploy_user_home }}/homelab'
+        register: apps_common_mise_install_check
+        check_mode: false
+        changed_when: "'all tools are installed' not in apps_common_mise_install_check.stderr"
 
       - name: "Set docker secrets directory fact"
         ansible.builtin.set_fact:
