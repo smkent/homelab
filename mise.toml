@@ -3,6 +3,7 @@ min_version = "2026.2.5"
 [hooks]
 postinstall = [
     "uv sync",
+    "uv run ansible-galaxy collection install -r ansible/requirements.yml --upgrade",
     "[ -d .git ] && prek install || { echo \"No git repository found. If this is a new project, run \\`mise run init\\` to create it.\"; }",
 ]
 

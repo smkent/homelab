@@ -23,7 +23,6 @@ mise.local.toml
 coverage.xml
 
 # Ansible
-/ansible/.requirements.yml.sha256sum
 /ansible/vault
 
 # Docker Compose stacks

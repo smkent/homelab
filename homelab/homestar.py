@@ -1,10 +1,9 @@
-import hashlib
 import os
 import sys
 import textwrap
 from collections.abc import Sequence
 from contextlib import chdir
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cached_property
 from importlib.util import find_spec
 from pathlib import Path
@@ -15,49 +14,6 @@ from typer import Argument, BadParameter, Context, Option, Typer
 from .app import HomelabCLIApp
 from .project import HomelabProject
 from .util import gpg_fifo, run
-
-
-@dataclass
-class AnsibleCollections:
-    project: HomelabProject = field(default_factory=HomelabProject)
-
-    @cached_property
-    def requirements(self) -> Path:
-        return self.project.ansible_dir / "requirements.yml"
-
-    @cached_property
-    def checksum(self) -> Path:
-        return (
-            self.requirements.parent / f".{self.requirements.name}.sha256sum"
-        )
-
-    def ensure(self) -> None:
-        if not self._requirements_changed():
-            return
-        run(
-            [
-                "ansible-galaxy",
-                "collection",
-                "install",
-                "-r",
-                str(self.requirements),
-            ],
-        )
-        self._update_checksum()
-
-    def _requirements_changed(self) -> bool:
-        if not self.checksum.exists():
-            return True
-        new_checksum = hashlib.sha256(
-            self.requirements.read_bytes()
-        ).hexdigest()
-        old_checksum = self.checksum.read_text().strip()
-        return new_checksum != old_checksum
-
-    def _update_checksum(self) -> None:
-        self.checksum.write_text(
-            hashlib.sha256(self.requirements.read_bytes()).hexdigest()
-        )
 
 
 class HomestarOptions:
@@ -125,9 +81,6 @@ class HomestarOptions:
 class Homestar(HomelabCLIApp):
     dry_run: bool = False
     invoke_cwd: Path = Path(".").resolve()
-    ansible_collections: AnsibleCollections = field(
-        default_factory=AnsibleCollections
-    )
 
     cli = Typer(
         help="Homelab setup",
@@ -159,7 +112,6 @@ class Homestar(HomelabCLIApp):
         kwargs["env"] |= {
             "ANSIBLE_STRATEGY_PLUGINS": self.mitogen_path,
         }
-        self.ansible_collections.ensure()
         return run(cmd, *args, dry_run=self.dry_run, **kwargs)
 
     @cli.callback()
