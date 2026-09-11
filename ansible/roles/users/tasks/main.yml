@@ -1,54 +1,54 @@
-- name: Ensure shared group exists
-  ansible.builtin.group:
-    name: shared
-    gid: 8888
-    state: present
+  - name: Ensure shared group exists
+    ansible.builtin.group:
+      name: shared
+      gid: 8888
+      state: present
 
-- name: "User creation tasks"
-  ansible.builtin.include_tasks: user.yml
-  vars:
-    user_name: "{{ loop_user.user }}"
-    user_def: "{{ loop_user.data }}"
-  loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
-  loop_control:
-    loop_var: loop_user
-    label: "{{ loop_user.user }}"
+  - name: "User creation tasks"
+    ansible.builtin.include_tasks: user.yml
+    vars:
+      user_name: "{{ loop_user.user }}"
+      user_def: "{{ loop_user.data }}"
+    loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
+    loop_control:
+      loop_var: loop_user
+      label: "{{ loop_user.user }}"
 
-- name: Ensure system packages for user features are installed
-  ansible.builtin.apt:
-    name: "{{ item }}"
-    state: present
-    update_cache: true
-    cache_valid_time: 600
-  loop:
-  - git
-  - >-
-    {{
-      'pipx'
-      if ansible_facts['distribution'] == 'Debian'
-      and ansible_facts['distribution_version'] | int >= 12
-      else ''
-    }}
-  when: item | length > 0
+  - name: Ensure system packages for user features are installed
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: present
+      update_cache: true
+      cache_valid_time: 600
+    loop:
+      - git
+      - >-
+        {{
+          'pipx'
+          if ansible_facts['distribution'] == 'Debian'
+          and ansible_facts['distribution_version'] | int >= 12
+          else ''
+        }}
+    when: item | length > 0
 
-- name: "User package tasks"
-  ansible.builtin.include_tasks: packages.yml
-  vars:
-    user_name: "{{ loop_user.user }}"
-    user_def: "{{ loop_user.data }}"
-  loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
-  loop_control:
-    loop_var: loop_user
-    label: "{{ loop_user.user }}"
-  when: loop_user.data.user_packages|d(False)
+  - name: "User package tasks"
+    ansible.builtin.include_tasks: packages.yml
+    vars:
+      user_name: "{{ loop_user.user }}"
+      user_def: "{{ loop_user.data }}"
+    loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
+    loop_control:
+      loop_var: loop_user
+      label: "{{ loop_user.user }}"
+    when: loop_user.data.user_packages|d(False)
 
-- name: "User dotfiles tasks"
-  ansible.builtin.include_tasks: dotfiles.yml
-  vars:
-    user_name: "{{ loop_user.user }}"
-    user_def: "{{ loop_user.data }}"
-  loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
-  loop_control:
-    loop_var: loop_user
-    label: "{{ loop_user.user }}"
-  when: loop_user.data.dotfiles|d(False)
+  - name: "User dotfiles tasks"
+    ansible.builtin.include_tasks: dotfiles.yml
+    vars:
+      user_name: "{{ loop_user.user }}"
+      user_def: "{{ loop_user.data }}"
+    loop: "{{ create_users | dict2items(key_name='user', value_name='data') }}"
+    loop_control:
+      loop_var: loop_user
+      label: "{{ loop_user.user }}"
+    when: loop_user.data.dotfiles|d(False)

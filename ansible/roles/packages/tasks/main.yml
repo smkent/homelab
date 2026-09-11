@@ -1,22 +1,22 @@
-- name: Ensure apt packages are installed
-  ansible.builtin.apt:
-    pkg:
-    - cryptsetup
-    - curl
-    - htop
-    - jq
-    - libpam-modules
-    - make
-    - mtools
-    - net-tools
-    - parted
-    - python3-pip
-    - python3-venv
-    - rsync
-    - s3cmd
-    - tmux
-    - universal-ctags
-    - vim-nox
-    state: present
-    update_cache: true
-    cache_valid_time: 600
+  - name: Ensure apt packages are installed
+    ansible.builtin.apt:
+      pkg:
+        - cryptsetup
+        - curl
+        - htop
+        - jq
+        - libpam-modules
+        - make
+        - mtools
+        - net-tools
+        - parted
+        - python3-pip
+        - python3-venv
+        - rsync
+        - s3cmd
+        - tmux
+        - universal-ctags
+        - vim-nox
+      state: present
+      update_cache: true
+      cache_valid_time: 600

@@ -1,19 +1,19 @@
-- name: Provision homelab host
-  hosts: all
-  roles:
-  - system
-  - ssh
-  - auth
-  - deploy_user
-  - docker
-  - mta
-  - packages
-  - users
-  - tailscale
-  - name: helmet
-    when: helmet_role|d(false)
-  become: true
-  become_user: root
-  become_method: sudo
+  - name: Provision homelab host
+    hosts: all
+    roles:
+      - system
+      - ssh
+      - auth
+      - deploy_user
+      - docker
+      - mta
+      - packages
+      - users
+      - tailscale
+      - name: helmet
+        when: helmet_role|d(false)
+    become: true
+    become_user: root
+    become_method: sudo
 
-- import_playbook: apps.yml
+  - import_playbook: apps.yml

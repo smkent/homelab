@@ -1,63 +1,63 @@
-- name: "Ensure hostname is set"
-  ansible.builtin.hostname:
-    name: "{{ node_fqdn }}"
+  - name: "Ensure hostname is set"
+    ansible.builtin.hostname:
+      name: "{{ node_fqdn }}"
 
-- name: "Ensure time zone is set to Etc/UTC"
-  community.general.timezone:
-    name: Etc/UTC
+  - name: "Ensure time zone is set to Etc/UTC"
+    community.general.timezone:
+      name: Etc/UTC
 
-- name: "Ensure journald disk usage limits are configured"
-  ansible.builtin.ini_file:
-    path: /etc/systemd/journald.conf
-    section: Journal
-    option: "{{ item.key }}"
-    value: "{{ item.value }}"
-    no_extra_spaces: true
-  loop:
-  - key: SystemMaxUse
-    value: 1G
-  - key: RuntimeMaxUse
-    value: 1G
-  loop_control:
-    label: "{{ item.key }}"
-  notify: restart-journald
+  - name: "Ensure journald disk usage limits are configured"
+    ansible.builtin.ini_file:
+      path: /etc/systemd/journald.conf
+      section: Journal
+      option: "{{ item.key }}"
+      value: "{{ item.value }}"
+      no_extra_spaces: true
+    loop:
+      - key: SystemMaxUse
+        value: 1G
+      - key: RuntimeMaxUse
+        value: 1G
+    loop_control:
+      label: "{{ item.key }}"
+    notify: restart-journald
 
-- name: "Ensure journald logs are vacuumed"
-  ansible.builtin.command: journalctl --vacuum-size=1G
-  changed_when: false
+  - name: "Ensure journald logs are vacuumed"
+    ansible.builtin.command: journalctl --vacuum-size=1G
+    changed_when: false
 
-- block:
-  - name: "Ensure smartmontools are installed"
-    ansible.builtin.apt:
-      pkg:
-      - smartmontools
-      state: present
-      update_cache: true
-      cache_valid_time: 600
+  - block:
+      - name: "Ensure smartmontools are installed"
+        ansible.builtin.apt:
+          pkg:
+            - smartmontools
+          state: present
+          update_cache: true
+          cache_valid_time: 600
 
-  - name: "Ensure smartd is configured"
-    ansible.builtin.copy:
-      content: |
-        DEVICESCAN \
-          -a \
-          -o on \
-          -S on \
-          -m {{ email }} \
-          -M exec /usr/share/smartmontools/smartd-runner
-      dest: /etc/smartd.conf
-      owner: root
-      group: root
-      mode: '0644'
-    notify: restart-smartd
-  when: ansible_facts["virtualization_role"] != "guest"
+      - name: "Ensure smartd is configured"
+        ansible.builtin.copy:
+          content: |
+            DEVICESCAN \
+              -a \
+              -o on \
+              -S on \
+              -m {{ email }} \
+              -M exec /usr/share/smartmontools/smartd-runner
+          dest: /etc/smartd.conf
+          owner: root
+          group: root
+          mode: '0644'
+        notify: restart-smartd
+    when: ansible_facts["virtualization_role"] != "guest"
 
-- name: "Ensure mdadm email is configured"
-  ansible.builtin.lineinfile:
-    path: /etc/mdadm/mdadm.conf
-    regexp: "^{{ item.name }} "
-    line: "{{ item.name }} {{ item.value }}"
-  loop:
-  - {name: "MAILADDR", value: "{{ email }}"}
-  - {name: "MAILFROM", value: "mdadm.{{ inventory_hostname}}@{{ node_domain }}"}
-  loop_control:
-    label: "{{ item.name }}"
+  - name: "Ensure mdadm email is configured"
+    ansible.builtin.lineinfile:
+      path: /etc/mdadm/mdadm.conf
+      regexp: "^{{ item.name }} "
+      line: "{{ item.name }} {{ item.value }}"
+    loop:
+      - {name: "MAILADDR", value: "{{ email }}"}
+      - {name: "MAILFROM", value: "mdadm.{{ inventory_hostname}}@{{ node_domain }}"}
+    loop_control:
+      label: "{{ item.name }}"

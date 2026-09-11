@@ -12,19 +12,19 @@ services:
     image: ghcr.io/smkent/homelab/caddy:latest
     # build: ../../images/caddy
     env_file:
-    - host.env
-    - ../../secrets/caddy.env
+      - host.env
+      - ../../secrets/caddy.env
     environment:
       CADDY_ADMIN: "unix//opt/caddy/caddy_admin.socket"
     networks:
-    - web
+      - web
     ports:
-    - 80:80
-    - 443:443
+      - 80:80
+      - 443:443
     restart: unless-stopped
     volumes:
-    - caddy_socket:/opt/caddy
-    - ./caddy:/etc/caddy:ro
-    - ./host:/etc/caddy/host:ro
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_data:/data
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_config:/config
+      - caddy_socket:/opt/caddy
+      - ./caddy:/etc/caddy:ro
+      - ./host:/etc/caddy/host:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_data:/data
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/caddy_config:/config

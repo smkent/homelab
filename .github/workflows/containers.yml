@@ -16,31 +16,31 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
-    - name: 💾 Check out repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: 💾 Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: 🔭 Discover container images to build
-      id: set-matrix
-      run: |
-        base_ref="${{ github.event.before }}"
-        head_ref="${{ github.event.after }}"
-        if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-          base_ref="${{ github.event.pull_request.base.sha }}"
-          head_ref="${{ github.event.pull_request.head.sha }}"
-        fi
-        if git diff --diff-filter=d --name-only "${base_ref}" "${head_ref}" | grep -q "^\.github/workflows"; then
-          changed_dirs="$(git ls-files | grep "^compose/images/.*/Dockerfile$" | sort -u)"
-        else
-          changed_dirs="$(git diff --diff-filter=d --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/.*/Dockerfile$" | sort -u)"
-        fi
-        if [ -n "${changed_dirs}" ]; then
-          json="$(printf '%s\n' "$(echo "${changed_dirs}" | xargs -n1 dirname | xargs -n1 basename)" | jq -R . | jq -s -c .)"
-        else
-          json="[]";
-        fi
-        echo "matrix={\"image\":${json}}" >> "${GITHUB_OUTPUT}"
+      - name: 🔭 Discover container images to build
+        id: set-matrix
+        run: |
+          base_ref="${{ github.event.before }}"
+          head_ref="${{ github.event.after }}"
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            base_ref="${{ github.event.pull_request.base.sha }}"
+            head_ref="${{ github.event.pull_request.head.sha }}"
+          fi
+          if git diff --diff-filter=d --name-only "${base_ref}" "${head_ref}" | grep -q "^\.github/workflows"; then
+            changed_dirs="$(git ls-files | grep "^compose/images/.*/Dockerfile$" | sort -u)"
+          else
+            changed_dirs="$(git diff --diff-filter=d --name-only "${base_ref}" "${head_ref}" | grep "^compose/images/.*/Dockerfile$" | sort -u)"
+          fi
+          if [ -n "${changed_dirs}" ]; then
+            json="$(printf '%s\n' "$(echo "${changed_dirs}" | xargs -n1 dirname | xargs -n1 basename)" | jq -R . | jq -s -c .)"
+          else
+            json="[]";
+          fi
+          echo "matrix={\"image\":${json}}" >> "${GITHUB_OUTPUT}"
 
   build:
     name: "Build and push / ${{ matrix.image }}"
@@ -56,45 +56,45 @@ jobs:
       matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
 
     steps:
-    - name: 💾 Check out repository
-      uses: actions/checkout@v4
+      - name: 💾 Check out repository
+        uses: actions/checkout@v4
 
-    - name: ⚙️  Set up qemu
-      uses: docker/setup-qemu-action@v3
+      - name: ⚙️  Set up qemu
+        uses: docker/setup-qemu-action@v3
 
-    - name: 🛠️ Set up buildx
-      uses: docker/setup-buildx-action@v3
+      - name: 🛠️ Set up buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: 🔑 Log in to the container registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🔑 Log in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: 📡 Collect image metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}/${{ matrix.image }}
-        tags: |
-          type=raw,value=latest,enable={{ is_default_branch }}
-          type=ref,event=branch
-          type=ref,event=pr
-        labels: |
-          org.opencontainers.image.source=${{ github.repository_url }}
-          org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.title=homelab image for ${{ matrix.image }}
-          org.opencontainers.image.description=customized homelab image for ${{ matrix.image }}
-          org.opencontainers.image.licenses=
+      - name: 📡 Collect image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_PREFIX }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable={{ is_default_branch }}
+            type=ref,event=branch
+            type=ref,event=pr
+          labels: |
+            org.opencontainers.image.source=${{ github.repository_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=homelab image for ${{ matrix.image }}
+            org.opencontainers.image.description=customized homelab image for ${{ matrix.image }}
+            org.opencontainers.image.licenses=
 
-    - name: 📦 Build and publish container image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./compose/images/${{ matrix.image }}
-        platforms: linux/amd64,linux/arm64
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha,scope=${{ matrix.image }}
-        cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+      - name: 📦 Build and publish container image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./compose/images/${{ matrix.image }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

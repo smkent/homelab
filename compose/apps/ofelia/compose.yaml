@@ -4,4 +4,4 @@ services:
     command: daemon --docker-events
     restart: unless-stopped
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro

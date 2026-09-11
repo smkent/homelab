@@ -1,11 +1,11 @@
-- name: restart-journald
-  ansible.builtin.service:
-    name: systemd-journald
-    state: restarted
+  - name: restart-journald
+    ansible.builtin.service:
+      name: systemd-journald
+      state: restarted
 
-- name: restart-smartd
-  ansible.builtin.systemd_service:
-    name: smartd
-    enabled: yes
-    state: restarted
-  when: not ansible_check_mode
+  - name: restart-smartd
+    ansible.builtin.systemd_service:
+      name: smartd
+      enabled: yes
+      state: restarted
+    when: not ansible_check_mode

@@ -1,36 +1,36 @@
-- name: "Ensure user {{ user_name }} exists"
-  ansible.builtin.user:
-    name: '{{ user_name }}'
-    uid: '{{ user_def.uid|d(None) or omit }}'
-    groups: '{{ user_def.groups|d([]) }}'
-    append: true
-    password: "{{ (user_def.password | password_hash('sha512')) if user_def.password|d() else '!' }}"
-    update_password: on_create
-    shell: "{{ user_def.shell|d(None) or '/bin/bash' }}"
-    home: '{{ user_def.home|d(None) or omit }}'
-    create_home: '{{ user_def.create_home|d(True) }}'
-    state: present
-  when: ansible_ssh_user != user_name
-  ignore_errors: '{{ ansible_check_mode }}'
+  - name: "Ensure user {{ user_name }} exists"
+    ansible.builtin.user:
+      name: '{{ user_name }}'
+      uid: '{{ user_def.uid|d(None) or omit }}'
+      groups: '{{ user_def.groups|d([]) }}'
+      append: true
+      password: "{{ (user_def.password | password_hash('sha512')) if user_def.password|d() else '!' }}"
+      update_password: on_create
+      shell: "{{ user_def.shell|d(None) or '/bin/bash' }}"
+      home: '{{ user_def.home|d(None) or omit }}'
+      create_home: '{{ user_def.create_home|d(True) }}'
+      state: present
+    when: ansible_ssh_user != user_name
+    ignore_errors: '{{ ansible_check_mode }}'
 
-- import_role:
-    name: common
-    tasks_from: resolve_user_home
-  vars:
-    resolve_home_user_name: "{{ user_name }}"
-    resolve_home_user_def: "{{ user_def }}"
+  - import_role:
+      name: common
+      tasks_from: resolve_user_home
+    vars:
+      resolve_home_user_name: "{{ user_name }}"
+      resolve_home_user_def: "{{ user_def }}"
 
-- name: "Ensure authorized_keys are present for {{ user_name }}"
-  ansible.posix.authorized_key:
-    user: "{{ user_name }}"
-    key: '{{ key }}'
-    state: present
-  loop: '{{ user_def.authorized_keys }}'
-  loop_control:
-    loop_var: key
-    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
-  when: user_def.authorized_keys is defined
-  register: user_authorized_keys
-  failed_when:
-  - not ansible_check_mode
-  - user_authorized_keys.failed
+  - name: "Ensure authorized_keys are present for {{ user_name }}"
+    ansible.posix.authorized_key:
+      user: "{{ user_name }}"
+      key: '{{ key }}'
+      state: present
+    loop: '{{ user_def.authorized_keys }}'
+    loop_control:
+      loop_var: key
+      label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+    when: user_def.authorized_keys is defined
+    register: user_authorized_keys
+    failed_when:
+      - not ansible_check_mode
+      - user_authorized_keys.failed

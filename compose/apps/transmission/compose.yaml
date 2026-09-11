@@ -6,28 +6,28 @@ services:
   transmission:
     image: lscr.io/linuxserver/transmission
     environment:
-    - PUID=2000
-    - PGID=8888
-    - TZ=UTC
-    - TRANSMISSION_WEB_HOME=/flood-for-transmission/
+      - PUID=2000
+      - PGID=8888
+      - TZ=UTC
+      - TRANSMISSION_WEB_HOME=/flood-for-transmission/
     ports:
-    - 51413:51413
-    - 51413:51413/udp
+      - 51413:51413
+      - 51413:51413/udp
     profiles:
-    - manual
+      - manual
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/config
-    - ${FS_MEDIA_PATH-/data/media}/bt/downloads:/downloads:rw
-    - ${FS_MEDIA_PATH-/data/media}/bt/watch:/watch:rw
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/config
+      - ${FS_MEDIA_PATH-/data/media}/bt/downloads:/downloads:rw
+      - ${FS_MEDIA_PATH-/data/media}/bt/watch:/watch:rw
 
   transmission-oidc:
     image: quay.io/oauth2-proxy/oauth2-proxy
     env_file:
-    - host.env
-    - transmission-oidc.env
-    - ../../secrets/transmission-oidc.env
+      - host.env
+      - transmission-oidc.env
+      - ../../secrets/transmission-oidc.env
     environment:
     profiles:
-    - manual
+      - manual
     restart: unless-stopped

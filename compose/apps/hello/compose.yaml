@@ -1,6 +1,6 @@
 x-common-service: &common-service
   networks:
-  - web
+    - web
   restart: unless-stopped
 
 networks:

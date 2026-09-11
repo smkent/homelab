@@ -11,9 +11,9 @@ services:
   plex:
     image: linuxserver/plex:1.43.3
     ports:
-    - 32400:32400
+      - 32400:32400
     environment:
-    - VERSION=docker
+      - VERSION=docker
     healthcheck:
       test: [CMD, curl, -m, '5', -f, --insecure, https://localhost:32400/web/index.html]
       interval: 2m
@@ -21,9 +21,9 @@ services:
       retries: 3
       start_period: 1m
     networks:
-    - web
+      - web
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/config:rw
-    - plex_media_cache:/config/Library/Application Support/Plex Media Server/Media:rw
-    - ${FS_MEDIA_PATH-/data/media}:/media:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/config:rw
+      - plex_media_cache:/config/Library/Application Support/Plex Media Server/Media:rw
+      - ${FS_MEDIA_PATH-/data/media}:/media:ro

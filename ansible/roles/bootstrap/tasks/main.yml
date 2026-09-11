@@ -1,21 +1,21 @@
-- name: Check configuration
-  ansible.builtin.assert:
-    that:
-    - installation_user | mandatory | length > 0
-    quiet: true
+  - name: Check configuration
+    ansible.builtin.assert:
+      that:
+        - installation_user | mandatory | length > 0
+      quiet: true
 
-- name: Ensure installation user is removed
-  ansible.builtin.user:
-    name: "{{ installation_user }}"
-    state: absent
-    remove: true
-    force: true
-  when: installation_user != deploy_user
-  ignore_errors: true
+  - name: Ensure installation user is removed
+    ansible.builtin.user:
+      name: "{{ installation_user }}"
+      state: absent
+      remove: true
+      force: true
+    when: installation_user != deploy_user
+    ignore_errors: true
 
-- name: Ensure installation group is removed
-  ansible.builtin.group:
-    name: "{{ installation_user }}"
-    state: absent
-  when: installation_user != deploy_user
-  ignore_errors: true
+  - name: Ensure installation group is removed
+    ansible.builtin.group:
+      name: "{{ installation_user }}"
+      state: absent
+    when: installation_user != deploy_user
+    ignore_errors: true

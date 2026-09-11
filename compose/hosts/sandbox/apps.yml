@@ -1,7 +1,7 @@
 apps:
-- backrest
-- gateway
-- hello
-- login
-- smtp_relay
-- web
+  - backrest
+  - gateway
+  - hello
+  - login
+  - smtp_relay
+  - web

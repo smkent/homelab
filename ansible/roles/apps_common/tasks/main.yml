@@ -1,97 +1,97 @@
-- block:
-  - name: "Ensure homelab repository is present"
-    ansible.builtin.git:
-      repo: https://github.com/smkent/homelab
-      dest: '{{ deploy_user_home }}/homelab'
-      version: main
-      accept_hostkey: true
-    environment:
-      GIT_TERMINAL_PROMPT: 0
-    register: homelab_git_repo
-    ignore_errors: '{{ ansible_check_mode }}'
-    when:
-    - ensure_homelab_repo | d(True)
+  - block:
+      - name: "Ensure homelab repository is present"
+        ansible.builtin.git:
+          repo: https://github.com/smkent/homelab
+          dest: '{{ deploy_user_home }}/homelab'
+          version: main
+          accept_hostkey: true
+        environment:
+          GIT_TERMINAL_PROMPT: 0
+        register: homelab_git_repo
+        ignore_errors: '{{ ansible_check_mode }}'
+        when:
+          - ensure_homelab_repo | d(True)
 
-  - ansible.builtin.include_role:
-      name: common
-      tasks_from: resolve_executable
-    vars:
-      resolve_executable_search_name: pipx
-      resolve_executable_try_path: "{{ deploy_user_home }}/.local/bin"
-      resolve_executable_set_fact: pipx_exe_path
+      - ansible.builtin.include_role:
+          name: common
+          tasks_from: resolve_executable
+        vars:
+          resolve_executable_search_name: pipx
+          resolve_executable_try_path: "{{ deploy_user_home }}/.local/bin"
+          resolve_executable_set_fact: pipx_exe_path
 
-  - name: "Install homelab package via pipx"
-    community.general.pipx:
-      executable: "{{ pipx_exe_path }}"
-      name: homelab
-      source: "{{ deploy_user_home }}/homelab"
-      state: present
-      force: true
-    when:
-    - not ansible_check_mode
-    - homelab_git_repo.changed
-    - ensure_homelab_repo | d(True)
+      - name: "Install homelab package via pipx"
+        community.general.pipx:
+          executable: "{{ pipx_exe_path }}"
+          name: homelab
+          source: "{{ deploy_user_home }}/homelab"
+          state: present
+          force: true
+        when:
+          - not ansible_check_mode
+          - homelab_git_repo.changed
+          - ensure_homelab_repo | d(True)
 
-  - name: "Set docker secrets directory fact"
-    ansible.builtin.set_fact:
-      deploy_user_secrets_dir: "{{ deploy_user_home }}/homelab/compose/secrets/"
-      deploy_user_volumes_dir: "{{ deploy_user_home }}/homelab/compose/volumes/"
+      - name: "Set docker secrets directory fact"
+        ansible.builtin.set_fact:
+          deploy_user_secrets_dir: "{{ deploy_user_home }}/homelab/compose/secrets/"
+          deploy_user_volumes_dir: "{{ deploy_user_home }}/homelab/compose/volumes/"
 
-  - name: "Ensure {{ deploy_user }} compose directories have proper permissions"
-    ansible.builtin.file:
-      path: "{{ item }}"
-      owner: "{{ deploy_user }}"
-      group: "{{ deploy_user }}"
-      mode: 0700
-      state: directory
-    loop:
-    - "{{ deploy_user_secrets_dir }}"
-    - "{{ deploy_user_volumes_dir}}"
+      - name: "Ensure {{ deploy_user }} compose directories have proper permissions"
+        ansible.builtin.file:
+          path: "{{ item }}"
+          owner: "{{ deploy_user }}"
+          group: "{{ deploy_user }}"
+          mode: 0700
+          state: directory
+        loop:
+          - "{{ deploy_user_secrets_dir }}"
+          - "{{ deploy_user_volumes_dir}}"
 
-  - name: "Ensure app config templates are installed"
-    ansible.builtin.template:
-      src: "{{ item }}.env.j2"
-      dest: "{{ deploy_user_secrets_dir }}/{{ item }}.env"
-      owner: "{{ deploy_user }}"
-      group: "{{ deploy_user }}"
-      mode: 0600
-    diff: false
-    loop: "{{ app_config_templates }}"
+      - name: "Ensure app config templates are installed"
+        ansible.builtin.template:
+          src: "{{ item }}.env.j2"
+          dest: "{{ deploy_user_secrets_dir }}/{{ item }}.env"
+          owner: "{{ deploy_user }}"
+          group: "{{ deploy_user }}"
+          mode: 0600
+        diff: false
+        loop: "{{ app_config_templates }}"
 
-  - name: "Ensure Docker secrets are installed"
-    ansible.builtin.copy:
-      dest: "{{ deploy_user_secrets_dir }}/{{ item }}"
-      content: "{{ compose_secrets[item] }}"
-      owner: "{{ deploy_user }}"
-      group: "{{ deploy_user }}"
-      mode: 0600
-    diff: false
-    loop: "{{ compose_secrets.keys() | sort }}"
+      - name: "Ensure Docker secrets are installed"
+        ansible.builtin.copy:
+          dest: "{{ deploy_user_secrets_dir }}/{{ item }}"
+          content: "{{ compose_secrets[item] }}"
+          owner: "{{ deploy_user }}"
+          group: "{{ deploy_user }}"
+          mode: 0600
+        diff: false
+        loop: "{{ compose_secrets.keys() | sort }}"
 
-  - name: "Locate existing installed Docker secrets"
-    ansible.builtin.find:
-      paths: "{{ deploy_user_secrets_dir }}"
-      file_type: file
-      excludes: >-
-        {{
-          compose_secrets.keys() | list
-          + (app_config_templates | map('regex_replace', '$', '.env') | list)
-        }}
-    register: existing_compose_secrets
+      - name: "Locate existing installed Docker secrets"
+        ansible.builtin.find:
+          paths: "{{ deploy_user_secrets_dir }}"
+          file_type: file
+          excludes: >-
+            {{
+              compose_secrets.keys() | list
+              + (app_config_templates | map('regex_replace', '$', '.env') | list)
+            }}
+        register: existing_compose_secrets
 
-  - name: "Ensure unused Docker secrets are removed"
-    ansible.builtin.file:
-      path: "{{ deploy_user_secrets_dir }}/{{ item }}"
-      state: absent
-    diff: false
-    loop: >-
-      {{
-        existing_compose_secrets.files
-        | map(attribute='path')
-        | map('basename')
-        | list
-        | sort
-      }}
+      - name: "Ensure unused Docker secrets are removed"
+        ansible.builtin.file:
+          path: "{{ deploy_user_secrets_dir }}/{{ item }}"
+          state: absent
+        diff: false
+        loop: >-
+          {{
+            existing_compose_secrets.files
+            | map(attribute='path')
+            | map('basename')
+            | list
+            | sort
+          }}
 
-  become: "{{ ansible_ssh_user != deploy_user }}"
-  become_user: "{{ deploy_user }}"
+    become: "{{ ansible_ssh_user != deploy_user }}"
+    become_user: "{{ deploy_user }}"
