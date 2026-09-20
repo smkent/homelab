@@ -4,18 +4,19 @@
         - installation_user | mandatory | length > 0
       quiet: true
 
-  - name: Ensure installation user is removed
-    ansible.builtin.user:
-      name: "{{ installation_user }}"
-      state: absent
-      remove: true
-      force: true
-    when: installation_user != deploy_user
-    ignore_errors: true
+  - name: Ensure temporary installation user and group are removed
+    block:
+      - name: Ensure installation user is removed
+        ansible.builtin.user:
+          name: "{{ installation_user }}"
+          state: absent
+          remove: true
+          force: true
+        ignore_errors: true
 
-  - name: Ensure installation group is removed
-    ansible.builtin.group:
-      name: "{{ installation_user }}"
-      state: absent
-    when: installation_user != deploy_user
-    ignore_errors: true
+      - name: Ensure installation group is removed
+        ansible.builtin.group:
+          name: "{{ installation_user }}"
+          state: absent
+        ignore_errors: true
+    when: installation_user not in [deploy_user, 'root']
