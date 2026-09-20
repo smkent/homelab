@@ -40,10 +40,3 @@
     register: ssh_crypto
     notify:
       - restart-ssh
-
-  - name: Ensure RSA host key has sufficient bits
-    ansible.builtin.script: ssh-generate
-    when: ssh_crypto.changed
-    register: ssh_generate
-    notify:
-      - restart-ssh
