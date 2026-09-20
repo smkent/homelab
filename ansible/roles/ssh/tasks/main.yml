@@ -29,7 +29,7 @@
       block: |
         KexAlgorithms {%
             if ansible_facts["distribution"] == "Debian" and ansible_facts["distribution_major_version"] == "13"
-          %}sntrup761x25519-sha512@openssh.com,{%
+          %}mlkem768x25519-sha256,sntrup761x25519-sha512@openssh.com,{%
             endif
           %}curve25519-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256
         Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr
