@@ -60,7 +60,13 @@
         S1GIqgTqW7TRaQRg
         =yIM2
         -----END PGP PUBLIC KEY BLOCK-----
-      architectures: amd64
+      architectures: |-
+        {{
+          {
+            'x86_64': 'amd64',
+            'aarch64': 'arm64'
+          }[ansible_facts.architecture]
+        }}
       state: present
       enabled: true
     register: mise_apt_repo
