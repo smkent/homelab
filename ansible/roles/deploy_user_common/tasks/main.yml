@@ -1,67 +1,67 @@
-- name: "Ensure {{ deploy_user }} group exists"
-  ansible.builtin.group:
-    name: "{{ deploy_user | mandatory }}"
-    gid: 1000
-    state: present
+  - name: "Ensure {{ deploy_user }} group exists"
+    ansible.builtin.group:
+      name: "{{ deploy_user | mandatory }}"
+      gid: 1000
+      state: present
 
-- name: "Ensure {{ deploy_user }} user exists"
-  ansible.builtin.user:
-    name: "{{ deploy_user | mandatory }}"
-    uid: 1000
-    group: "{{ deploy_user }}"
-    groups: sudo
-    append: true
-    password: "{{ create_users[deploy_user].password | mandatory | password_hash('sha512') }}"
-    update_password: "{{ 'always' if deploy_user_update_password|d(False) else 'on_create' }}"
-    home: "{{ create_users[deploy_user].home|d(None) or omit }}"
-    create_home: true
-    shell: /bin/bash
-    state: present
-  when: ansible_ssh_user != deploy_user
+  - name: "Ensure {{ deploy_user }} user exists"
+    ansible.builtin.user:
+      name: "{{ deploy_user | mandatory }}"
+      uid: 1000
+      group: "{{ deploy_user }}"
+      groups: sudo
+      append: true
+      password: "{{ create_users[deploy_user].password | mandatory | password_hash('sha512') }}"
+      update_password: "{{ 'always' if deploy_user_update_password|d(False) else 'on_create' }}"
+      home: "{{ create_users[deploy_user].home|d(None) or omit }}"
+      create_home: true
+      shell: /bin/bash
+      state: present
+    when: ansible_ssh_user != deploy_user
 
-- name: Ensure deploy user authorized_keys are present
-  ansible.posix.authorized_key:
-    user: "{{ deploy_user }}"
-    key: '{{ key }}'
-    state: present
-  loop: '{{ create_users[deploy_user].authorized_keys }}'
-  loop_control:
-    loop_var: key
-    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
-  register: deploy_authorized_keys_state
-  failed_when:
-  - not ansible_check_mode
-  - deploy_authorized_keys_state.failed
+  - name: Ensure deploy user authorized_keys are present
+    ansible.posix.authorized_key:
+      user: "{{ deploy_user }}"
+      key: '{{ key }}'
+      state: present
+    loop: '{{ create_users[deploy_user].authorized_keys }}'
+    loop_control:
+      loop_var: key
+      label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+    register: deploy_authorized_keys_state
+    failed_when:
+      - not ansible_check_mode
+      - deploy_authorized_keys_state.failed
 
-- import_role:
-    name: common
-    tasks_from: resolve_user_home
-  vars:
-    resolve_home_user_name: "{{ deploy_user }}"
-    resolve_home_user_def: "{{ create_users[deploy_user] }}"
-    resolve_home_set_fact: deploy_user_home
+  - import_role:
+      name: common
+      tasks_from: resolve_user_home
+    vars:
+      resolve_home_user_name: "{{ deploy_user }}"
+      resolve_home_user_def: "{{ create_users[deploy_user] }}"
+      resolve_home_set_fact: deploy_user_home
 
-- name: "Ensure {{ deploy_user_home }}/.ssh exists"
-  ansible.builtin.file:
-    path: "{{ deploy_user_home }}/.ssh"
-    state: directory
-    owner: '{{ deploy_user }}'
-    group: '{{ deploy_user }}'
-    mode: 0700
+  - name: "Ensure {{ deploy_user_home }}/.ssh exists"
+    ansible.builtin.file:
+      path: "{{ deploy_user_home }}/.ssh"
+      state: directory
+      owner: '{{ deploy_user }}'
+      group: '{{ deploy_user }}'
+      mode: 0700
 
-- name: "Ensure SSH private key is installed for {{ deploy_user }}"
-  ansible.builtin.copy:
-    dest: '{{ deploy_user_home }}/.ssh/id_ed25519'
-    content: '{{ ssh_key_deploy }}'
-    mode: 0600
-    owner: '{{ deploy_user }}'
-    group: '{{ deploy_user }}'
-  diff: false
+  - name: "Ensure SSH private key is installed for {{ deploy_user }}"
+    ansible.builtin.copy:
+      dest: '{{ deploy_user_home }}/.ssh/id_ed25519'
+      content: '{{ ssh_key_deploy }}'
+      mode: 0600
+      owner: '{{ deploy_user }}'
+      group: '{{ deploy_user }}'
+    diff: false
 
-- name: "Ensure SSH public key is installed for {{ deploy_user }}"
-  ansible.builtin.copy:
-    dest: '{{ deploy_user_home }}/.ssh/id_ed25519.pub'
-    content: '{{ ssh_key_deploy_pub }}'
-    mode: 0644
-    owner: '{{ deploy_user }}'
-    group: '{{ deploy_user }}'
+  - name: "Ensure SSH public key is installed for {{ deploy_user }}"
+    ansible.builtin.copy:
+      dest: '{{ deploy_user_home }}/.ssh/id_ed25519.pub'
+      content: '{{ ssh_key_deploy_pub }}'
+      mode: 0644
+      owner: '{{ deploy_user }}'
+      group: '{{ deploy_user }}'

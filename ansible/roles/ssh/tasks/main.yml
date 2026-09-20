@@ -1,49 +1,49 @@
-- name: Ensure root authorized_keys are present
-  ansible.posix.authorized_key:
-    user: root
-    key: '{{ key }}'
-    state: present
-  loop: '{{ ssh_root_authorized_keys }}'
-  loop_control:
-    loop_var: key
-    label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
+  - name: Ensure root authorized_keys are present
+    ansible.posix.authorized_key:
+      user: root
+      key: '{{ key }}'
+      state: present
+    loop: '{{ ssh_root_authorized_keys }}'
+    loop_control:
+      loop_var: key
+      label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
 
-- name: Configure ssh login settings
-  ansible.builtin.lineinfile:
-    dest: /etc/ssh/sshd_config
-    regexp: ^#?{{ item.name }}
-    line: '{{ item.name }} {{ item.value }}'
-    state: present
-  loop:
-  - {name: PasswordAuthentication, value: "no"}
-  - {name: PermitRootLogin, value: "prohibit-password"}
-  - {name: StreamLocalBindUnlink, value: "yes"}
-  loop_control:
-    label: "{{ item.name }}"
-  notify:
-  - restart-ssh
+  - name: Configure ssh login settings
+    ansible.builtin.lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: ^#?{{ item.name }}
+      line: '{{ item.name }} {{ item.value }}'
+      state: present
+    loop:
+      - {name: PasswordAuthentication, value: "no"}
+      - {name: PermitRootLogin, value: "prohibit-password"}
+      - {name: StreamLocalBindUnlink, value: "yes"}
+    loop_control:
+      label: "{{ item.name }}"
+    notify:
+      - restart-ssh
 
-- name: Configure ssh cryptography settings
-  ansible.builtin.blockinfile:
-    path: /etc/ssh/sshd_config
-    block: |
-      KexAlgorithms {%
-          if ansible_facts["distribution"] == "Debian" and ansible_facts["distribution_major_version"] == "13"
-        %}sntrup761x25519-sha512@openssh.com,{%
-          endif
-        %}curve25519-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256
-      Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr
-      MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
-      HostKey /etc/ssh/ssh_host_ed25519_key
-      RekeyLimit 128M 15m
-    marker: '# {mark} ANSIBLE MANAGED BLOCK ssh-crypto'
-  register: ssh_crypto
-  notify:
-  - restart-ssh
+  - name: Configure ssh cryptography settings
+    ansible.builtin.blockinfile:
+      path: /etc/ssh/sshd_config
+      block: |
+        KexAlgorithms {%
+            if ansible_facts["distribution"] == "Debian" and ansible_facts["distribution_major_version"] == "13"
+          %}sntrup761x25519-sha512@openssh.com,{%
+            endif
+          %}curve25519-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256
+        Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr
+        MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+        HostKey /etc/ssh/ssh_host_ed25519_key
+        RekeyLimit 128M 15m
+      marker: '# {mark} ANSIBLE MANAGED BLOCK ssh-crypto'
+    register: ssh_crypto
+    notify:
+      - restart-ssh
 
-- name: Ensure RSA host key has sufficient bits
-  ansible.builtin.script: ssh-generate
-  when: ssh_crypto.changed
-  register: ssh_generate
-  notify:
-  - restart-ssh
+  - name: Ensure RSA host key has sufficient bits
+    ansible.builtin.script: ssh-generate
+    when: ssh_crypto.changed
+    register: ssh_generate
+    notify:
+      - restart-ssh

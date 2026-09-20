@@ -14,9 +14,9 @@ services:
       # WAFFLES_DEBUG: "true"
       TZ: PST8PDT
     profiles:
-    - manual
+      - manual
     restart: unless-stopped
     volumes:
-    - ./reply.html:/reply.html:ro
+      - ./reply.html:/reply.html:ro
     secrets:
-    - jmap-api-token
+      - jmap-api-token

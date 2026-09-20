@@ -7,12 +7,12 @@ services:
     image: ghcr.io/smkent/homelab/nut:latest
     # build: ../../images/nut
     env_file:
-    - host.env
-    - nut.env
+      - host.env
+      - nut.env
     environment:
     privileged: true
     profiles:
-    - manual
+      - manual
     restart: unless-stopped
     secrets:
-    - nut-upsd-password
+      - nut-upsd-password

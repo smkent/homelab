@@ -11,28 +11,28 @@ services:
       db:
         condition: service_healthy
     env_file:
-    - host.env
-    - gitea.env
+      - host.env
+      - gitea.env
     networks:
-    - local
-    - web
+      - local
+      - web
     ports:
-    - "2202:22"
+      - "2202:22"
     restart: unless-stopped
     volumes:
-    - ./files/sshd_config-template:/etc/templates/sshd_config:ro
-    - ../../secrets/gitea-ssh-ed25519-host-key:/data/ssh/ssh_host_ed25519_key:ro
-    - ../../secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
-    - ../../secrets/gitea-ssh-rsa-host-key:/data/ssh/ssh_host_rsa_key:ro
-    - ../../secrets/gitea-ssh-rsa-host-key-pub:/data/ssh/ssh_host_rsa_key.pub:ro
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/gitea:/data
+      - ./files/sshd_config-template:/etc/templates/sshd_config:ro
+      - ../../secrets/gitea-ssh-ed25519-host-key:/data/ssh/ssh_host_ed25519_key:ro
+      - ../../secrets/gitea-ssh-ed25519-host-key-pub:/data/ssh/ssh_host_ed25519_key.pub:ro
+      - ../../secrets/gitea-ssh-rsa-host-key:/data/ssh/ssh_host_rsa_key:ro
+      - ../../secrets/gitea-ssh-rsa-host-key-pub:/data/ssh/ssh_host_rsa_key.pub:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/gitea:/data
 
   db:
     image: postgres:18
     environment:
-    - POSTGRES_USER=gitea
-    - POSTGRES_PASSWORD=gitea
-    - POSTGRES_DB=gitea
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
     healthcheck:
       test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
       interval: 1m
@@ -41,7 +41,7 @@ services:
       start_period: 30s
       start_interval: 2s
     networks:
-    - local
+      - local
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql

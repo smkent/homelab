@@ -1,39 +1,47 @@
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
-  hooks:
-  - id: check-merge-conflict
-  - id: debug-statements
-  - id: end-of-file-fixer
-  - id: trailing-whitespace
-    exclude: \.(yml|yaml)$
-- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.16.0
-  hooks:
-  - id: pretty-format-yaml
-    args: [--preserve-quotes, --autofix, --indent, '2']
-    exclude: /authelia/configuration.yml$
-- repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: v0.11.0.1-1
-  hooks:
-  - id: shellcheck
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.16.6
-  hooks:
-  - id: ruff
-    args: ["--fix"]
-  - id: ruff-format
-- repo: https://github.com/pycqa/bandit
-  rev: 1.9.4
-  hooks:
-  - id: bandit
-    additional_dependencies: ['.[toml]']
-    args: ["--configfile", "pyproject.toml"]
-    exclude: '^tests/'
-- repo: local
-  hooks:
-  - id: mypy
-    name: mypy
-    language: python
-    types_or: [python, pyi]
-    entry: env -u VIRTUAL_ENV poetry run mypy
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
+        exclude: /authelia/configuration\.yml$
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+      - id: detect-private-key
+      - id: debug-statements
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.16.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--preserve-quotes, --autofix, --offset, '2']
+        exclude: (^\.copier-answers\.yml$|/authelia/configuration\.yml$)
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+  - repo: local
+    hooks:
+      - id: betterleaks
+        name: betterleaks
+        entry: betterleaks git . --pre-commit --staged --redact
+        language: system
+        pass_filenames: false
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check --fix
+        language: system
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format
+        language: system
+        types_or: [python, pyi]
+      - id: ty
+        name: ty
+        entry: uv run ty check
+        language: system
+        types: [python]
+        pass_filenames: false

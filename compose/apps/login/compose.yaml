@@ -1,6 +1,6 @@
 x-common-service: &common-service
   networks:
-  - web
+    - web
   restart: unless-stopped
 
 networks:
@@ -43,8 +43,8 @@ services:
       valkey:
         condition: service_healthy
     env_file:
-    - host.env
-    - ../../secrets/authelia.env
+      - host.env
+      - ../../secrets/authelia.env
     environment:
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: "/run/secrets/authelia-jwt-secret"
       AUTHELIA_SESSION_SECRET_FILE: "/run/secrets/authelia-session-secret"
@@ -52,22 +52,22 @@ services:
       TZ: UTC
       X_AUTHELIA_CONFIG_FILTERS: template
     networks:
-    - local_db
-    - local_valkey
-    - web
+      - local_db
+      - local_valkey
+      - web
     ports:
-    - 19091:9091
+      - 19091:9091
     secrets:
-    - authelia-jwt-secret
-    - authelia-ldap-password
-    - authelia-oidc-hmac-secret
-    - authelia-oidc-jwks-key
-    - authelia-session-secret
-    - authelia-storage-encryption-key
+      - authelia-jwt-secret
+      - authelia-ldap-password
+      - authelia-oidc-hmac-secret
+      - authelia-oidc-jwks-key
+      - authelia-session-secret
+      - authelia-storage-encryption-key
     user: "1000:1000"
     volumes:
-    - ./authelia:/config
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/authelia:/data
+      - ./authelia:/config
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/authelia:/data
 
   lldap:
     <<: *common-service
@@ -76,17 +76,17 @@ services:
       db:
         condition: service_healthy
     env_file:
-    - host.env
-    - lldap.env
+      - host.env
+      - lldap.env
     networks:
-    - local_db
-    - web
+      - local_db
+      - web
     secrets:
-    - lldap-jwt-secret
-    - lldap-key-seed
-    - lldap-ldap-user-pass
+      - lldap-jwt-secret
+      - lldap-key-seed
+      - lldap-ldap-user-pass
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/lldap:/data
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/lldap:/data
 
   db:
     image: postgres:18
@@ -102,12 +102,12 @@ services:
       start_period: 30s
       start_interval: 2s
     networks:
-    - local_db
-    - web
+      - local_db
+      - web
     restart: unless-stopped
     volumes:
-    - ./db:/docker-entrypoint-initdb.d:ro
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
+      - ./db:/docker-entrypoint-initdb.d:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
 
   valkey:
     image: valkey/valkey:9
@@ -119,7 +119,7 @@ services:
       start_period: 30s
       start_interval: 2s
     networks:
-    - local_valkey
+      - local_valkey
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data

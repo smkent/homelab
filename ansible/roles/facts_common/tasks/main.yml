@@ -1,15 +1,15 @@
-- name: Get the configured domain name from host.env
-  ansible.builtin.shell: |
-    set -e
-    cd $(git rev-parse --show-toplevel)
-    . compose/hosts/{{ inventory_hostname }}/host.env && echo "${DOMAIN}"
-  register: host_env_domain_result
-  become: false
-  delegate_to: localhost
-  changed_when: false
-  check_mode: false  # Run in check mode
+  - name: Get the configured domain name from host.env
+    ansible.builtin.shell: |
+      set -e
+      cd $(git rev-parse --show-toplevel)
+      . compose/hosts/{{ inventory_hostname }}/host.env && echo "${DOMAIN}"
+    register: host_env_domain_result
+    become: false
+    delegate_to: localhost
+    changed_when: false
+    check_mode: false # Run in check mode
 
-- name: Set the detected FQDN as a fact
-  ansible.builtin.set_fact:
-    node_domain: "{{ host_env_domain_result.stdout }}"
-    node_fqdn: "{{ inventory_hostname }}.{{ host_env_domain_result.stdout }}"
+  - name: Set the detected FQDN as a fact
+    ansible.builtin.set_fact:
+      node_domain: "{{ host_env_domain_result.stdout }}"
+      node_fqdn: "{{ inventory_hostname }}.{{ host_env_domain_result.stdout }}"

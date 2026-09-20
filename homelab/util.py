@@ -17,9 +17,10 @@ def run(
     **kwargs: Any,
 ) -> Any:
     kwargs.setdefault("check", True)
-    print("+", " ".join(shlex.quote(c) for c in cmd), file=sys.stderr)
+    print("+", " ".join(shlex.quote(c) for c in cmd), file=sys.stderr)  # noqa: T201
     if not dry_run:
-        return subprocess.run(cmd, env=os.environ | (env or {}), **kwargs)
+        return subprocess.run(cmd, env=os.environ | (env or {}), **kwargs)  # noqa: PLW1510, S603
+    return None
 
 
 @contextmanager
@@ -28,8 +29,8 @@ def gpg_fifo(vault: Path) -> Iterator[Path]:
         fifo = Path(td) / "ansible.fifo"
         os.mkfifo(fifo, 0o0600)
         cmd = f"gpg -d {vault} > {fifo}"
-        print("+", cmd, file=sys.stderr)
-        p = subprocess.Popen(cmd, shell=True)  # nosec
+        print("+", cmd, file=sys.stderr)  # noqa: T201
+        p = subprocess.Popen(cmd, shell=True)  # noqa: S602
         try:
             yield fifo
         finally:

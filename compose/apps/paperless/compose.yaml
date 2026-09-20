@@ -20,21 +20,21 @@ services:
       valkey:
         condition: service_healthy
     env_file:
-    - host.env
-    - ../../secrets/paperless.env
-    - paperless.env
+      - host.env
+      - ../../secrets/paperless.env
+      - paperless.env
     networks:
-    - local_db
-    - local_gotenberg
-    - local_tika
-    - local_valkey
-    - web
+      - local_db
+      - local_gotenberg
+      - local_tika
+      - local_valkey
+      - web
     volumes:
-    - ./scripts:/opt/scripts:ro
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_data:/usr/src/paperless/data
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_media:/usr/src/paperless/media
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_export:/usr/src/paperless/export
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_consume:/usr/src/paperless/consume
+      - ./scripts:/opt/scripts:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_data:/usr/src/paperless/data
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_media:/usr/src/paperless/media
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_export:/usr/src/paperless/export
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/paperless_consume:/usr/src/paperless/consume
 
   db:
     image: postgres:18
@@ -51,33 +51,33 @@ services:
       start_period: 30s
       start_interval: 2s
     networks:
-    - local_db
+      - local_db
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
 
   valkey:
     image: docker.io/valkey/valkey:9
     healthcheck:
       test: valkey-cli ping || exit 1
     networks:
-    - local_valkey
+      - local_valkey
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data
 
   gotenberg:
     image: docker.io/gotenberg/gotenberg:8.25
     networks:
-    - local_gotenberg
+      - local_gotenberg
     restart: unless-stopped
     command:
-    - "gotenberg"
-    - "--chromium-disable-javascript=true"
-    - "--chromium-allow-list=file:///tmp/.*"
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
 
   tika:
     image: docker.io/apache/tika:latest
     networks:
-    - local_tika
+      - local_tika
     restart: unless-stopped

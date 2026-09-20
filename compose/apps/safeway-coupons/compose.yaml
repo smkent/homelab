@@ -10,7 +10,7 @@ services:
       SMTPHOST: smtp
       SAFEWAY_ACCOUNTS_FILE: /accounts
     networks:
-    - web
+      - web
     restart: unless-stopped
     volumes:
-    - ../../secrets/safeway-accounts:/accounts:ro
+      - ../../secrets/safeway-accounts:/accounts:ro

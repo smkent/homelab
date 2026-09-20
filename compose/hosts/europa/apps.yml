@@ -1,16 +1,16 @@
 apps:
-- backrest
-- beszel-agent
-- cups
-- extsync
-- gateway
-- hello
-- immich
-- mail-hc
-- mealie
-- ofelia
-- outline
-- paperless
-- rclone
-- smtp_relay
-- web
+  - backrest
+  - beszel-agent
+  - cups
+  - extsync
+  - gateway
+  - hello
+  - immich
+  - mail-hc
+  - mealie
+  - ofelia
+  - outline
+  - paperless
+  - rclone
+  - smtp_relay
+  - web

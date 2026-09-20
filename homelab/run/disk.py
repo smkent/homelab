@@ -7,17 +7,17 @@ from typing import Annotated, Any
 
 from typer import Argument, Context, Option, Typer
 
-from ..app import CLIError
-from ..util import run
+from homelab.app import CLIError
+from homelab.util import run
 
 LABEL = "home_backup"
 MAPPER_NAME = "home_backup_disk"
 PARTPROBE_TIMEOUT = 5
-PASSPHRASE_SECRET = "backupdisk-luks-passphrase"  # nosec
+PASSPHRASE_SECRET = "backupdisk-luks-passphrase"  # noqa: S105
 
 
 def sudo_run(cmd: Sequence[str], *args: Any, **kwargs: Any) -> Any:
-    return run(["sudo"] + list(cmd), *args, **kwargs)
+    return run(["sudo", *list(cmd)], *args, **kwargs)
 
 
 def kf_args(ctx: Context) -> list[str]:
@@ -27,7 +27,7 @@ def kf_args(ctx: Context) -> list[str]:
 
 
 def unlock(ctx: Context, dev: Path) -> None:
-    cmd = ["cryptsetup", "luksOpen", str(dev), MAPPER_NAME] + kf_args(ctx)
+    cmd = ["cryptsetup", "luksOpen", str(dev), MAPPER_NAME, *kf_args(ctx)]
     # Open encrypted volume
     sudo_run(cmd)
 
@@ -52,17 +52,17 @@ def mount_mapper_volume(ctx: Context, mount_point: Path | None = None) -> None:
         # Verify mount target
         mount_point = mount_point or Path(f"/mnt/{fs_label}")
         if mount_point.is_mount():
-            raise CLIError(f"{mount_point} is already mounted")
+            raise CLIError(f"{mount_point} is already mounted")  # noqa: TRY301
         if not mount_point.is_dir() and mount_point.parent.is_dir():
             sudo_run(["mkdir", "-v", str(mount_point)])
         if not mount_point.is_dir():
-            raise CLIError(f"Mount point {mount_point} does not exist")
+            raise CLIError(f"Mount point {mount_point} does not exist")  # noqa: TRY301
         if any(mount_point.iterdir()):
-            raise CLIError(f"Mount point {mount_point} is not empty")
+            raise CLIError(f"Mount point {mount_point} is not empty")  # noqa: TRY301
         # Mount filesystem
         sudo_run(["mount", str(mapper_dev), str(mount_point)])
         sudo_run(["chown", "-c", "1000:1000", str(mount_point)])
-        print(f"Mounted at {mount_point}")
+        print(f"Mounted at {mount_point}")  # noqa: T201
         if current_command_name := ctx.command.name:
             unmount_command = (
                 [Path(sys.argv[0]).name]
@@ -73,9 +73,8 @@ def mount_mapper_volume(ctx: Context, mount_point: Path | None = None) -> None:
                 ]
                 + ["unmount"]
             )
-            print()
-            print(f"When finished, unmount with: {' '.join(unmount_command)}")
-
+            print()  # noqa: T201
+            print(f"When finished, unmount with: {' '.join(unmount_command)}")  # noqa: T201
     except Exception:
         # Close encrypted volume
         sudo_run(["cryptsetup", "luksClose", MAPPER_NAME])
@@ -92,6 +91,7 @@ class BackupDisk:
     @staticmethod
     def format(
         ctx: Context,
+        *,
         dev: Annotated[
             Path,
             Argument(
@@ -125,7 +125,7 @@ class BackupDisk:
     ) -> None:
         if not (is_block := dev.is_block_device()) and block:
             raise CLIError(f"{dev} is not a block device")
-        print(f"Format a new disk at {dev}")
+        print(f"Format a new disk at {dev}")  # noqa: T201
         if input(
             f"ALL DATA on {dev} will be LOST! Type {dev} to continue: "
         ) != str(dev):
@@ -184,8 +184,8 @@ class BackupDisk:
                 "--hash",
                 "sha512",
                 str(dev),
+                *kf_args(ctx),
             ]
-            + kf_args(ctx)
         )
         unlock(ctx, dev)
         # Ensure mapper device exists
@@ -207,6 +207,7 @@ class BackupDisk:
     @staticmethod
     def mount(
         ctx: Context,
+        *,
         dev: Annotated[
             Path,
             Argument(
@@ -254,13 +255,14 @@ class BackupDisk:
     @cli.command(help="Unmount disk")
     @staticmethod
     def unmount(
-        ctx: Context,
+        ctx: Context,  # noqa: ARG004
+        *,
         mapper: Annotated[
             str, Argument(metavar="name", help="Mapper device name")
         ] = MAPPER_NAME,
     ) -> None:
         # Check if mapper device exists
-        if not (mapper_dev := Path(f"/dev/mapper/{MAPPER_NAME}")).exists():
+        if not (mapper_dev := Path(f"/dev/mapper/{mapper}")).exists():
             return
         # Locate mount point
         try:

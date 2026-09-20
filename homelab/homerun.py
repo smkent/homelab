@@ -32,19 +32,20 @@ class HomerunBase:
     def run(
         self,
         cmd: list[str],
-        exec: bool = False,
+        *,
+        exec: bool = False,  # noqa: A002
         exec_args: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
         if not self.service:
-            raise Exception("service is required")
+            raise Exception("service is required")  # noqa: TRY002
         if exec:
             action_cmd = ["exec"] + (
                 exec_args if exec_args is not None else ["-i"]
             )
         else:
             action_cmd = ["run", "--rm", "--no-deps", "--quiet"]
-        cmd = ["docker", "compose"] + action_cmd + [self.service] + cmd
+        cmd = ["docker", "compose", *action_cmd, self.service, *cmd]
         run(cmd, dry_run=self.dry_run, **kwargs)
 
 
@@ -80,12 +81,13 @@ class Homerun(HomelabCLIApp):
         try:
             super().app()
         except subprocess.CalledProcessError as e:
-            print(f"{e.__class__.__name__}: {e}", file=sys.stderr)
+            print(f"{e.__class__.__name__}: {e}", file=sys.stderr)  # noqa: T201
 
     @cli.callback()
     @staticmethod
     def setup(
         ctx: Context,
+        *,
         dry_run: Annotated[
             bool,
             Option(
@@ -125,6 +127,7 @@ class Homerun(HomelabCLIApp):
     @staticmethod
     def dcp(
         ctx: Context,
+        *,
         apps: Annotated[
             list[str],
             Option(
@@ -151,9 +154,9 @@ class Homerun(HomelabCLIApp):
             return
         for i, app_dir in enumerate(ctx.obj.stack.each_host_app_dir(apps)):
             if i:
-                print()
-            print(f">>> {app_dir}")
-            run(["docker", "compose"] + dcp_args, dry_run=ctx.obj.dry_run)
+                print()  # noqa: T201
+            print(f">>> {app_dir}")  # noqa: T201
+            run(["docker", "compose", *dcp_args], dry_run=ctx.obj.dry_run)
 
     @cli.command(help="Create PBKDF2 hash of input OIDC client secret")
     @StackAppDir("login", "authelia")
@@ -243,7 +246,8 @@ class Homerun(HomelabCLIApp):
     @staticmethod
     def pgdump(
         ctx: Context,
-        stack: Annotated[str, Argument(metavar="stack", help="App stack")],
+        *,
+        stack: Annotated[str, Argument(metavar="stack", help="App stack")],  # noqa: ARG004
         dump_file: Annotated[
             Path, Option("-f", "--file", metavar="file", help="Dump file")
         ] = Path("./pg_dump.sql"),
@@ -251,7 +255,7 @@ class Homerun(HomelabCLIApp):
         if dump_file.exists():
             raise CLIError(f"{dump_file.resolve()} already exists")
         with (
-            open(dump_file, "w") if not ctx.obj.dry_run else nullcontext()
+            dump_file.open("w") if not ctx.obj.dry_run else nullcontext()
         ) as f:
             ctx.obj.run(
                 ["pg_dumpall", "-U", ctx.obj.pg.admin_user],
@@ -264,6 +268,7 @@ class Homerun(HomelabCLIApp):
     @staticmethod
     def pgupgrade(
         ctx: Context,
+        *,
         stack: Annotated[str, Argument(metavar="stack", help="App stack")],
         dump_file: Annotated[
             Path, Option("-f", "--file", metavar="file", help="Dump file")
@@ -288,14 +293,14 @@ class Homerun(HomelabCLIApp):
             )
 
         def _start_container() -> None:
-            print(f"Starting {ctx.obj.service} container")
+            print(f"Starting {ctx.obj.service} container")  # noqa: T201
             run(
                 ["docker", "compose", "up", "--wait", ctx.obj.service],
                 dry_run=ctx.obj.dry_run,
             )
 
         def _stop_container() -> None:
-            print(f"Stopping {ctx.obj.service} container")
+            print(f"Stopping {ctx.obj.service} container")  # noqa: T201
             run(
                 ["docker", "compose", "down", ctx.obj.service],
                 dry_run=ctx.obj.dry_run,
@@ -320,10 +325,10 @@ class Homerun(HomelabCLIApp):
             )
         if not _is_container_up():
             _start_container()
-        print(f"Dumping existing database data to {dump_file}")
+        print(f"Dumping existing database data to {dump_file}")  # noqa: T201
         Homerun.pgdump(ctx, stack, dump_file)
         _stop_container()
-        print("Updating container configuration")
+        print("Updating container configuration")  # noqa: T201
         pg.set_version(version)
         pg.set_volume_source(new_data_dir.name)
         run(
@@ -331,22 +336,23 @@ class Homerun(HomelabCLIApp):
             dry_run=ctx.obj.dry_run,
         )
         _start_container()
-        print("Importing dumped database data")
-        with open(dump_file) if not ctx.obj.dry_run else nullcontext() as f:
+        print("Importing dumped database data")  # noqa: T201
+        with dump_file.open() if not ctx.obj.dry_run else nullcontext() as f:
             ctx.obj.run(
                 ["psql", "-U", pg.admin_user, "-d", pg.admin_database],
                 exec=True,
                 exec_args=["-T"],
                 stdin=f,
             )
-        print("Upgrade complete")
+        print("Upgrade complete")  # noqa: T201
 
     @cli.command(help="Interact with PostgreSQL")
     @StackAppDir(None, "db")
     @staticmethod
     def psql(
         ctx: Context,
-        stack: Annotated[str, Argument(metavar="stack", help="App stack")],
+        *,
+        stack: Annotated[str, Argument(metavar="stack", help="App stack")],  # noqa: ARG004
     ) -> None:
         pg = ctx.obj.pg
         ctx.obj.run(
@@ -373,6 +379,7 @@ class Homerun(HomelabCLIApp):
     @staticmethod
     def restic(
         ctx: Context,
+        *,
         repository: Annotated[
             str,
             Option(

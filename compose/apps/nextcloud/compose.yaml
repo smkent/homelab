@@ -15,29 +15,29 @@ services:
       db:
         condition: service_healthy
     env_file:
-    - host.env
+      - host.env
     environment:
-    - POSTGRES_HOST=db:5432
-    - POSTGRES_DB=nextcloud
-    - POSTGRES_USER=nextcloud
-    - POSTGRES_PASSWORD=nextcloud
-    - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud-admin-password
-    - NEXTCLOUD_ADMIN_USER=admin
+      - POSTGRES_HOST=db:5432
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=nextcloud
+      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud-admin-password
+      - NEXTCLOUD_ADMIN_USER=admin
     networks:
-    - local
-    - web
+      - local
+      - web
     restart: unless-stopped
     secrets:
-    - nextcloud-admin-password
+      - nextcloud-admin-password
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/nextcloud:/var/www/html
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/nextcloud:/var/www/html
 
   db:
     image: postgres:18
     environment:
-    - POSTGRES_USER=nextcloud
-    - POSTGRES_PASSWORD=nextcloud
-    - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=nextcloud
+      - POSTGRES_DB=nextcloud
     healthcheck:
       test: "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"
       interval: 1m
@@ -46,7 +46,7 @@ services:
       start_period: 30s
       start_interval: 2s
     networks:
-    - local
+      - local
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postgres18:/var/lib/postgresql

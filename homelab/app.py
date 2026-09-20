@@ -16,4 +16,4 @@ class HomelabCLIApp(ABC):
         try:
             cls.cli()
         except CLIError as e:
-            print(f"Error: {e}", file=sys.stderr)
+            print(f"Error: {e}", file=sys.stderr)  # noqa: T201

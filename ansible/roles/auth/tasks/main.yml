@@ -1,52 +1,52 @@
-- name: Ensure sudo is installed
-  ansible.builtin.apt:
-    name: sudo
-    state: present
-    update_cache: true
-    cache_valid_time: 600
+  - name: Ensure sudo is installed
+    ansible.builtin.apt:
+      name: sudo
+      state: present
+      update_cache: true
+      cache_valid_time: 600
 
-- name: Ensure sudo is not configured with NOPASSWD or global timestamps
-  ansible.builtin.file:
-    path: "/etc/sudoers.d/{{ item }}"
-    state: absent
-  loop:
-  - 010_pi-nopasswd
-  - 010_global-tty
+  - name: Ensure sudo is not configured with NOPASSWD or global timestamps
+    ansible.builtin.file:
+      path: "/etc/sudoers.d/{{ item }}"
+      state: absent
+    loop:
+      - 010_pi-nopasswd
+      - 010_global-tty
 
-- name: Ensure sudo timestamp type is set to ppid
-  ansible.builtin.copy:
-    dest: /etc/sudoers.d/888_timestamp
-    content: |
-      Defaults timestamp_type=ppid
-      Defaults timestamp_timeout=5
-    mode: '0440'
+  - name: Ensure sudo timestamp type is set to ppid
+    ansible.builtin.copy:
+      dest: /etc/sudoers.d/888_timestamp
+      content: |
+        Defaults timestamp_type=ppid
+        Defaults timestamp_timeout=5
+      mode: '0440'
 
-- name: Ensure wheel group exists
-  ansible.builtin.group:
-    name: wheel
-    system: true
-    state: present
+  - name: Ensure wheel group exists
+    ansible.builtin.group:
+      name: wheel
+      system: true
+      state: present
 
-- name: Restrict su to wheel group
-  community.general.pamd:
-    name: su
-    type: auth
-    control: sufficient
-    module_path: pam_rootok.so
-    new_type: auth
-    new_control: required
-    new_module_path: pam_wheel.so
-    module_arguments: use_uid
-    state: after
+  - name: Restrict su to wheel group
+    community.general.pamd:
+      name: su
+      type: auth
+      control: sufficient
+      module_path: pam_rootok.so
+      new_type: auth
+      new_control: required
+      new_module_path: pam_wheel.so
+      module_arguments: use_uid
+      state: after
 
-- name: Configure default umask
-  community.general.pamd:
-    name: "{{ item }}"
-    type: session
-    control: optional
-    module_path: pam_umask.so
-    module_arguments: umask=002
-    state: updated
-  loop:
-  - common-session
-  - common-session-noninteractive
+  - name: Configure default umask
+    community.general.pamd:
+      name: "{{ item }}"
+      type: session
+      control: optional
+      module_path: pam_umask.so
+      module_arguments: umask=002
+      state: updated
+    loop:
+      - common-session
+      - common-session-noninteractive

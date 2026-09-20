@@ -1,11 +1,14 @@
-- name: Ensure basic apt packages are installed
-  ansible.builtin.apt:
-    pkg:
-    - git
-    - gnupg
-    - mdadm
-    state: present
-    update_cache: true
-    cache_valid_time: 600
-  become: true
-  become_user: root
+  - name: Ensure basic apt packages are installed
+    ansible.builtin.apt:
+      pkg:
+        - git
+        - gnupg
+        - mdadm
+      state: present
+      update_cache: true
+      cache_valid_time: 600
+    become: true
+    become_user: root
+
+  - name: Include mise tasks
+    ansible.builtin.import_tasks: mise.yml

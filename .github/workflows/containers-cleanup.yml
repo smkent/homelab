@@ -6,10 +6,10 @@ env:
 on:
   pull_request:
     types:
-    - closed
+      - closed
   delete:
     branches:
-    - '*'
+      - '*'
 
 jobs:
   cleanup:
@@ -22,29 +22,29 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-    - name: 💾 Check out repository
-      uses: actions/checkout@v4
+      - name: 💾 Check out repository
+        uses: actions/checkout@v4
 
-    - name: 🧹 Remove obsolete image tags
-      run: |
-        set -x
-        set -eu
-        if [ "${{ github.event_name }}" = "delete" ] && [ "${{ github.event.ref_type }}" = "branch" ]; then
-          delete_tag="$(basename "${{ github.event.ref }}")"
-        elif [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.action }}" = "closed" ]; then
-          delete_tag="pr-${{ github.event.pull_request.number }}"
-        fi
-        [ -z "${delete_tag}" ] && { echo "Error detecting deletion label" && exit 1; }
-        git ls-files | grep "^compose/images/.*/Dockerfile$" | sort -u | xargs -n1 dirname | xargs -n1 basename | while read -r container_name; do
-          package_name="${IMAGE_PREFIX}/${container_name}"
-          package_encoded="${package_name//\//%2F}"
-          echo "Checking ${package_name}:${delete_tag}"
-          endpoint="/users/${{ github.repository_owner }}/packages/container/${package_encoded}/versions"
-          version_id="$(gh api "${endpoint}" --jq ".[] | select(.metadata.container.tags[]? == \"${delete_tag}\") | .id" || true)"
-          if [ -z "${version_id}" ]; then
-            echo "No remote version found for ${package_name}:${delete_tag}"
-            continue
+      - name: 🧹 Remove obsolete image tags
+        run: |
+          set -x
+          set -eu
+          if [ "${{ github.event_name }}" = "delete" ] && [ "${{ github.event.ref_type }}" = "branch" ]; then
+            delete_tag="$(basename "${{ github.event.ref }}")"
+          elif [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.action }}" = "closed" ]; then
+            delete_tag="pr-${{ github.event.pull_request.number }}"
           fi
-          echo "Untagging ${package_name}:${delete_tag} (version ${version_id})"
-          gh api -X DELETE "${endpoint}/${version_id}"
-        done
+          [ -z "${delete_tag}" ] && { echo "Error detecting deletion label" && exit 1; }
+          git ls-files | grep "^compose/images/.*/Dockerfile$" | sort -u | xargs -n1 dirname | xargs -n1 basename | while read -r container_name; do
+            package_name="${IMAGE_PREFIX}/${container_name}"
+            package_encoded="${package_name//\//%2F}"
+            echo "Checking ${package_name}:${delete_tag}"
+            endpoint="/users/${{ github.repository_owner }}/packages/container/${package_encoded}/versions"
+            version_id="$(gh api "${endpoint}" --jq ".[] | select(.metadata.container.tags[]? == \"${delete_tag}\") | .id" || true)"
+            if [ -z "${version_id}" ]; then
+              echo "No remote version found for ${package_name}:${delete_tag}"
+              continue
+            fi
+            echo "Untagging ${package_name}:${delete_tag} (version ${version_id})"
+            gh api -X DELETE "${endpoint}/${version_id}"
+          done

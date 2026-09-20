@@ -1,11 +1,11 @@
 apps:
-- backrest
-- beszel-agent
-- fs
-- gateway
-- hello
-- mail-hc
-- ofelia
-- plex
-- rclone
-- smtp_relay
+  - backrest
+  - beszel-agent
+  - fs
+  - gateway
+  - hello
+  - mail-hc
+  - ofelia
+  - plex
+  - rclone
+  - smtp_relay

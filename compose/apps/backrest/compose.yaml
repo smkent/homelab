@@ -23,7 +23,7 @@ services:
     image: ghcr.io/smkent/homelab/backrest:latest
     # build: ../../images/backrest
     cap_add:
-    - DAC_READ_SEARCH
+      - DAC_READ_SEARCH
     environment:
       BACKREST_CONFIG: /opt/backrest/config/config.json
       BACKREST_DATA: /opt/backrest/data
@@ -36,24 +36,24 @@ services:
       HEALTHCHECKS_PING_KEY_FILE: "/run/secrets/healthchecks-ping-key"
     hostname: "${MACHINE?}"
     networks:
-    - web
+      - web
     restart: unless-stopped
     secrets:
-    - deploy-backup-ssh-key
-    - healthchecks-ping-key
-    - restic-password
+      - deploy-backup-ssh-key
+      - healthchecks-ping-key
+      - restic-password
     user: 1000:1000
     group_add:
-    - 200
+      - 200
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-    - ./scripts:/scripts:ro
-    - backrest_cache:/cache
-    - backrest_tmp:/tmp
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_config:/opt/backrest/config
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_data:/opt/backrest/data
-    - $HOME/backup:/backup:rw
-    - $HOME/homelab/compose/volumes:/deploy/compose_volumes:ro
-    - $HOME/external:/deploy/external:ro,rshared
-    - /mnt:/mnt:rw,rshared
-    - ${DATA_MOUNT:-/dev/null}:${DATA_MOUNT:-/root/.nodatamount}:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./scripts:/scripts:ro
+      - backrest_cache:/cache
+      - backrest_tmp:/tmp
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_config:/opt/backrest/config
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/backrest_data:/opt/backrest/data
+      - $HOME/backup:/backup:rw
+      - $HOME/homelab/compose/volumes:/deploy/compose_volumes:ro
+      - $HOME/external:/deploy/external:ro,rshared
+      - /mnt:/mnt:rw,rshared
+      - ${DATA_MOUNT:-/dev/null}:${DATA_MOUNT:-/root/.nodatamount}:ro

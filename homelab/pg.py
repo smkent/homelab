@@ -28,17 +28,18 @@ class PostgresConfig:
 
     @cached_property
     def yaml(self) -> Any:
-        with open(self.compose_file) as f:
+        with self.compose_file.open() as f:
             return yaml.load(f)
 
     def write_yaml(self) -> Any:
         if self.dry_run:
-            return
-        with open(self.compose_file, "w") as f:
+            return None
+        with self.compose_file.open("w") as f:
             return yaml.dump(self.yaml, f)
         del self.yaml
         del self.yaml_svc
         del self.version
+        return None
 
     @property
     def yaml_svc(self) -> Any:
@@ -53,7 +54,7 @@ class PostgresConfig:
         env_data = self.compose_config["environment"]
         if isinstance(env_data, list):
             dict(i.split("=", 1) for i in env_data)
-        assert isinstance(env_data, dict)
+        assert isinstance(env_data, dict)  # noqa: S101
         return env_data
 
     @cached_property

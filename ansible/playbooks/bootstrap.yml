@@ -1,38 +1,38 @@
-- name: "Configure root ssh on bootstrap host"
-  hosts: all
-  ignore_unreachable: true
-  gather_facts: true
-  become: true
-  become_method: "{{ bootstrap_become_method|d('su') }}"
-  vars:
-    ansible_ssh_common_args: "-o StrictHostKeyChecking=accept-new"
-  vars_files:
-  - vars/common.yml
-  roles:
-  - ssh
+  - name: "Configure root ssh on bootstrap host"
+    hosts: all
+    ignore_unreachable: true
+    gather_facts: true
+    become: true
+    become_method: "{{ bootstrap_become_method|d('su') }}"
+    vars:
+      ansible_ssh_common_args: "-o StrictHostKeyChecking=accept-new"
+    vars_files:
+      - vars/common.yml
+    roles:
+      - ssh
 
-- name: "Add deployment user to bootstrap host"
-  hosts: all
-  gather_facts: false
-  remote_user: root
-  become: true
-  become_method: "{{ bootstrap_become_method|d('su') }}"
-  vars:
-    deploy_user_update_password: true
-  vars_files:
-  - vars/common.yml
-  roles:
-  - bootstrap
-  - deploy_user_common
-  - auth
+  - name: "Add deployment user to bootstrap host"
+    hosts: all
+    gather_facts: false
+    remote_user: root
+    become: true
+    become_method: "{{ bootstrap_become_method|d('su') }}"
+    vars:
+      deploy_user_update_password: true
+    vars_files:
+      - vars/common.yml
+    roles:
+      - bootstrap
+      - deploy_user_common
+      - auth
 
-- name: "Test configured connection to bootstrap host"
-  hosts: all
-  gather_facts: true
-  remote_user: deploy
-  become: true
-  become_method: sudo
-  vars_files:
-  - vars/common.yml
-  vars:
-    ansible_become_pass: "{{ create_users[deploy_user].password | mandatory }}"
+  - name: "Test configured connection to bootstrap host"
+    hosts: all
+    gather_facts: true
+    remote_user: deploy
+    become: true
+    become_method: sudo
+    vars_files:
+      - vars/common.yml
+    vars:
+      ansible_become_pass: "{{ create_users[deploy_user].password | mandatory }}"

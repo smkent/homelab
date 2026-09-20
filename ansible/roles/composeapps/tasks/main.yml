@@ -1,12 +1,12 @@
-- name: "Locate host profile directory"
-  ansible.builtin.stat:
-    path: "{{ deploy_user_home }}/homelab/compose/hosts/{{ inventory_hostname }}"
-  register: host_profile_dir
+  - name: "Locate host profile directory"
+    ansible.builtin.stat:
+      path: "{{ deploy_user_home }}/homelab/compose/hosts/{{ inventory_hostname }}"
+    register: host_profile_dir
 
-- name: "Ensure active host symlink exists"
-  ansible.builtin.file:
-    src: "{{ inventory_hostname }}"
-    dest: "{{ deploy_user_home }}/homelab/compose/hosts/active"
-    state: link
-    force: yes
-  when: host_profile_dir.stat.isdir | default(false)
+  - name: "Ensure active host symlink exists"
+    ansible.builtin.file:
+      src: "{{ inventory_hostname }}"
+      dest: "{{ deploy_user_home }}/homelab/compose/hosts/active"
+      state: link
+      force: yes
+    when: host_profile_dir.stat.isdir | default(false)

@@ -68,7 +68,7 @@ class ComposeStack:
             for app in sorted(apps)
         ]:
             if app not in self.host_apps:
-                print(
+                print(  # noqa: T201
                     f"Warning: {app} is not in"
                     f" {self.active_host_dir / 'apps.yml'}",
                     file=sys.stderr,

@@ -15,21 +15,21 @@ services:
     image: ghcr.io/smkent/homelab/postfix:latest
     # build: ../../images/postfix
     env_file:
-    - host.env
-    - postfix.env
-    - ../../secrets/caddy.env
+      - host.env
+      - postfix.env
+      - ../../secrets/caddy.env
     networks:
-    - web
+      - web
     ports:
-    - 25:25
-    - 587:587
+      - 25:25
+      - 587:587
     restart: unless-stopped
     secrets:
-    - smtp-submit-password
+      - smtp-submit-password
     volumes:
-    - tls_certs:/data/certs
-    - ./config:/opt/postfix:ro
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/lib:/var/lib/postfix:rw
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/spool:/var/spool/postfix:rw
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/mail:/var/mail:rw
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/dkim:/etc/opendkim/keys:rw
+      - tls_certs:/data/certs
+      - ./config:/opt/postfix:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/lib:/var/lib/postfix:rw
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/spool:/var/spool/postfix:rw
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/mail:/var/mail:rw
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/postfix/dkim:/etc/opendkim/keys:rw

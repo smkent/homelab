@@ -1,2 +1,2 @@
 dependencies:
-- role: facts_common
+  - role: facts_common

@@ -1,17 +1,17 @@
 apps:
-- backrest
-- beszel
-- gateway
-- gitea
-- healthchecks
-- headscale
-- hello
-- jobdb
-- login
-- mail-hc
-- mosquitto
-- nextcloud
-- ofelia
-- postfix
-- smtp_relay
-- web
+  - backrest
+  - beszel
+  - gateway
+  - gitea
+  - healthchecks
+  - headscale
+  - hello
+  - jobdb
+  - login
+  - mail-hc
+  - mosquitto
+  - nextcloud
+  - ofelia
+  - postfix
+  - smtp_relay
+  - web

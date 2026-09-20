@@ -3,7 +3,7 @@ services:
     image: ghcr.io/smkent/homelab/cups:latest
     # build: ../../images/cups
     ports:
-    - 631:631
+      - 631:631
     restart: unless-stopped
     volumes:
-    - ../../volumes/${COMPOSE_PROJECT_NAME}/cups:/data/cups:rw
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/cups:/data/cups:rw
