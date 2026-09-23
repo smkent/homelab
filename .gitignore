@@ -22,6 +22,7 @@ mise.local.toml
 coverage.xml
 
 # Ansible
+/ansible/collections
 /ansible/vault
 
 # Docker Compose stacks
