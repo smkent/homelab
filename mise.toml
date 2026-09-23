@@ -6,7 +6,7 @@ UV_PYTHON = { default = "3.12" }
 [hooks]
 postinstall = [
   "uv sync",
-  "uv run ansible-galaxy collection install -r ansible/requirements.yml --upgrade",
+  { task = "ansible-collections" },
   "[ -d .git ] && prek install || { echo \"No git repository found. If this is a new project, run \\`mise run init\\` to create it.\"; }",
 ]
 
@@ -17,6 +17,17 @@ prek = "latest"
 shellcheck = "latest"
 taplo = "latest"
 uv = "latest"
+
+[tasks.ansible-collections]
+description = "Ensure required Ansible collections are installed"
+dir = "{{ config_root }}/ansible"
+outputs = ["collections/"]
+raw_args = true
+run = [
+  "uv run ansible-galaxy collection install --collections-path ./collections -r requirements.yml --upgrade",
+  "touch collections/",
+]
+sources = ["requirements.yml"]
 
 [tasks.audit]
 description = "Run dependencies security audit"
