@@ -14,6 +14,7 @@ postinstall = [
 betterleaks = "latest"
 "pipx:copier" = "latest"
 prek = "latest"
+shellcheck = "latest"
 uv = "latest"
 
 [tasks.audit]
