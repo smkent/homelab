@@ -18,10 +18,6 @@ repos:
       - id: pretty-format-yaml
         args: [--preserve-quotes, --autofix, --offset, '2']
         exclude: (^\.copier-answers\.yml$|/authelia/configuration\.yml$)
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1-1
-    hooks:
-      - id: shellcheck
   - repo: local
     hooks:
       - id: betterleaks
@@ -39,6 +35,11 @@ repos:
         entry: uv run ruff format
         language: system
         types_or: [python, pyi]
+      - id: shellcheck
+        name: shellcheck
+        language: system
+        entry: shellcheck
+        types: [shell]
       - id: ty
         name: ty
         entry: uv run ty check
