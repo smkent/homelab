@@ -9,30 +9,31 @@
       label: "{{ key.split(' ')[-1]|d('(no comment)') }}"
 
   - name: Configure ssh login settings
-    ansible.builtin.lineinfile:
-      dest: /etc/ssh/sshd_config
-      regexp: ^#?{{ item.name }}
-      line: '{{ item.name }} {{ item.value }}'
-      state: present
-    loop:
-      - {name: PasswordAuthentication, value: "no"}
-      - {name: PermitRootLogin, value: "prohibit-password"}
-      - {name: StreamLocalBindUnlink, value: "yes"}
-    loop_control:
-      label: "{{ item.name }}"
+    ansible.builtin.copy:
+      dest: /etc/ssh/sshd_config.d/settings-login
+      content: |
+        PasswordAuthentication: no
+        PermitRootLogin: prohibit-password
+        StreamLocalBindUnlink: yes
+      owner: root
+      group: root
+      mode: "0644"
+    become: true
     notify:
       - restart-ssh
 
   - name: Configure ssh cryptography settings
-    ansible.builtin.blockinfile:
-      path: /etc/ssh/sshd_config
-      block: |
+    ansible.builtin.copy:
+      dest: /etc/ssh/sshd_config.d/settings-crypto
+      content: |
         KexAlgorithms mlkem768x25519-sha256,sntrup761x25519-sha512@openssh.com,curve25519-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256
         Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr
         MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
         HostKey /etc/ssh/ssh_host_ed25519_key
         RekeyLimit 128M 15m
-      marker: '# {mark} ANSIBLE MANAGED BLOCK ssh-crypto'
-    register: ssh_crypto
+      owner: root
+      group: root
+      mode: "0644"
+    become: true
     notify:
       - restart-ssh
