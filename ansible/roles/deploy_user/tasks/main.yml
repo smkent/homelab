@@ -10,10 +10,10 @@
       - not ansible_check_mode
       - deploy_user_local_dir.failed
 
-  - name: "Ensure {{ deploy_user_home }}/.local/shell-rc is populated"
+  - name: "Ensure {{ deploy_user_home }}/.local/state/smkent/dotfiles/shell-rc is populated"
     ansible.builtin.copy:
       src: shell-rc
-      dest: '{{ deploy_user_home }}/.local/shell-rc'
+      dest: '{{ deploy_user_home }}/.local/state/smkent/dotfiles/shell-rc'
       owner: '{{ deploy_user }}'
       group: '{{ deploy_user }}'
       mode: 0755
