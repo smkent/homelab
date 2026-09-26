@@ -10,11 +10,11 @@
 
   - name: Configure ssh login settings
     ansible.builtin.copy:
-      dest: /etc/ssh/sshd_config.d/settings-login
+      dest: /etc/ssh/sshd_config.d/settings-login.conf
       content: |
-        PasswordAuthentication: no
-        PermitRootLogin: prohibit-password
-        StreamLocalBindUnlink: yes
+        PasswordAuthentication no
+        PermitRootLogin prohibit-password
+        StreamLocalBindUnlink yes
       owner: root
       group: root
       mode: "0644"
@@ -24,7 +24,7 @@
 
   - name: Configure ssh cryptography settings
     ansible.builtin.copy:
-      dest: /etc/ssh/sshd_config.d/settings-crypto
+      dest: /etc/ssh/sshd_config.d/settings-crypto.conf
       content: |
         KexAlgorithms mlkem768x25519-sha256,sntrup761x25519-sha512@openssh.com,curve25519-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha256
         Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes256-ctr
