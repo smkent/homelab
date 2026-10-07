@@ -3,7 +3,7 @@
 Self-hosted apps I run on my [homelab][homelab] and personal infrastructure.
 Deployments are managed by [Ansible][ansible].
 
-[![License](https://img.shields.io/github/license/smkent/homelab)](https://github.com/smkent/homelab/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/smkent/homelab)](https://github.com/smkent/homelab/blob/main/COPYING)
 [![CI](https://github.com/smkent/homelab/actions/workflows/ci.yaml/badge.svg)](https://github.com/smkent/homelab/actions/workflows/ci.yaml)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovatebot)](https://renovatebot.com)
 [![GitHub stars](https://img.shields.io/github/stars/smkent/homelab?style=social)](https://github.com/smkent/homelab)
@@ -48,6 +48,13 @@ through to [ansible-playbook][ansible-playbook-docs].
 * Deploy to a single host: `homestar run -l target-host-name`
 * Deploy to all configured hosts (dry run): `homestar run -C`
 * Deploy to all configured hosts: `homestar run`
+
+# License
+
+Copyright (C) 2022 Stephen Kent and contributors
+
+Licensed under the GNU General Public License v3.0 only
+([`GPL-3.0-only`](https://github.com/smkent/homelab/blob/main/COPYING)).
 
 # Project template
 
