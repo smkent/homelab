@@ -12,7 +12,7 @@ networks:
 
 services:
   paperless:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20
+    image: ghcr.io/paperless-ngx/paperless-ngx:3.3
     restart: unless-stopped
     depends_on:
       db:
@@ -67,7 +67,7 @@ services:
       - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data
 
   gotenberg:
-    image: docker.io/gotenberg/gotenberg:8.25
+    image: docker.io/gotenberg/gotenberg:8.37
     networks:
       - local_gotenberg
     restart: unless-stopped
