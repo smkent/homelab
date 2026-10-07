@@ -53,8 +53,8 @@ through to [ansible-playbook][ansible-playbook-docs].
 
 Copyright (C) 2022 Stephen Kent and contributors
 
-Licensed under the GNU General Public License v3.0 only
-([`GPL-3.0-only`](https://github.com/smkent/homelab/blob/main/COPYING)).
+Licensed under the GNU General Public License v3.0 or later
+([`GPL-3.0-or-later`](https://github.com/smkent/homelab/blob/main/COPYING)).
 
 # Project template
 
