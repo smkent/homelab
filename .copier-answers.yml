@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: v0.19.0
+_commit: v0.20.1
 _src_path: gh:smkent/copier-python
 copyright_holder: Stephen Kent
 copyright_license: GPL-3.0-or-later
@@ -12,6 +12,7 @@ enable_features:
 - xdist
 enable_pypi: false
 github_user: smkent
+llm_contribution_policy: accepted-with-disclosure
 project_description: Self-hosted apps I run on my homelab and personal infrastructure.
     Deployments are managed by Ansible.
 project_name: homelab
