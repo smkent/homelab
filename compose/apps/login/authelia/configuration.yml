@@ -188,3 +188,4 @@ identity_providers:
       - openid
       - profile
       - email
+      token_endpoint_auth_method: client_secret_post
