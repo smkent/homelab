@@ -6,12 +6,28 @@ env:
 on:
   pull_request:
   push:
+    branches:
+      - main
+    tags:
+      - v[0-9]*.[0-9]*
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   discover:
     name: "Discover builds"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -19,6 +35,7 @@ jobs:
       - name: 💾 Check out repository
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: 🔭 Discover container images to build
@@ -47,6 +64,7 @@ jobs:
     needs: discover
     if: ${{ fromJson(needs.discover.outputs.matrix).image[0] != null }}
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     permissions:
       contents: read
@@ -58,6 +76,8 @@ jobs:
     steps:
       - name: 💾 Check out repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: ⚙️  Set up qemu
         uses: docker/setup-qemu-action@v3
@@ -82,13 +102,14 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
           labels: |
-            org.opencontainers.image.source=${{ github.repository_url }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.title=homelab image for ${{ matrix.image }}
             org.opencontainers.image.description=customized homelab image for ${{ matrix.image }}
             org.opencontainers.image.licenses=
 
       - name: 📦 Build and publish container image
+        # jactionlint ignore=cache-poisoning
         uses: docker/build-push-action@v5
         with:
           context: ./compose/images/${{ matrix.image }}

@@ -9,12 +9,23 @@ on:
       - closed
   delete:
     branches:
-      - '*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: containers-cleanup
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   cleanup:
     name: Remove obsolete images
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       packages: write
       contents: read
@@ -24,6 +35,8 @@ jobs:
     steps:
       - name: 💾 Check out repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: 🧹 Remove obsolete image tags
         run: |
