@@ -1,5 +1,5 @@
 import sys
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Generator, Iterator, Mapping, Sequence
 from contextlib import chdir, contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -81,7 +81,7 @@ class ComposeStack:
         return self.project.stack_dir / "secrets"
 
     @contextmanager
-    def app_stack(self, app_name: str) -> Iterator[Path]:
+    def app_stack(self, app_name: str) -> Generator[Path]:
         if app_name not in self.host_apps:
             raise CLIError(f"{app_name} is not configured on this host")
         app_dir = self.host_apps[app_name]
