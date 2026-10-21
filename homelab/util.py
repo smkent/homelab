@@ -3,7 +3,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
-from collections.abc import Iterator, Sequence
+from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -24,7 +24,7 @@ def run(
 
 
 @contextmanager
-def gpg_fifo(vault: Path) -> Iterator[Path]:
+def gpg_fifo(vault: Path) -> Generator[Path]:
     with tempfile.TemporaryDirectory() as td:
         fifo = Path(td) / "ansible.fifo"
         os.mkfifo(fifo, 0o0600)
