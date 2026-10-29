@@ -94,7 +94,7 @@ updated by running:
 mise run snapup
 ```
 
-### Applying copier-python template updates
+### Applying copier-project template updates
 
 Copier can update your project with template changes that have occurred since
 the project was created.

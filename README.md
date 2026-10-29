@@ -58,11 +58,11 @@ Licensed under the GNU General Public License v3.0 or later
 
 # Project template
 
-This project is generated and maintained with [copier-python][copier-python].
+This project is generated and maintained with [copier-project][copier-project].
 
 [ansible-playbook-docs]: https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html
 [ansible]: https://docs.ansible.com/ansible/latest/
-[copier-python]: https://smkent.github.io/copier-python
+[copier-project]: https://smkent.github.io/copier-project
 [debian-netinst]: https://www.debian.org/distrib/netinst
 [debian]: https://www.debian.org/releases/stable/
 [homelab]: https://web.archive.org/web/20221023001900/https://linuxhandbook.com/homelab/
