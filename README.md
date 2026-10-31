@@ -58,7 +58,7 @@ Licensed under the GNU General Public License v3.0 or later
 
 # Project template
 
-This project is generated and maintained with [copier-project][copier-project].
+This project is based on and maintained with [copier-project][copier-project].
 
 [ansible-playbook-docs]: https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html
 [ansible]: https://docs.ansible.com/ansible/latest/
