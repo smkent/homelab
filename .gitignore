@@ -18,7 +18,6 @@ mise.local.toml
 .pytest_cache/
 .ruff_cache/
 /htmlcov/
-/site/
 coverage.xml
 
 # Ansible
