@@ -1,6 +1,7 @@
-FROM caddy:2-builder AS builder
+FROM --platform=$BUILDPLATFORM caddy:2-builder AS builder
 
-RUN xcaddy build \
+ARG TARGETOS TARGETARCH
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 xcaddy build \
     --with github.com/caddy-dns/linode \
     --with github.com/mholt/caddy-dynamicdns \
     --with github.com/mholt/caddy-l4 \
