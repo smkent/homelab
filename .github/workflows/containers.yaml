@@ -56,8 +56,8 @@ jobs:
           fi
           echo "matrix={\"image\":${json}}" >> "${GITHUB_OUTPUT}"
 
-  build:
-    name: Build and push / ${{ matrix.image }}
+  image:
+    name: Image / ${{ matrix.image }}
     needs: discover
     if: ${{ fromJson(needs.discover.outputs.matrix).image[0] != null }}
     strategy:
