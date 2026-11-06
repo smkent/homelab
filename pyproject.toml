@@ -49,14 +49,14 @@ Issues = "https://github.com/smkent/homelab/issues"
 dev = [
   "bump-my-version>=1.3.0",
   "commit-check>=2.18",
-  "pysentry-rs>=0.4",
+  "pysentry-rs>=0.5",
   "pytest>=9,<9.2",
   "pytest-cov>=7",
   "pytest-sugar>=1",
   "pytest-xdist>=3",
-  "ruff>=0.15",
+  "ruff>=0.17",
   "syrupy>=5",
-  "ty>=0.0.49",
+  "ty>=0.0.84",
 ]
 
 [tool.bumpversion]
@@ -68,6 +68,9 @@ push = true
 
 [tool.hatch.build.targets.sdist]
 include = ["/homelab", "/tests", "*.md", "COPYING"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["homelab"]
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
@@ -132,6 +135,10 @@ error-on-warning = true
 output-format = "concise"
 
 [tool.uv]
+cache-keys = [
+  { file = "pyproject.toml" },
+  { git = { commit = true, tags = true } },
+]
 default-groups = ["dev"]
 
 [tool.uv-dynamic-versioning]
