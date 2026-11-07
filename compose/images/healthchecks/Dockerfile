@@ -1,6 +1,6 @@
-FROM healthchecks/healthchecks:v4.0
+FROM healthchecks/healthchecks:v5.0
 COPY logo.png static-collected/img/
 COPY *.py hc/
 USER root
-RUN pip install mozilla-django-oidc
+RUN pip install "mozilla-django-oidc>=5,<6.0"
 USER hc
