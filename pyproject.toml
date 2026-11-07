@@ -31,7 +31,7 @@ dependencies = [
   "gnupg",
   "passlib",
   "ruamel-yaml>=0.19.1,<0.20.0",
-  "typer>=0.21.1,<0.22.0",
+  "typer>=0.28,<0.29.0",
   "mitogen>=0.3.39,<0.4.0",
 ]
 
