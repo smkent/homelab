@@ -1,6 +1,6 @@
 services:
   ofelia:
-    image: ghcr.io/netresearch/ofelia:0.20.0
+    image: ghcr.io/netresearch/ofelia:1
     command: daemon --docker-events
     restart: unless-stopped
     volumes:
