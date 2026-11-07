@@ -1,4 +1,4 @@
-FROM instantlinux/nut-upsd:2.8.0-r2
+FROM instantlinux/nut-upsd:2.8.5-r1
 RUN apk add tini s-nail
 COPY entrypoint /smkent-extras/
 COPY upssched.conf /etc/nut/upssched.conf
