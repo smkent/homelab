@@ -1,4 +1,4 @@
-FROM healthchecks/healthchecks:v5.0
+FROM healthchecks/healthchecks:v5.0.3
 COPY logo.png static-collected/img/
 COPY *.py hc/
 USER root
