@@ -10,7 +10,7 @@ networks:
 
 services:
   immich:
-    image: ghcr.io/immich-app/immich-server:v2
+    image: ghcr.io/immich-app/immich-server:v3
     depends_on:
       db:
         condition: service_healthy
@@ -29,7 +29,7 @@ services:
       - ../../volumes/${COMPOSE_PROJECT_NAME}/immich_uploads:/data
 
   immich-machine-learning:
-    image: ghcr.io/immich-app/immich-machine-learning:v2
+    image: ghcr.io/immich-app/immich-machine-learning:v3
     volumes:
       - ../../volumes/${COMPOSE_PROJECT_NAME}/immich_model_cache:/cache
     networks:
