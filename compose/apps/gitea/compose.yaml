@@ -6,7 +6,7 @@ networks:
 
 services:
   gitea:
-    image: docker.gitea.com/gitea:1.23
+    image: docker.gitea.com/gitea:1.27
     depends_on:
       db:
         condition: service_healthy
