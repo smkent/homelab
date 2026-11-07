@@ -67,7 +67,7 @@ services:
       - ../../volumes/${COMPOSE_PROJECT_NAME}/valkey:/data
 
   gotenberg:
-    image: docker.io/gotenberg/gotenberg:8.37
+    image: docker.io/gotenberg/gotenberg:8.40
     networks:
       - local_gotenberg
     restart: unless-stopped
