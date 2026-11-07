@@ -4,7 +4,7 @@ networks:
 
 services:
   headscale:
-    image: headscale/headscale:0.28
+    image: headscale/headscale:0.29
     command: serve
     env_file:
       - host.env
