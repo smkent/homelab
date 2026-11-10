@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: ghcr.io/immich-app/postgres:18-vectorchord0.5.3-pgvector0.8.1
+    image: ghcr.io/immich-app/postgres:18-vectorchord1.1.1-pgvector0.8.5
     environment:
       POSTGRES_USER: immich
       POSTGRES_PASSWORD: immich
