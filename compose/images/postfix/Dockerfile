@@ -1,4 +1,4 @@
-FROM mwader/postfix-relay:1
+FROM mwader/postfix-relay:1.2.17@sha256:3ff7e7cb535f17570faabd9df3036ea65e69e3507c491e4ff8938189225a3382
 RUN apt update \
     && apt install -y sasl2-bin libsasl2-modules s3cmd \
     && rm -rf /var/lib/apt/lists/*
