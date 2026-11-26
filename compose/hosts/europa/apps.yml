@@ -12,5 +12,6 @@ apps:
   - outline
   - paperless
   - rclone
+  - safeway-coupons
   - smtp_relay
   - web

@@ -8,9 +8,10 @@ services:
     environment:
       CRON_SCHEDULE: "42 13 * * *"
       SMTPHOST: smtp
-      SAFEWAY_ACCOUNTS_FILE: /accounts
     networks:
       - web
     restart: unless-stopped
     volumes:
-      - ../../secrets/safeway-accounts:/accounts:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/storage/config:ro
+      - ../../secrets/safeway-accounts:/storage/config/accounts.toml:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/state:/storage/state:rw
