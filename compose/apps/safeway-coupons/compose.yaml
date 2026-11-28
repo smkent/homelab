@@ -12,6 +12,5 @@ services:
       - web
     restart: unless-stopped
     volumes:
-      - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/storage/config:ro
-      - ../../secrets/safeway-accounts:/storage/config/accounts.toml:ro
+      - ../../volumes/${COMPOSE_PROJECT_NAME}/config:/storage/config:rw
       - ../../volumes/${COMPOSE_PROJECT_NAME}/state:/storage/state:rw
